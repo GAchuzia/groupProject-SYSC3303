@@ -1,2 +1,3 @@
-# GroupProject-SYSC3303
-Group L2G1 team project for SYSC3303: Real Time Concurrent Systems
+# Elevator System Project
+
+SYSC3303: Real Time Concurrent Systems group project of an elevator control system and simulator using threads in Java.
