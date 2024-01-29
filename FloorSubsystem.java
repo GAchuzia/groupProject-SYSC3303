@@ -1,9 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
  * This class represents the floor subsystem, which will read the elevator usage data.
+ *
  * @author Matteo Golin, 101220709
  * @author Grant Achuzia, 101222695
  * @author Saja Fawagreh, 101217326
@@ -13,7 +15,9 @@ import java.util.Scanner;
  */
 public class FloorSubsystem implements Runnable {
 
-    /** Reads the input file. */
+    /**
+     * Reads the input file.
+     */
     private Scanner reader;
 
     public FloorSubsystem(String file_path) throws FileNotFoundException {
@@ -23,7 +27,12 @@ public class FloorSubsystem implements Runnable {
 
     public void run() {
         while (this.reader.hasNextLine()) {
-            System.out.println(this.reader.nextLine());
+            try {
+                ElevatorRequest line = new ElevatorRequest(this.reader.nextLine());
+                System.out.println(line);
+            } catch (DateTimeParseException e) {
+                System.out.println("Failed to parse input line timestamp: " + e);
+            }
         }
         this.reader.close();
     }
