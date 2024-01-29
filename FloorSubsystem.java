@@ -3,5 +3,8 @@
  * @author Matteo Golin, 101220709
  * @version 0.0.0
  */
-public class FloorSubsystem {
+public class FloorSubsystem implements Runnable {
+    pblic void run() {
+        return;
+    }
 }

@@ -3,5 +3,8 @@
  * @author Matteo Golin, 101220709
  * @version 0.0.0
  */
-public class Scheduler {
+public class Scheduler implements Runnable {
+    public void run() {
+        return;
+    }
 }
