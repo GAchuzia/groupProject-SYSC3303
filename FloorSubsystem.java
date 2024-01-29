@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 /**
  * This class represents the floor subsystem, which will read the elevator usage data.
  * @author Matteo Golin, 101220709
@@ -8,7 +12,19 @@
  * @version 0.0.0
  */
 public class FloorSubsystem implements Runnable {
+
+    /** Reads the input file. */
+    private Scanner reader;
+
+    public FloorSubsystem(String file_path) throws FileNotFoundException {
+        File file = new File(file_path);
+        this.reader = new Scanner(file);
+    }
+
     public void run() {
-        return;
+        while (this.reader.hasNextLine()) {
+            System.out.println(this.reader.nextLine());
+        }
+        this.reader.close();
     }
 }
