@@ -1,15 +1,11 @@
-# Elevator System Project
-
-SYSC3303: Real Time Concurrent Systems group project of an elevator control system and simulator using threads in Java.
-
-## Team Members
-
+=== SYSC 3303 Group 1 Project ===
+Team Members:
 - Grant Achuzia
 - Saja Fawagreh
 - Matteo Golin
 - Yousef Hammad
 - Javeria Sohail
 
-## Project Files
+=== Project Files ===
 
-## Setup Instructions
+=== Setup Instrcutions ===
