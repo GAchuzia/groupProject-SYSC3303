@@ -8,7 +8,7 @@
  * @version 0.0.0
  */
 public class FloorSubsystem implements Runnable {
-    pblic void run() {
+    public void run() {
         return;
     }
 }
