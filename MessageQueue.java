@@ -14,10 +14,10 @@ import java.util.ArrayList;
 public class MessageQueue {
 
     // Queue for messages from the Floor subsystem.
-    private ArrayList<String> floorMessages;
+    private ArrayList<ElevatorRequest> floorMessages;
 
     // Queue for messages from the Elevator subsystem.
-    private ArrayList<String> elevatorMessages;
+    private ArrayList<ElevatorRequest> elevatorMessages;
 
     /**
      * Constructor for the MessageQueue class.
@@ -34,7 +34,7 @@ public class MessageQueue {
      *
      * @param message The message to be added to the Floor queue.
      */
-    public synchronized void putFromFloor(String message) {
+    public synchronized void putFromFloor(ElevatorRequest message) {
         while (!floorMessages.isEmpty()) {
             try {
                 wait();
@@ -53,7 +53,7 @@ public class MessageQueue {
      *
      * @return The last message from the Floor queue.
      */
-    public synchronized String getFromFloor() {
+    public synchronized ElevatorRequest getFromFloor() {
         while (floorMessages.isEmpty()) {
             try {
                 wait();
@@ -62,10 +62,8 @@ public class MessageQueue {
             }
         }
 
-        String lastElement = floorMessages.getLast();
-        floorMessages.removeLast();
         notifyAll();
-        return lastElement;
+        return floorMessages.removeLast();
     }
 
     /**
@@ -74,7 +72,7 @@ public class MessageQueue {
      *
      * @param message The message to be added to the Elevator queue.
      */
-    public synchronized void putFromElevator(String message) {
+    public synchronized void putFromElevator(ElevatorRequest message) {
         while (!elevatorMessages.isEmpty()) {
             try {
                 wait();
@@ -93,7 +91,7 @@ public class MessageQueue {
      *
      * @return The last message from the Elevator queue.
      */
-    public synchronized String getFromElevator() {
+    public synchronized ElevatorRequest getFromElevator() {
         while (elevatorMessages.isEmpty()) {
             try {
                 wait();
@@ -102,9 +100,7 @@ public class MessageQueue {
             }
         }
 
-        String lastElement = elevatorMessages.getLast();
-        elevatorMessages.removeLast();
         notifyAll();
-        return lastElement;
+        return elevatorMessages.removeLast();
     }
 }
