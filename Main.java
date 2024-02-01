@@ -24,5 +24,9 @@ public class Main {
             return;
         }
         fsys.run();
+
+        while (!floorMessages.isEmpty()) {
+            System.out.println("Got message on queue: " + floorMessages.getMessage());
+        }
     }
 }

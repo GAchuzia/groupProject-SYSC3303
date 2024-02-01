@@ -55,4 +55,13 @@ public class MessageQueue<T> {
         notifyAll();
         return this.messages.removeLast();
     }
+
+    /**
+     * Checks if the message queue is empty.
+     * 
+     * @return True if empty, false otherwise.
+     */
+    public boolean isEmpty() {
+        return this.messages.isEmpty();
+    }
 }
