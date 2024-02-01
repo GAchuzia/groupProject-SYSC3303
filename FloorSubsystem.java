@@ -4,7 +4,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
- * This class represents the floor subsystem, which will read the elevator usage data.
+ * This class represents the floor subsystem, which will read the elevator usage
+ * data.
  *
  * @author Matteo Golin, 101220709
  * @author Grant Achuzia, 101222695
@@ -20,16 +21,21 @@ public class FloorSubsystem implements Runnable {
      */
     private Scanner reader;
 
-    public FloorSubsystem(String file_path) throws FileNotFoundException {
+    /** Queue to put elevator request messages on. */
+    private MessageQueue<ElevatorRequest> queue;
+
+    public FloorSubsystem(String file_path, MessageQueue<ElevatorRequest> queue) throws FileNotFoundException {
         File file = new File(file_path);
         this.reader = new Scanner(file);
+        this.queue = queue;
     }
 
     public void run() {
         while (this.reader.hasNextLine()) {
             try {
-                ElevatorRequest line = new ElevatorRequest(this.reader.nextLine());
-                System.out.println(line);
+                ElevatorRequest rqst = new ElevatorRequest(this.reader.nextLine());
+                System.out.println("Put request on queue: " + rqst);
+                this.queue.putMessage(rqst);
             } catch (DateTimeParseException e) {
                 System.out.println("Failed to parse input line timestamp: " + e);
             }

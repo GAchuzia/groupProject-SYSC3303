@@ -18,7 +18,7 @@ public class Main {
 
         FloorSubsystem fsys;
         try {
-            fsys = new FloorSubsystem("./testdata.txt");
+            fsys = new FloorSubsystem("./testdata.txt", floorMessages);
         } catch (FileNotFoundException e) {
             System.out.println("Could not open input file.");
             return;
