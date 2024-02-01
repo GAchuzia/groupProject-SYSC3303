@@ -33,14 +33,6 @@ public class MessageQueue<T> {
      * @param message The message to be added to the queue.
      */
     public synchronized void putMessage(T message) {
-        while (!this.messages.isEmpty()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-
         this.messages.add(message);
         notifyAll();
     }
