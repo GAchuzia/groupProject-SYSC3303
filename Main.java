@@ -18,6 +18,8 @@ public class Main {
         MessageQueue<ElevatorRequest> elevatorIncoming = new MessageQueue<ElevatorRequest>();
         MessageQueue<ElevatorRequest> elevatorOutgoing = new MessageQueue<ElevatorRequest>();
 
+        ElevatorSubsystem esys = new ElevatorSubsystem(elevatorIncoming, elevatorOutgoing);
+
         FloorSubsystem fsys;
         try {
             fsys = new FloorSubsystem("./testdata.txt", floorIncoming, floorOutgoing);
@@ -28,7 +30,4 @@ public class Main {
         fsys.run();
 
         while (!floorOutgoing.isEmpty()) {
-            System.out.println("Got message on queue: " + floorOutgoing.getMessage());
-        }
-    }
-}
+            System.out.println("Got message on queue: " + floorOutgoing.getMessage()); } } }
