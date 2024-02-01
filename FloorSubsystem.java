@@ -16,9 +16,7 @@ import java.util.Scanner;
  */
 public class FloorSubsystem implements Runnable {
 
-    /**
-     * Reads the input file.
-     */
+    /** Reads the input file. */
     private Scanner reader;
 
     /** Queue to put elevator request messages on. */
@@ -27,6 +25,15 @@ public class FloorSubsystem implements Runnable {
     /** Queue to read messages from. */
     private MessageQueue<ElevatorRequest> outgoing;
 
+    /**
+     * Constructs the floor subsystem.
+     * 
+     * @param file_path The file to read the input requests from for the simulation.
+     * @param incoming  The message queue with incoming messages for the
+     *                  FloorSubsystem.
+     * @param outgoing  The message queue with outgoing messages from the
+     *                  FloorSubsystem.
+     */
     public FloorSubsystem(String file_path, MessageQueue<ElevatorRequest> incoming,
             MessageQueue<ElevatorRequest> outgoing) throws FileNotFoundException {
         File file = new File(file_path);
@@ -35,6 +42,7 @@ public class FloorSubsystem implements Runnable {
         this.outgoing = outgoing;
     }
 
+    /** Runs the primary logic of the FloorSubsystem. */
     public void run() {
         while (this.reader.hasNextLine()) {
             try {
