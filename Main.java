@@ -12,6 +12,10 @@ import java.io.FileNotFoundException;
  */
 public class Main {
     public static void main(String[] args) {
+
+        MessageQueue<ElevatorRequest> floorMessages = new MessageQueue<ElevatorRequest>();
+        MessageQueue<ElevatorRequest> elevatorMessage = new MessageQueue<ElevatorRequest>();
+
         FloorSubsystem fsys;
         try {
             fsys = new FloorSubsystem("./testdata.txt");

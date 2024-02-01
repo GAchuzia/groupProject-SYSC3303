@@ -7,35 +7,33 @@ import java.util.ArrayList;
  * Elevator messages.
  * This class ensures thread-safe operations for adding and retrieving messages.
  *
- * @version 1.0
- * @author Javeria Sohail
- * @author Saja Fawagreh
+ * @author Saja Fawagreh, 101217326
+ * @author Javeria Sohail, 101197163
+ * @author Matteo Golin, 101220709
+ * @author Grant Achuzia, 101222695
+ * @author Yousef Hammad, 101217858
+ * @version 0.0.0
  */
-public class MessageQueue {
+public class MessageQueue<T> {
 
-    // Queue for messages from the Floor subsystem.
-    private ArrayList<ElevatorRequest> floorMessages;
-
-    // Queue for messages from the Elevator subsystem.
-    private ArrayList<ElevatorRequest> elevatorMessages;
+    // Queue for messages
+    private ArrayList<T> messages;
 
     /**
-     * Constructor for the MessageQueue class.
-     * Initializes the queues and sets the initial empty flags to true.
+     * Constructor for the MessageQueue class. Initializes the queues.
      */
     public MessageQueue() {
-        floorMessages = new ArrayList<>();
-        elevatorMessages = new ArrayList<>();
+        this.messages = new ArrayList<T>();
     }
 
     /**
-     * Puts a message into the Floor queue.
+     * Puts a message into the queue.
      * Waits if the queue is not empty until it becomes empty.
      *
-     * @param message The message to be added to the Floor queue.
+     * @param message The message to be added to the queue.
      */
-    public synchronized void putFromFloor(ElevatorRequest message) {
-        while (!floorMessages.isEmpty()) {
+    public synchronized void putMessage(T message) {
+        while (!this.messages.isEmpty()) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -43,64 +41,26 @@ public class MessageQueue {
             }
         }
 
-        floorMessages.add(message);
+        this.messages.add(message);
         notifyAll();
     }
 
     /**
-     * Retrieves a message from the Floor queue.
+     * Retrieves a message from the queue.
      * Waits if the queue is empty until a message is available.
      *
-     * @return The last message from the Floor queue.
+     * @return The last message from the queue.
      */
-    public synchronized ElevatorRequest getFromFloor() {
-        while (floorMessages.isEmpty()) {
+    public synchronized T getMessage() {
+        while (this.messages.isEmpty()) {
             try {
                 wait();
             } catch (InterruptedException e) {
-                return e.getMessage();
+                return null;
             }
         }
 
         notifyAll();
-        return floorMessages.removeLast();
-    }
-
-    /**
-     * Puts a message into the Elevator queue.
-     * Waits if the queue is not empty until it becomes empty.
-     *
-     * @param message The message to be added to the Elevator queue.
-     */
-    public synchronized void putFromElevator(ElevatorRequest message) {
-        while (!elevatorMessages.isEmpty()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-
-        elevatorMessages.add(message);
-        notifyAll();
-    }
-
-    /**
-     * Retrieves a message from the Elevator queue.
-     * Waits if the queue is empty until a message is available.
-     *
-     * @return The last message from the Elevator queue.
-     */
-    public synchronized ElevatorRequest getFromElevator() {
-        while (elevatorMessages.isEmpty()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                return e.getMessage();
-            }
-        }
-
-        notifyAll();
-        return elevatorMessages.removeLast();
+        return this.messages.removeLast();
     }
 }
