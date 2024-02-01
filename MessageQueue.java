@@ -16,12 +16,10 @@ import java.util.ArrayList;
  */
 public class MessageQueue<T> {
 
-    // Queue for messages
+    /** Queue for messages. */
     private ArrayList<T> messages;
 
-    /**
-     * Constructor for the MessageQueue class. Initializes the queues.
-     */
+    /** Constructor for the MessageQueue class. Initializes the queues. */
     public MessageQueue() {
         this.messages = new ArrayList<T>();
     }

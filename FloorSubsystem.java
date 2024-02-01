@@ -22,12 +22,17 @@ public class FloorSubsystem implements Runnable {
     private Scanner reader;
 
     /** Queue to put elevator request messages on. */
-    private MessageQueue<ElevatorRequest> queue;
+    private MessageQueue<ElevatorRequest> incoming;
 
-    public FloorSubsystem(String file_path, MessageQueue<ElevatorRequest> queue) throws FileNotFoundException {
+    /** Queue to read messages from. */
+    private MessageQueue<ElevatorRequest> outgoing;
+
+    public FloorSubsystem(String file_path, MessageQueue<ElevatorRequest> incoming,
+            MessageQueue<ElevatorRequest> outgoing) throws FileNotFoundException {
         File file = new File(file_path);
         this.reader = new Scanner(file);
-        this.queue = queue;
+        this.incoming = incoming;
+        this.outgoing = outgoing;
     }
 
     public void run() {
@@ -35,7 +40,7 @@ public class FloorSubsystem implements Runnable {
             try {
                 ElevatorRequest rqst = new ElevatorRequest(this.reader.nextLine());
                 System.out.println("Put request on queue: " + rqst);
-                this.queue.putMessage(rqst);
+                this.outgoing.putMessage(rqst);
             } catch (DateTimeParseException e) {
                 System.out.println("Failed to parse input line timestamp: " + e);
             }
