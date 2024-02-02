@@ -61,11 +61,23 @@ public class FloorSubsystem implements Runnable {
             }
         }
         this.reader.close();
+        this.outgoing.putMessage(null); // Signal end of stream, tell other subsystems to kill themselves
 
         // Look for incoming messages
         while (true) {
             while (!this.incoming.isEmpty()) {
-                System.out.println("Floor got message: " + this.incoming.getMessage());
+                ElevatorRequest message = this.incoming.getMessage();
+                if (message == null) {
+                    System.out.println("Floor subsystem exited.");
+                    return;
+                }
+                System.out.println("Floor got message: " + message);
+            }
+
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+                continue;
             }
         }
     }

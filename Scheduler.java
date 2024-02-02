@@ -40,7 +40,14 @@ public class Scheduler implements Runnable {
             // If there is a message from the elevator, forward it to the floor
             if (!this.elevatorOutgoing.isEmpty()) {
                 System.out.println("Scheduler forwarded elevator message.");
-                this.floorIncoming.putMessage(this.elevatorOutgoing.getMessage());
+
+                ElevatorRequest message = this.elevatorOutgoing.getMessage();
+                if (message == null) {
+                    this.floorIncoming.putMessage(null);
+                    System.out.println("Scheduler exited.");
+                    return;
+                }
+                this.floorIncoming.putMessage(message);
             }
 
             try {

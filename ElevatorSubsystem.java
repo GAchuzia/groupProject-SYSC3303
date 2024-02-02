@@ -33,9 +33,22 @@ public class ElevatorSubsystem implements Runnable {
     public void run() {
         while (true) {
             ElevatorRequest request = this.incoming.getMessage();
+
+            if (request == null) {
+                System.out.println("Elevator system exited.");
+                this.outgoing.putMessage(null);
+                return;
+            }
+
             System.out.println("Elevator got request: " + request);
             System.out.println("Elevator echoed request back.");
             this.outgoing.putMessage(request);
+
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+                continue;
+            }
         }
     }
 }
