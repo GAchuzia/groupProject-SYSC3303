@@ -31,11 +31,8 @@ public class Main {
         }
 
         // Run subsystems in separate threads
+        new Thread(scheduler, "Scheduler").start(); // Put this last so it doesn't quit immediately
         new Thread(fsys, "Floors").start();
         new Thread(esys, "Elevators").start();
-        try {
-            Thread.sleep(8);
-        } catch (InterruptedException e) { }
-        new Thread(scheduler, "Scheduler").start(); // Put this last so it doesn't quit immediately
     }
 }
