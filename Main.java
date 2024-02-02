@@ -13,13 +13,15 @@ import java.io.FileNotFoundException;
 public class Main {
     public static void main(String[] args) {
 
+        // Construct message queues
         MessageQueue<ElevatorRequest> floorIncoming = new MessageQueue<ElevatorRequest>();
         MessageQueue<ElevatorRequest> floorOutgoing = new MessageQueue<ElevatorRequest>();
         MessageQueue<ElevatorRequest> elevatorIncoming = new MessageQueue<ElevatorRequest>();
         MessageQueue<ElevatorRequest> elevatorOutgoing = new MessageQueue<ElevatorRequest>();
 
+        // Construct subsystems
         ElevatorSubsystem esys = new ElevatorSubsystem(elevatorIncoming, elevatorOutgoing);
-
+        Scheduler scheduler = new Scheduler(floorIncoming, floorOutgoing, elevatorIncoming, elevatorOutgoing);
         FloorSubsystem fsys;
         try {
             fsys = new FloorSubsystem("./testdata.txt", floorIncoming, floorOutgoing);
@@ -27,7 +29,10 @@ public class Main {
             System.out.println("Could not open input file.");
             return;
         }
-        fsys.run();
 
-        while (!floorOutgoing.isEmpty()) {
-            System.out.println("Got message on queue: " + floorOutgoing.getMessage()); } } }
+        // Run subsystems in separate threads
+        new Thread(scheduler, "Scheduler").start();
+        new Thread(esys, "Elevators").start();
+        new Thread(fsys, "Floors").start();
+    }
+}

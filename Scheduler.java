@@ -1,7 +1,7 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 /**
- * The scheduler that will be responsible for assigning the correct elevators to the correct floor.
+ * The scheduler that will be responsible for assigning the correct elevators to
+ * the correct floor.
+ * 
  * @author Matteo Golin, 101220709
  * @author Grant Achuzia, 101222695
  * @author Saja Fawagreh, 101217326
@@ -12,24 +12,41 @@
 
 public class Scheduler implements Runnable {
 
-    private MessageQueue messageQ;
+    private MessageQueue<ElevatorRequest> floorIncoming;
+    private MessageQueue<ElevatorRequest> floorOutgoing;
+    private MessageQueue<ElevatorRequest> elevatorIncoming;
+    private MessageQueue<ElevatorRequest> elevatorOutgoing;
 
-    public Scheduler (MessageQueue messageQ){
-        this.messageQ = messageQ;
+    public Scheduler(MessageQueue<ElevatorRequest> floorIncoming, MessageQueue<ElevatorRequest> floorOutgoing,
+            MessageQueue<ElevatorRequest> elevatorIncoming, MessageQueue<ElevatorRequest> elevatorOutgoing) {
+        this.floorIncoming = floorIncoming;
+        this.floorOutgoing = floorOutgoing;
+        this.elevatorIncoming = elevatorIncoming;
+        this.elevatorOutgoing = elevatorOutgoing;
     }
-    @Override
+
+    /** Executes the main logical loop of the Scheduler subsystem. */
     public void run() {
-        //NOTE: Need to create floorMessagesSize and elevatorMessagesSize methods in MessageQueue
-        while (messageQ.floorMessagesSize() > 0 || messageQ.elevatorMessagesSize() > 0){
-            //NOTE: need to create checkFloor methods in MessageQueue
-            if (messageQ.checkFloor()){
-                String floorMessage = messageQ.getFromFloor();
-                messageQ.putFromElevator(floorMessage);
+
+        // While there are still messages
+        while (true) {
+
+            // If there is a message from the floor, forward it to the elevator
+            if (!this.floorOutgoing.isEmpty()) {
+                System.out.println("Scheduler forwarded floor message.");
+                this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
             }
-            //NOTE: need to create checkEelevator method in messageQueue
-            if (messageQ.checkEelevator()){
-                String elevatorMessage = messageQ.getFromElevator();
-                messageQ.putFromFloor(elevatorMessage);
+
+            // If there is a message from the elevator, forward it to the floor
+            if (!this.elevatorOutgoing.isEmpty()) {
+                System.out.println("Scheduler forwarded elevator message.");
+                this.floorIncoming.putMessage(this.elevatorOutgoing.getMessage());
+            }
+
+            try {
+                Thread.sleep(4);
+            } catch (InterruptedException e) {
+                continue;
             }
         }
     }

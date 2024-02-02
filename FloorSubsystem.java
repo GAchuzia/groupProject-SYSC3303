@@ -44,15 +44,29 @@ public class FloorSubsystem implements Runnable {
 
     /** Runs the primary logic of the FloorSubsystem. */
     public void run() {
+
+        // Send all messages
         while (this.reader.hasNextLine()) {
             try {
                 ElevatorRequest rqst = new ElevatorRequest(this.reader.nextLine());
-                System.out.println("Put request on queue: " + rqst);
+                System.out.println("Floor put request on queue: " + rqst);
                 this.outgoing.putMessage(rqst);
+                try {
+                    Thread.sleep(4);
+                } catch (InterruptedException e) {
+                    continue;
+                }
             } catch (DateTimeParseException e) {
                 System.out.println("Failed to parse input line timestamp: " + e);
             }
         }
         this.reader.close();
+
+        // Look for incoming messages
+        while (true) {
+            while (!this.incoming.isEmpty()) {
+                System.out.println("Floor got message: " + this.incoming.getMessage());
+            }
+        }
     }
 }
