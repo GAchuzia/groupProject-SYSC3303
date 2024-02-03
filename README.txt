@@ -18,7 +18,7 @@ Team Members: Matteo Golin, Yousef Hammad, Saja Fawagreh, Javeria Sohail, Grant 
 Matteo Golin:
 Yousef Hammad:
 Saja Fawagreh:
-Javeria Sohail:
+Javeria Sohail: Wrote MessageQueues.java and made the UML Diagrams for Project Iteration 1
 Grant Achuzia: Wrote JUnit test classes, testdata.txt, and README.txt for Project Iteration 1
 
 === Setup Instrcutions ===
