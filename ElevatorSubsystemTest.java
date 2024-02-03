@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,16 @@ class ElevatorSubsystemTest {
     }
 
     /**
+     * Removes the subsystem and its message queues so they can be freshly replaced.
+     */
+    @AfterEach
+    void tearDown() {
+        this.subsystem = null;
+        this.outgoing = null;
+        this.incoming = null;
+    }
+
+    /**
      * Tests the echo behaviour of the ElevatorSubsystem when it receives a message.
      *
      * @throws InterruptedException
@@ -60,6 +71,10 @@ class ElevatorSubsystemTest {
         // Check that the ElevatorSubsystem put the request in the outgoing queue
         assertFalse(this.outgoing.isEmpty());
         assertEquals(elevatorRequest, this.outgoing.getMessage());
+
+        // Stop the ElevatorSubsystem
+        this.incoming.putMessage(null);
+        elevatorThread.join();
     }
 
     /**
