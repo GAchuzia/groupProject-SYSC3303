@@ -1,24 +1,26 @@
 === SYSC 3303 Group 1 Project ===
-Description: Project Iteration 1 (establishing connections between three subsystems) for an Elevator System developed using Java.
-Team Members:   Matteo Golin, Yousef Hammad, Saja Fawagreh, Javeria Sohail, Grant Achuzia
+Description: Establishing connections between three subsystems for an Elevator Simulator developed using Java.
+Team Members: Matteo Golin, Yousef Hammad, Saja Fawagreh, Javeria Sohail, Grant Achuzia
 
 === Project Files ===
-- ElevatorRequest.java:
-- ElevatorSubsystem.java:
-- FloorSubsytem.java
+- ElevatorRequest.java: Specifies the structure for elevator requests
+- ElevatorSubsystem.java: Represents the Elevator Subsystem's functionality (communicates with the scheduler and floor)
+- FloorSubsytem.java: Represents the Floor Subsystem's functionality (read input data from a file & listens for messages from scheduler)
 - Main.java: Initializes the threads used in the elevator simulator
-- MessageQueue.java:
-- Scheduler.java:
-- ClassUML.png: A diagram depicting the relationships between the varying classes in the elevator sim
-- SequenceUML.png: A diagram showing the sequential interaction between objects in the elevator sim
-- testdata.txt: An input file with data on the elevator's properties (time stamp, floor, button pressed, car button)
-- README.txt: A text file describing the project's files and setup instructions
+- MessageQueue.java: Implements a message queue uses for communicating between subsystems
+- Scheduler.java: Assigns elevators to floors
+- ClassUML.png: Diagram depicting the relationships between the varying classes in the elevator sim
+- SequenceUML.png: Diagram showing the sequential interaction between objects in the elevator sim
+- testdata.txt: Input file with data on the elevator's properties (time stamp, floor, button pressed, car button)
+- README.txt: Text file describing the project's files and setup instructions
 
 === Group Responsibilities ===
 Matteo Golin:
 Yousef Hammad:
 Saja Fawagreh:
 Javeria Sohail:
-Grant Achuzia: Wrote test cases for Iteration 1's java classes and methods
+Grant Achuzia: Wrote JUnit test classes and README.txt for Project Iteration 1
 
 === Setup Instrcutions ===
+Run `Main.java` to begin the elevator simulation
+- Any messages will be displayed in the console
