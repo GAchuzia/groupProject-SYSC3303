@@ -1,5 +1,6 @@
 # IntelliJ relics
 .idea/
+*.iml
 
 # Output files
 *.class
