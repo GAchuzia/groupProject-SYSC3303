@@ -1,8 +1,11 @@
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 
 /**
- * Represents a single line of the input data, which is a request for the elevator to come.
+ * Represents a single line of the input data, which is a request for the
+ * elevator to come.
  *
  * @author Matteo Golin, 101220709
  * @author Grant Achuzia, 101222695
@@ -30,10 +33,15 @@ public class ElevatorRequest {
      */
     private int destination;
 
+    private static final DateTimeFormatter PARSER = new DateTimeFormatterBuilder()
+            .appendPattern("H:m:s")
+            .appendLiteral(".")
+            .appendFraction(ChronoField.MILLI_OF_SECOND, 1, 3, false)
+            .toFormatter();
+
     public ElevatorRequest(String input_line) {
         String[] elements = input_line.split(" ");
-        DateTimeFormatter parser = DateTimeFormatter.ofPattern("H:m:s.S");
-        this.timestamp = LocalTime.parse(elements[0], parser);
+        this.timestamp = LocalTime.parse(elements[0], PARSER);
         this.origin = Integer.parseInt(elements[1]);
         this.direction = Direction.valueOf(elements[2]);
         this.destination = Integer.parseInt(elements[3]);
