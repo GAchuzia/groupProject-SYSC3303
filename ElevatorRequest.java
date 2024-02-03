@@ -46,7 +46,7 @@ public class ElevatorRequest {
      * Constructs an elevator request dataclass from a line of the input file.
      *
      * @param input_line A line from the input file in the format [timestamp] [origin] [destination] [direction].
-     * Example: "14:05:15.2 2 Up 4"
+     *                   Example: "14:05:15.2 2 Up 4"
      */
     public ElevatorRequest(String input_line) {
         String[] elements = input_line.split(" ");
@@ -102,5 +102,16 @@ public class ElevatorRequest {
         String self = "Timestamp: " + this.timestamp + " Direction: " + this.direction;
         self += " To: " + this.destination + " From: " + this.origin;
         return self;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        return this.destination == ((ElevatorRequest) obj).getDestinationFloor()
+                && this.origin == ((ElevatorRequest) obj).getOriginFloor()
+                && this.timestamp.equals(((ElevatorRequest) obj).getTimestamp())
+                && this.direction == ((ElevatorRequest) obj).direction;
     }
 }
