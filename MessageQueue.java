@@ -16,10 +16,14 @@ import java.util.ArrayList;
  */
 public class MessageQueue<T> {
 
-    /** Queue for messages. */
+    /**
+     * Queue for messages.
+     */
     private ArrayList<T> messages;
 
-    /** Constructor for the MessageQueue class. Initializes the queues. */
+    /**
+     * Constructor for the MessageQueue class. Initializes the queues.
+     */
     public MessageQueue() {
         this.messages = new ArrayList<T>();
     }
@@ -51,12 +55,12 @@ public class MessageQueue<T> {
         }
 
         notifyAll();
-        return this.messages.removeLast();
+        return this.messages.removeFirst();
     }
 
     /**
      * Checks if the message queue is empty.
-     * 
+     *
      * @return True if empty, false otherwise.
      */
     public boolean isEmpty() {
