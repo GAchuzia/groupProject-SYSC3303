@@ -44,6 +44,7 @@ testdata.txt: Input file with data on the elevator's properties (time stamp, flo
 === Group Responsibilities ===
 
 Matteo Golin: Implemented JUnit testing, performed integration tests, wrote MessageQueue, wrote FloorSubsystem and
+helped debug other classes.
 Yousef Hammad: Wrote Scheduler and helped combine the other java classes together for Project Iteration 1.
 Saja Fawagreh: Wrote MessageQueue and created the UML diagrams for Project Iteration 1.
 Javeria Sohail: Wrote MessageQueue and made the UML Diagrams for Project Iteration 1.
