@@ -20,38 +20,99 @@ Main --> ElevatorSubsystem: <<create>>(ElevatorIncoming, ElevatorOutgoing)
 create Scheduler
 Main --> Scheduler: <<create>>(FloorIncoming, FloorOutgoing, ElevatorIncoming, ElevatorOutgoing)
 
+activate FloorSubsystem
 Main -> FloorSubsystem: start()
+deactivate FloorSubsystem
+activate ElevatorSubsystem
 Main -> ElevatorSubsystem: start()
+deactivate ElevatorSubsystem
+activate Scheduler
 Main -> Scheduler: start()
+deactivate Scheduler
 
 deactivate Main
 
-FloorIncoming -> MessageQueue: putMessage(request)
-loop until FloorSubsystem exits
+loop filestream != EOF
+
+    ' FloorSubsystem produces a request
+    activate FloorSubsystem
+    FloorSubsystem -> FloorOutgoing: putMessage(request)
+    deactivate FloorSubsystem
+
+    ' Scheduler gets request
+    activate Scheduler
+    activate FloorOutgoing
+    Scheduler -> FloorOutgoing: getMessage()
+    FloorOutgoing --> Scheduler: request
+    deactivate FloorOutgoing
+
+    ' Scheduler forwards request to elevator subsystem
+    activate ElevatorIncoming
+    Scheduler -> ElevatorIncoming: putMessage(request)
+    deactivate Scheduler
+
+    ' Elevator subsystem echoes request back to its outgoing
+    activate ElevatorSubsystem
+    ElevatorSubsystem -> ElevatorIncoming: getMessage()
+    ElevatorIncoming --> ElevatorSubsystem: request
+    deactivate ElevatorIncoming
+    activate ElevatorOutgoing
+    ElevatorSubsystem -> ElevatorOutgoing: putMessage(request)
+    deactivate ElevatorSubsystem
+
+    ' Scheduler forwards elevator outgoing back to floor
+    activate Scheduler
+    Scheduler -> ElevatorOutgoing: getMessage()
+    ElevatorOutgoing --> Scheduler: request
+    deactivate ElevatorOutgoing
+    activate FloorIncoming
+    Scheduler -> FloorIncoming: putMessage(request)
+    deactivate Scheduler
+
+    ' Floor reads message
+    activate FloorSubsystem
     FloorSubsystem -> FloorIncoming: getMessage()
-    alt "Request from Elevator"
-        FloorIncoming -> ElevatorOutgoing: putMessage(request)
-        loop until ElevatorSubsystem exits
-            ElevatorSubsystem -> ElevatorIncoming: getMessage()
-            ElevatorIncoming -> Scheduler: putMessage(request)
-            loop until Scheduler exits
-                Scheduler -> ElevatorOutgoing: getMessage()
-                ElevatorOutgoing -> FloorIncoming: putMessage(echoedRequest)
-            end
-        end
-    else "Request from Floor"
-        FloorIncoming -> Scheduler: putMessage(request)
-        loop until Scheduler exits
-            Scheduler -> FloorOutgoing: getMessage()
-            FloorOutgoing -> ElevatorIncoming: putMessage(request)
-            loop until ElevatorSubsystem exits
-                ElevatorSubsystem -> ElevatorOutgoing: getMessage()
-                ElevatorOutgoing -> FloorIncoming: putMessage(echoedRequest)
-            end
-        end
-    end
+    FloorIncoming --> FloorSubsystem: request
 end
 
-FloorIncoming -> Scheduler: putMessage(null)
+    ' FloorSubsystem signals kill message
+    deactivate FloorIncoming
+    FloorSubsystem -> FloorOutgoing: putMessage(null)
+    deactivate FloorSubsystem
+    activate FloorOutgoing
+
+    ' Scheduler forwards kill message to elevator
+    activate Scheduler
+    Scheduler -> FloorOutgoing: getMessage()
+    FloorOutgoing --> Scheduler: null
+    deactivate FloorOutgoing
+    activate ElevatorIncoming
+    Scheduler -> ElevatorIncoming: putMessage(null)
+    deactivate Scheduler
+
+    ' Elevator kills itself
+    ElevatorSubsystem -> ElevatorIncoming: getMessage()
+    ElevatorIncoming --> ElevatorSubsystem: null
+    deactivate ElevatorIncoming
+    activate ElevatorOutgoing
+    ElevatorSubsystem -> ElevatorOutgoing: putMessage(null)
+    ElevatorSubsystem --> ElevatorSubsystem: <<destroy>>
+    destroy ElevatorSubsystem
+
+    ' Scheduler receives self-destruct
+    Scheduler -> ElevatorOutgoing: getMessage()
+    ElevatorOutgoing --> Scheduler: null
+    deactivate ElevatorOutgoing
+    activate FloorIncoming
+    Scheduler -> FloorIncoming: putMessage(null)
+    Scheduler --> Scheduler: <<destroy>>
+    destroy Scheduler
+
+    ' Floor receives self-destruct
+    FloorSubsystem -> FloorIncoming: getMessage()
+    FloorIncoming --> FloorSubsystem: null
+    deactivate FloorIncoming
+    FloorSubsystem --> FloorSubsystem: <<destroy>>
+    destroy FloorSubsystem
 
 @enduml
