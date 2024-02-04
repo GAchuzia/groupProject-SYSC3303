@@ -39,6 +39,8 @@ ClassUML.png: Diagram depicting the relationships between the varying classes in
 
 SequenceUML.png: Diagram showing the sequential interaction between objects in the elevator simulator.
 
+SequenceUML.puml: Open-source UML-based component used in making the sequence diagram.
+
 testdata.txt: Input file with data on the elevator's properties (time stamp, floor, button pressed, car button).
 
 === Group Responsibilities ===
