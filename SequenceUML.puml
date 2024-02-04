@@ -2,21 +2,23 @@
 'autonumber
 
 participant Main
-participant FloorSubsystem
-participant ElevatorSubsystem
-participant Scheduler
-participant MessageQueue
-
-Main -> MessageQueue: Create FloorIncoming
-Main -> MessageQueue: Create FloorOutgoing
-Main -> MessageQueue: Create ElevatorIncoming
-Main -> MessageQueue: Create ElevatorOutgoing
 
 activate Main
+create "ElevatorIncoming: MessageQueue" as ElevatorIncoming
+Main --> ElevatorIncoming: <<create>>
+create "ElevatorOutgoing: MessageQueue" as ElevatorOutgoing
+Main --> ElevatorOutgoing: <<create>>
+create "FloorIncoming: MessageQueue" as FloorIncoming
+Main --> FloorIncoming: <<create>>
+create "FloorOutgoing: MessageQueue" as FloorOutgoing
+Main --> FloorOutgoing: <<create>>
 
-Main -> FloorSubsystem: create(FloorIncoming, FloorOutgoing)
-Main -> ElevatorSubsystem: create(ElevatorIncoming, ElevatorOutgoing)
-Main -> Scheduler: create(FloorIncoming, FloorOutgoing, ElevatorIncoming, ElevatorOutgoing)
+create FloorSubsystem
+Main --> FloorSubsystem: <<create>>(FloorIncoming, FloorOutgoing)
+create ElevatorSubsystem
+Main --> ElevatorSubsystem: <<create>>(ElevatorIncoming, ElevatorOutgoing)
+create Scheduler
+Main --> Scheduler: <<create>>(FloorIncoming, FloorOutgoing, ElevatorIncoming, ElevatorOutgoing)
 
 Main -> FloorSubsystem: start()
 Main -> ElevatorSubsystem: start()
@@ -24,8 +26,6 @@ Main -> Scheduler: start()
 
 deactivate Main
 
-Main -> FloorIncoming: autonumber 100
-Main -> FloorIncoming: putMessage(null)
 FloorIncoming -> MessageQueue: putMessage(request)
 loop until FloorSubsystem exits
     FloorSubsystem -> FloorIncoming: getMessage()
