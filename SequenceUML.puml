@@ -91,28 +91,34 @@ end
     deactivate Scheduler
 
     ' Elevator kills itself
+    activate ElevatorSubsystem
     ElevatorSubsystem -> ElevatorIncoming: getMessage()
     ElevatorIncoming --> ElevatorSubsystem: null
     deactivate ElevatorIncoming
     activate ElevatorOutgoing
     ElevatorSubsystem -> ElevatorOutgoing: putMessage(null)
     ElevatorSubsystem --> ElevatorSubsystem: <<destroy>>
+    deactivate ElevatorSubsystem
     destroy ElevatorSubsystem
 
     ' Scheduler receives self-destruct
+    activate Scheduler
     Scheduler -> ElevatorOutgoing: getMessage()
     ElevatorOutgoing --> Scheduler: null
     deactivate ElevatorOutgoing
     activate FloorIncoming
     Scheduler -> FloorIncoming: putMessage(null)
     Scheduler --> Scheduler: <<destroy>>
+    deactivate Scheduler
     destroy Scheduler
 
     ' Floor receives self-destruct
+    activate FloorSubsystem
     FloorSubsystem -> FloorIncoming: getMessage()
     FloorIncoming --> FloorSubsystem: null
     deactivate FloorIncoming
     FloorSubsystem --> FloorSubsystem: <<destroy>>
+    deactivate FloorSubsystem
     destroy FloorSubsystem
 
 @enduml
