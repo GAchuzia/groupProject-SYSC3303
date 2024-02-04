@@ -1,0 +1,57 @@
+@startuml
+'autonumber
+
+participant Main
+participant FloorSubsystem
+participant ElevatorSubsystem
+participant Scheduler
+participant MessageQueue
+
+Main -> MessageQueue: Create FloorIncoming
+Main -> MessageQueue: Create FloorOutgoing
+Main -> MessageQueue: Create ElevatorIncoming
+Main -> MessageQueue: Create ElevatorOutgoing
+
+activate Main
+
+Main -> FloorSubsystem: create(FloorIncoming, FloorOutgoing)
+Main -> ElevatorSubsystem: create(ElevatorIncoming, ElevatorOutgoing)
+Main -> Scheduler: create(FloorIncoming, FloorOutgoing, ElevatorIncoming, ElevatorOutgoing)
+
+Main -> FloorSubsystem: start()
+Main -> ElevatorSubsystem: start()
+Main -> Scheduler: start()
+
+deactivate Main
+
+Main -> FloorIncoming: autonumber 100
+Main -> FloorIncoming: putMessage(null)
+FloorIncoming -> MessageQueue: putMessage(request)
+loop until FloorSubsystem exits
+    FloorSubsystem -> FloorIncoming: getMessage()
+    alt "Request from Elevator"
+        FloorIncoming -> ElevatorOutgoing: putMessage(request)
+        loop until ElevatorSubsystem exits
+            ElevatorSubsystem -> ElevatorIncoming: getMessage()
+            ElevatorIncoming -> Scheduler: putMessage(request)
+            loop until Scheduler exits
+                Scheduler -> ElevatorOutgoing: getMessage()
+                ElevatorOutgoing -> FloorIncoming: putMessage(echoedRequest)
+            end
+        end
+    else "Request from Floor"
+        FloorIncoming -> Scheduler: putMessage(request)
+        loop until Scheduler exits
+            Scheduler -> FloorOutgoing: getMessage()
+            FloorOutgoing -> ElevatorIncoming: putMessage(request)
+            loop until ElevatorSubsystem exits
+                ElevatorSubsystem -> ElevatorOutgoing: getMessage()
+                ElevatorOutgoing -> FloorIncoming: putMessage(echoedRequest)
+            end
+        end
+    end
+end
+
+FloorIncoming -> Scheduler: putMessage(null)
+
+@enduml
