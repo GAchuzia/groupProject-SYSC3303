@@ -5,3 +5,6 @@
 # Output files
 *.class
 out/
+
+# Development/debug
+lib/
