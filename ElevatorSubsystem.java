@@ -22,6 +22,9 @@ public class ElevatorSubsystem implements Runnable {
     /** Queue to put outgoing messages to. */
     private MessageQueue<ElevatorRequest> outgoing;
 
+    /** The current floor that the elevator is at. */
+    private int floor;
+
     /**
      * Constructs the elevator subsystem.
      * 
@@ -34,6 +37,7 @@ public class ElevatorSubsystem implements Runnable {
         this.incoming = incoming;
         this.outgoing = outgoing;
         this.id = ELEVATOR_COUNT;
+        this.floor = 1; // Assume all elevators start at ground floor
         ELEVATOR_COUNT++;
     }
 
@@ -49,7 +53,16 @@ public class ElevatorSubsystem implements Runnable {
             }
 
             System.out.println("Elevator got request: " + request);
-            System.out.println("Elevator echoed request back.");
+
+            // Handle request
+            if (this.floor != request.getOriginFloor()) {
+                System.out.println("Moving from floor " + this.floor + " to " + request.getOriginFloor());
+                this.floor = request.getOriginFloor();
+                System.out.println("Moving from floor " + this.floor + " to " + request.getDestinationFloor());
+                this.floor = request.getDestinationFloor();
+                System.out.println("Request completed.");
+            }
+
             this.outgoing.putMessage(request);
 
             try {
