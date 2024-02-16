@@ -10,6 +10,12 @@
  */
 public class ElevatorSubsystem implements Runnable {
 
+    /** Counts the number of ElevatorSubsystems that have been created. */
+    static private int ELEVATOR_COUNT = 0;
+
+    /** The unique identifier of this ElevatorSubsystem. */
+    private final int id;
+
     /** Queue to read incoming messages from. */
     private MessageQueue<ElevatorRequest> incoming;
 
@@ -27,6 +33,8 @@ public class ElevatorSubsystem implements Runnable {
     public ElevatorSubsystem(MessageQueue<ElevatorRequest> incoming, MessageQueue<ElevatorRequest> outgoing) {
         this.incoming = incoming;
         this.outgoing = outgoing;
+        this.id = ELEVATOR_COUNT;
+        ELEVATOR_COUNT++;
     }
 
     /** Runs the primary logic of the ElevatorSubsystem. */

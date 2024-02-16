@@ -14,10 +14,10 @@ public class Main {
     public static void main(String[] args) {
 
         // Construct message queues
-        MessageQueue<ElevatorRequest> floorIncoming = new MessageQueue<ElevatorRequest>();
-        MessageQueue<ElevatorRequest> floorOutgoing = new MessageQueue<ElevatorRequest>();
-        MessageQueue<ElevatorRequest> elevatorIncoming = new MessageQueue<ElevatorRequest>();
-        MessageQueue<ElevatorRequest> elevatorOutgoing = new MessageQueue<ElevatorRequest>();
+        MessageQueue<ElevatorRequest> floorIncoming = new MessageQueue<>();
+        MessageQueue<ElevatorRequest> floorOutgoing = new MessageQueue<>();
+        MessageQueue<ElevatorRequest> elevatorIncoming = new MessageQueue<>();
+        MessageQueue<ElevatorRequest> elevatorOutgoing = new MessageQueue<>();
 
         // Construct subsystems
         ElevatorSubsystem esys = new ElevatorSubsystem(elevatorIncoming, elevatorOutgoing);
