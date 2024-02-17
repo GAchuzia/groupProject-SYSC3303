@@ -12,13 +12,34 @@
 
 public class Scheduler implements Runnable {
 
+    /** The message queue for sending messages to the FloorSubsystem. */
     private MessageQueue<ElevatorRequest> floorIncoming;
+
+    /** The message queue for receiving messages from the FloorSubsystem. */
     private MessageQueue<ElevatorRequest> floorOutgoing;
+
+    /** The message queue for sending messages to the ElevatorSubsystem. */
     private MessageQueue<ElevatorRequest> elevatorIncoming;
+
+    /** The message queue for receiving messages from the ElevatorSubsystem. */
     private MessageQueue<ElevatorRequest> elevatorOutgoing;
 
+    /** The current state of the Scheduler. */
     private SchedulerState state;
 
+    /**
+     * Constructs a new Scheduler with message queues for communicating with other
+     * subsystems.
+     * 
+     * @param floorIncoming    The message queue for sending messages to the
+     *                         FloorSubsystem.
+     * @param floorOutgoing    The message queue for receiving messages from the
+     *                         FloorSubsystem.
+     * @param elevatorIncoming The message queue for sending messages to the
+     *                         ElevatorSubsystem.
+     * @param elevatorOutgoing The message queue for receiving messages from the
+     *                         ElevatorSubsystem.
+     */
     public Scheduler(MessageQueue<ElevatorRequest> floorIncoming, MessageQueue<ElevatorRequest> floorOutgoing,
             MessageQueue<ElevatorRequest> elevatorIncoming, MessageQueue<ElevatorRequest> elevatorOutgoing) {
         this.floorIncoming = floorIncoming;
@@ -66,6 +87,16 @@ public class Scheduler implements Runnable {
     }
 }
 
+/**
+ * Describes the current state of the Scheduler.
+ *
+ * @author Matteo Golin, 101220709
+ * @author Grant Achuzia, 101222695
+ * @author Saja Fawagreh, 101217326
+ * @author Javeria Sohail, 101197163
+ * @author Yousef Hammad, 101217858
+ * @version 0.0.0
+ */
 enum SchedulerState {
     Thinking,
     Idle,

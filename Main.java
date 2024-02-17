@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
  */
 public class Main {
 
+    /** The number of elevators that will be used in the simulation. */
     static int NUM_ELEVATORS = 1;
 
     public static void main(String[] args) {

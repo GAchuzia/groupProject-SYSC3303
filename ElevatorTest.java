@@ -1,15 +1,34 @@
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test suite for testing the functionality of the Elevator class.
+ * 
+ * @author Matteo Golin, 101220709
+ * @author Grant Achuzia, 101222695
+ * @author Saja Fawagreh, 101217326
+ * @author Javeria Sohail, 101197163
+ * @author Yousef Hammad, 101217858
+ * @version 0.0.0
+ */
 class ElevatorTest {
 
+    /** The message queue for the elevator under test to receive messages on. */
     private MessageQueue<ElevatorRequest> requestQueue;
+
+    /**
+     * The message queue for the elevator under test to send completion messages on.
+     */
     private MessageQueue<ElevatorRequest> completionQueue;
+
+    /** The elevator under test. */
     private Elevator elevator;
 
+    /**
+     * Sets up the elevator and its message queues before each test.
+     */
     @BeforeEach
     void setUp() {
         requestQueue = new MessageQueue<>();
@@ -17,6 +36,9 @@ class ElevatorTest {
         elevator = new Elevator(requestQueue, completionQueue);
     }
 
+    /**
+     * Tears down the elevator and its message queues after each test.
+     */
     @AfterEach
     void tearDown() {
         requestQueue = null;
@@ -25,7 +47,8 @@ class ElevatorTest {
     }
 
     /**
-     * Tests that the elevator is initialized correctly using the default constructor.
+     * Tests that the elevator is initialized correctly using the default
+     * constructor.
      */
     @Test
     void testDefaultConstructor() {
@@ -34,7 +57,8 @@ class ElevatorTest {
     }
 
     /**
-     * Test that the elevator moves between floors in accordance with its received request.
+     * Test that the elevator moves between floors in accordance with its received
+     * request.
      */
     @Test
     void testElevatorMovement() {
