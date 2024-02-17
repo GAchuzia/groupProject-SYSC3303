@@ -1,6 +1,13 @@
 /**
- * Represents a physical, simulated elevator.
- * 
+ * Represents a physical or simulated elevator.
+ * This class provides functionality to simulate the behavior of an elevator,
+ * including moving between floors, opening and closing doors, and handling requests.
+ *
+ * The elevator operates as a separate thread and communicates with the ElevatorSubsystem
+ * using message queues for receiving requests and sending completion notifications.
+ *
+ * This class implements the Runnable interface to support concurrent execution.
+ *
  * @author Matteo Golin, 101220709
  * @author Grant Achuzia, 101222695
  * @author Saja Fawagreh, 101217326

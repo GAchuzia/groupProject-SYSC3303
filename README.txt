@@ -12,6 +12,9 @@ Establishing synchronized communication between three subsystems for an Elevator
 
 === Project Files ===
 
+Elevator.java: Represents a physical or simulated elevator, providing functionality to simulate its behavior.
+ElevatorTest.java: Test suite to verify the functionality of the Elevator class.
+
 ElevatorRequest.java: Specifies the structure for elevator requests (sample input in the testdata.txt class).
 ElevatorRequestTest.java: Test suite to verify the functionality of the ElevatorRequest class.
 
@@ -21,7 +24,7 @@ ElevatorSubsystem.java: Listens for messages on its incoming message queue, prin
 on its outgoing queue.
 ElevatorSubsystemTest.java: Test suite to verify the functionality of the ElevatorSubsystem class.
 
-FloorSubsytem.java: Reads input data from a file and puts ElevatorRequests on its outgoing message queue. It listens for
+FloorSubsystem.java: Reads input data from a file and puts ElevatorRequests on its outgoing message queue. It listens for
 messages on its incoming message queue which it prints to the console.
 FloorSubsystemTest.java: Test suite to verify the functionality of the FloorSubsystem class.
 
