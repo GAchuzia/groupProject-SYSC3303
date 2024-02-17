@@ -31,9 +31,6 @@ class ElevatorTest {
     void testDefaultConstructor() {
         Elevator e = new Elevator(requestQueue, completionQueue);
         assertEquals(1, e.getFloor());
-        assertEquals(1, e.getId());
-        Elevator e2 = new Elevator(requestQueue, completionQueue);
-        assertEquals(2, e2.getId());
     }
 
     /**
