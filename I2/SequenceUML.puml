@@ -19,6 +19,8 @@ create ElevatorSubsystem
 Main --> ElevatorSubsystem: <<create>>(ElevatorIncoming, ElevatorOutgoing)
 create Scheduler
 Main --> Scheduler: <<create>>(FloorIncoming, FloorOutgoing, ElevatorIncoming, ElevatorOutgoing)
+create Elevator
+ElevatorSubsystem --> Elevator: <<create>>(ElevatorIncoming, ElevatorOutgoing)
 
 activate FloorSubsystem
 Main -> FloorSubsystem: start()
@@ -73,6 +75,21 @@ loop filestream != EOF
     activate FloorSubsystem
     FloorSubsystem -> FloorIncoming: getMessage()
     FloorIncoming --> FloorSubsystem: request
+    deactivate FloorIncoming
+
+    ' Elevator processes request
+    activate Elevator
+    Elevator -> ElevatorIncoming: getMessage()
+    ElevatorIncoming --> Elevator: request
+    Elevator -> Elevator: [Idle] moveTo(request.getOriginFloor())
+    Elevator -> Elevator: [DoorsOpen] openDoors()
+    Elevator -> Elevator: [DoorsClosed] closeDoors()
+    Elevator -> Elevator: [Moving] moveTo(request.getDestinationFloor())
+    Elevator -> Elevator: [DoorsOpen] openDoors()
+    Elevator -> Elevator: [DoorsClosed] closeDoors()
+    Elevator -> ElevatorOutgoing: putMessage(request)
+    deactivate Elevator
+
 end
 
     ' FloorSubsystem signals kill message
