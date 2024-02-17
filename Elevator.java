@@ -121,6 +121,8 @@ public class Elevator implements Runnable {
             this.openDoors(); // Let in passenger
             this.closeDoors(); // Get ready to leave
             this.moveTo(rqst.getDestinationFloor()); // Go to destination
+            this.openDoors(); // Let out passenger
+            this.closeDoors(); // Get ready to leave
 
             this.completion_q.putMessage(rqst); // Echo back request to signify completion
         }

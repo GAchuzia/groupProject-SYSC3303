@@ -17,12 +17,15 @@ public class Scheduler implements Runnable {
     private MessageQueue<ElevatorRequest> elevatorIncoming;
     private MessageQueue<ElevatorRequest> elevatorOutgoing;
 
+    private SchedulerState state;
+
     public Scheduler(MessageQueue<ElevatorRequest> floorIncoming, MessageQueue<ElevatorRequest> floorOutgoing,
             MessageQueue<ElevatorRequest> elevatorIncoming, MessageQueue<ElevatorRequest> elevatorOutgoing) {
         this.floorIncoming = floorIncoming;
         this.floorOutgoing = floorOutgoing;
         this.elevatorIncoming = elevatorIncoming;
         this.elevatorOutgoing = elevatorOutgoing;
+        this.state = SchedulerState.Idle;
     }
 
     /** Executes the main logical loop of the Scheduler subsystem. */
@@ -30,15 +33,18 @@ public class Scheduler implements Runnable {
 
         // While there are still messages
         while (true) {
+            this.state = SchedulerState.Idle;
 
             // If there is a message from the floor, forward it to the elevator subsystem
             if (!this.floorOutgoing.isEmpty()) {
+                this.state = SchedulerState.Thinking;
                 System.out.println("Scheduler forwarded floor message.");
                 this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
             }
 
             // If there is a message from the elevator subsystem, forward it to the floor
             if (!this.elevatorOutgoing.isEmpty()) {
+                this.state = SchedulerState.Thinking;
                 System.out.println("Scheduler forwarded elevator message.");
 
                 ElevatorRequest message = this.elevatorOutgoing.getMessage();
@@ -49,6 +55,7 @@ public class Scheduler implements Runnable {
                 }
                 this.floorIncoming.putMessage(message);
             }
+            this.state = SchedulerState.Idle;
 
             try {
                 Thread.sleep(4);
@@ -57,4 +64,9 @@ public class Scheduler implements Runnable {
             }
         }
     }
+}
+
+enum SchedulerState {
+    Thinking,
+    Idle,
 }
