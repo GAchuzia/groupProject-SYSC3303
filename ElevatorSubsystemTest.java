@@ -36,7 +36,7 @@ class ElevatorSubsystemTest {
     protected void setUp() {
         this.incoming = new MessageQueue<>();
         this.outgoing = new MessageQueue<>();
-        this.subsystem = new ElevatorSubsystem(incoming, outgoing);
+        this.subsystem = new ElevatorSubsystem(incoming, outgoing, 1);
     }
 
     /**
