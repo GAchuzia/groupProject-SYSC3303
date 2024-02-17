@@ -31,13 +31,13 @@ public class Scheduler implements Runnable {
         // While there are still messages
         while (true) {
 
-            // If there is a message from the floor, forward it to the elevator
+            // If there is a message from the floor, forward it to the elevator subsystem
             if (!this.floorOutgoing.isEmpty()) {
                 System.out.println("Scheduler forwarded floor message.");
                 this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
             }
 
-            // If there is a message from the elevator, forward it to the floor
+            // If there is a message from the elevator subsystem, forward it to the floor
             if (!this.elevatorOutgoing.isEmpty()) {
                 System.out.println("Scheduler forwarded elevator message.");
 

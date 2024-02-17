@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Represents the subsystem containing the elevators.
  *
@@ -10,61 +12,72 @@
  */
 public class ElevatorSubsystem implements Runnable {
 
-    /** Counts the number of ElevatorSubsystems that have been created. */
-    static private int ELEVATOR_COUNT = 0;
-
-    /** The unique identifier of this ElevatorSubsystem. */
-    private final int id;
-
     /** Queue to read incoming messages from. */
     private MessageQueue<ElevatorRequest> incoming;
 
     /** Queue to put outgoing messages to. */
     private MessageQueue<ElevatorRequest> outgoing;
 
-    /** The current floor that the elevator is at. */
-    private int floor;
+    /** A list of all the elevators controlled by this subsystem. */
+    private Thread[] elevators;
+
+    /**
+     * A list of all the message queues that the elevators can receives instructions
+     * on.
+     */
+    private ArrayList<MessageQueue<ElevatorRequest>> elevators_in;
 
     /**
      * Constructs the elevator subsystem.
      * 
-     * @param incoming The message queue containing messages for the
-     *                 ElevatorSubsystem.
-     * @param outgoing The message queue containing messages from the
-     *                 ElevatorSubsystem.
+     * @param incoming      The message queue containing messages for the
+     *                      ElevatorSubsystem.
+     * @param outgoing      The message queue containing messages from the
+     *                      ElevatorSubsystem.
+     * @param num_elevators The number of elevators that this system controls.
      */
-    public ElevatorSubsystem(MessageQueue<ElevatorRequest> incoming, MessageQueue<ElevatorRequest> outgoing) {
+    public ElevatorSubsystem(MessageQueue<ElevatorRequest> incoming, MessageQueue<ElevatorRequest> outgoing,
+            int num_elevators) {
         this.incoming = incoming;
         this.outgoing = outgoing;
-        this.id = ELEVATOR_COUNT;
-        this.floor = 1; // Assume all elevators start at ground floor
-        ELEVATOR_COUNT++;
+
+        // Initialize all elevators
+        this.elevators = new Thread[num_elevators];
+        this.elevators_in = new ArrayList<>();
+        for (int i = 0; i < num_elevators; i++) {
+            this.elevators_in.add(new MessageQueue<>());
+            this.elevators[i] = new Thread(new Elevator(this.elevators_in.get(i), outgoing));
+        }
+
     }
 
     /** Runs the primary logic of the ElevatorSubsystem. */
     public void run() {
+
+        // Start all elevators
+        for (int i = 0; i < this.elevators.length; i++) {
+            this.elevators[i].start();
+        }
+
         while (true) {
             ElevatorRequest request = this.incoming.getMessage();
 
+            // Destroy subystem
             if (request == null) {
                 System.out.println("Elevator system exited.");
-                this.outgoing.putMessage(null);
+
+                // Kill all elevator threads
+                for (int i = 0; i < this.elevators.length; i++) {
+                    this.elevators_in.get(i).putMessage(null);
+                }
+
+                this.outgoing.putMessage(null); // Signal to other subsystems that it's over
                 return;
             }
 
-            System.out.println("Elevator got request: " + request);
-
-            // Handle request
-            if (this.floor != request.getOriginFloor()) {
-                System.out.println("Moving from floor " + this.floor + " to " + request.getOriginFloor());
-                this.floor = request.getOriginFloor();
-                System.out.println("Moving from floor " + this.floor + " to " + request.getDestinationFloor());
-                this.floor = request.getDestinationFloor();
-                System.out.println("Request completed.");
-            }
-
-            this.outgoing.putMessage(request);
-
+            // Handle request (forward it to the only elevator that currently exists)
+            // WARNING: assumes a single elevator
+            this.elevators_in.get(0).putMessage(request);
             try {
                 Thread.sleep(3);
             } catch (InterruptedException e) {

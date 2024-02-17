@@ -11,6 +11,9 @@ import java.io.FileNotFoundException;
  * @version 0.0.0
  */
 public class Main {
+
+    static int NUM_ELEVATORS = 1;
+
     public static void main(String[] args) {
 
         // Construct message queues
@@ -20,7 +23,7 @@ public class Main {
         MessageQueue<ElevatorRequest> elevatorOutgoing = new MessageQueue<>();
 
         // Construct subsystems
-        ElevatorSubsystem esys = new ElevatorSubsystem(elevatorIncoming, elevatorOutgoing);
+        ElevatorSubsystem esys = new ElevatorSubsystem(elevatorIncoming, elevatorOutgoing, NUM_ELEVATORS);
         Scheduler scheduler = new Scheduler(floorIncoming, floorOutgoing, elevatorIncoming, elevatorOutgoing);
         FloorSubsystem fsys;
         try {
