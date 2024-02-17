@@ -24,6 +24,21 @@ class ElevatorTest {
         elevator = null;
     }
 
+    /**
+     * Tests that the elevator is initialized correctly using the default constructor.
+     */
+    @Test
+    void testDefaultConstructor() {
+        Elevator e = new Elevator(requestQueue, completionQueue);
+        assertEquals(1, e.getFloor());
+        assertEquals(1, e.getId());
+        Elevator e2 = new Elevator(requestQueue, completionQueue);
+        assertEquals(2, e2.getId());
+    }
+
+    /**
+     * Test that the elevator moves between floors in accordance with its received request.
+     */
     @Test
     void testElevatorMovement() {
         ElevatorRequest elevator_request = new ElevatorRequest("14:15:45.0 5 Down 3");
@@ -41,6 +56,4 @@ class ElevatorTest {
 
         assertEquals(3, elevator.getFloor());
     }
-
-
 }
