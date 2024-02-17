@@ -68,6 +68,7 @@ Javeria Sohail: Updated the sequence diagram and the README.txt.
 Grant Achuzia: Updated the ElevatorSubsystemTest file to work with 1 elevator. Also added a test class for Elevator.java
 Matteo Golin: Wrote the state machine code for the Elevator and Scheduler classes, and helped add a test case for the
 ElevatorTest.
+Yousef Hammad: Developed the scheduler and elevator subsystem state machine diagrams
 
 === Setup Instructions ===
 
