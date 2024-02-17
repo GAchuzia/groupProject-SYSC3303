@@ -10,16 +10,24 @@
  */
 public class Elevator implements Runnable {
 
-    /** Counts the number of elevators that have been created. */
+    /**
+     * Counts the number of elevators that have been created.
+     */
     static private int ELEVATOR_COUNT = 0;
 
-    /** The unique identifier of this elevator. */
+    /**
+     * The unique identifier of this elevator.
+     */
     private final int id;
 
-    /** The floor that the elevator is currently on. */
+    /**
+     * The floor that the elevator is currently on.
+     */
     private int floor;
 
-    /** The current state of the elevator. */
+    /**
+     * The current state of the elevator.
+     */
     private ElevatorState state;
 
     /**
@@ -52,7 +60,7 @@ public class Elevator implements Runnable {
 
     /**
      * Moves the elevator to the destination floor.
-     * 
+     *
      * @param destination The destination floor number to move to.
      */
     private void moveTo(int destination) {
@@ -133,8 +141,17 @@ public class Elevator implements Runnable {
      *
      * @return The current floor of the elevator.
      */
-    public int getFloor(){
+    public int getFloor() {
         return this.floor;
+    }
+
+    /**
+     * Gets the ID of the elevator.
+     *
+     * @return The unique ID of this elevator.
+     */
+    public int getId() {
+        return this.id;
     }
 
 }

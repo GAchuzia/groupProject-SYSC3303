@@ -40,7 +40,7 @@ class FloorSubsystemTest {
     private FloorSubsystem subsystem;
 
     /**
-     * Sets up the subsystem with its incoming and outgiong message queues.
+     * Sets up the subsystem with its incoming and outgoing message queues.
      */
     @BeforeEach
     void setUp() {
@@ -66,7 +66,7 @@ class FloorSubsystemTest {
     /**
      * Tests that the FloorSubsystem can send elevator requests.
      *
-     * @throws InterruptedException
+     * @throws InterruptedException When any of the threads are interrupted.
      */
     @Test
     void testRunning() throws InterruptedException {
@@ -111,8 +111,6 @@ class FloorSubsystemTest {
      */
     @Test
     void testBadFile() {
-        assertThrows(FileNotFoundException.class, () -> {
-            new FloorSubsystem("thisfiledefinitelydoesnotexist.lol", this.incoming, this.outgoing);
-        });
+        assertThrows(FileNotFoundException.class, () -> new FloorSubsystem("thisfiledefinitelydoesnotexist.lol", this.incoming, this.outgoing));
     }
 }

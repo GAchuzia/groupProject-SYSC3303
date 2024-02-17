@@ -52,7 +52,7 @@ class ElevatorSubsystemTest {
     /**
      * Tests the echo behaviour of the ElevatorSubsystem when it receives a message.
      *
-     * @throws InterruptedException
+     * @throws InterruptedException When the elevator thread is interrupted.
      */
     @Test
     void testEcho() throws InterruptedException {

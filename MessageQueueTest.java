@@ -26,7 +26,7 @@ class MessageQueueTest {
      */
     @BeforeEach
     void setUp() {
-        this.queue = new MessageQueue<String>();
+        this.queue = new MessageQueue<>();
     }
 
     /**

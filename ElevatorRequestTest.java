@@ -1,6 +1,5 @@
 import org.junit.jupiter.api.Test;
 
-import java.text.ParseException;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
@@ -47,8 +46,6 @@ class ElevatorRequestTest {
      */
     @Test
     void testBadConstruction() {
-        assertThrows(DateTimeParseException.class, () -> {
-            new ElevatorRequest("this is a bad string");
-        });
+        assertThrows(DateTimeParseException.class, () -> new ElevatorRequest("this is a bad string"));
     }
 }
