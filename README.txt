@@ -31,6 +31,9 @@ MessageQueueTest.java: Test suite to verify the functionality of the MessageQueu
 Scheduler.java: Forwards messages from the FloorSubsystem to the ElevatorSubsystem, and vice versa.
 SchedulerTest.java: Test suite to verify the functionality of the Scheduler class.
 
+ElevatorState.java: Represents the state of the elevator (Idle, Moving, DoorsOpen, DoorsClosed).
+ElevatorStateTest.java: Test suite to verify the functionality of the ElevatorState class.
+
 Main.java: Initializes each subsystem into a separate thread and runs the simulator. Currently messages are generated
 from the FloorSubsystem using the testdata.txt file, and passed along through the Scheduler to the ElevatorSubsystem
 before being passed back again.
@@ -41,9 +44,13 @@ SequenceUML.png: Diagram showing the sequential interaction between objects in t
 
 SequenceUML.puml: Open-source UML-based component used in making the sequence diagram.
 
+StateMachine.png: State machine diagram depicting the states and transitions of the elevator system.
+
 testdata.txt: Input file with data on the elevator's properties (time stamp, floor, button pressed, car button).
 
 === Group Responsibilities ===
+
+Iteration 1:
 
 Matteo Golin: Implemented JUnit testing, performed integration tests, wrote MessageQueue, wrote FloorSubsystem and
 helped debug other classes.
@@ -51,6 +58,11 @@ Yousef Hammad: Wrote Scheduler and helped combine the other java classes togethe
 Saja Fawagreh: Wrote MessageQueue and created the UML diagrams for Project Iteration 1.
 Javeria Sohail: Wrote MessageQueue and made the UML Diagrams for Project Iteration 1.
 Grant Achuzia: Wrote JUnit test classes, testdata.txt, and README.txt for Project Iteration 1.
+
+Iteration 2:
+
+Saja Fawagreh: Updated the sequence diagram and the README.txt.
+Javeria Sohail: Updated the sequence diagram and the README.txt.
 
 === Setup Instructions ===
 
