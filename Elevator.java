@@ -128,4 +128,13 @@ public class Elevator implements Runnable {
         }
     }
 
+    /**
+     * Get the current floor of the elevator.
+     *
+     * @return The current floor of the elevator.
+     */
+    public int getFloor(){
+        return this.floor;
+    }
+
 }
