@@ -32,7 +32,6 @@ Scheduler.java: Forwards messages from the FloorSubsystem to the ElevatorSubsyst
 SchedulerTest.java: Test suite to verify the functionality of the Scheduler class.
 
 ElevatorState.java: Represents the state of the elevator (Idle, Moving, DoorsOpen, DoorsClosed).
-ElevatorStateTest.java: Test suite to verify the functionality of the ElevatorState class.
 
 Main.java: Initializes each subsystem into a separate thread and runs the simulator. Currently messages are generated
 from the FloorSubsystem using the testdata.txt file, and passed along through the Scheduler to the ElevatorSubsystem
