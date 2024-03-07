@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Represents a physical or simulated elevator.
  *
@@ -43,6 +45,16 @@ public class Elevator implements Runnable {
     private MessageQueue<ElevatorRequest> completion_q;
 
     /**
+     * Keeps track of the floors the elevator needs to visit.
+     */
+    private ArrayList<Integer> floor_q;
+
+    /**
+     * The current request being handled by the Elevator.
+     */
+    private ElevatorRequest current_request;
+
+    /**
      * Constructs a new elevator.
      *
      * @param requests   The message queue for the elevator to receive requests on.
@@ -55,6 +67,7 @@ public class Elevator implements Runnable {
         this.id = ELEVATOR_COUNT;
         this.floor = 1; // Assume all elevators start on the ground floor
         this.state = ElevatorState.Idle; // Elevators start in the idle state
+        this.floor_q = new ArrayList<>();
         ELEVATOR_COUNT++;
     }
 
@@ -70,7 +83,6 @@ public class Elevator implements Runnable {
             return;
         }
 
-        this.state = ElevatorState.Moving; // Signify movement
         System.out.println("Elevator #" + this.id + " moving from floor " + this.floor + " to " + destination);
 
         // Sleep 50ms per floor traversed
@@ -81,7 +93,6 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
 
-        this.state = ElevatorState.Idle;
         this.floor = destination;
     }
 
@@ -96,7 +107,6 @@ public class Elevator implements Runnable {
             e.printStackTrace();
             System.exit(1);
         }
-        this.state = ElevatorState.DoorsOpen;
     }
 
     /**
@@ -110,29 +120,54 @@ public class Elevator implements Runnable {
             e.printStackTrace();
             System.exit(1);
         }
-        this.state = ElevatorState.DoorsClosed;
     }
 
     /**
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
+
         while (true) {
-            ElevatorRequest rqst = this.request_q.getMessage(); // Get any incoming request
 
-            // Handle kill message
-            if (rqst == null) {
-                return;
+            switch (this.state) {
+                case ElevatorState.Idle:
+
+                    if (this.floor_q.isEmpty()) {
+                        this.current_request = this.request_q.getMessage(); // Get any incoming request
+
+                        // Handle kill message
+                        if (this.current_request == null) {
+                            return;
+                        }
+
+                        // Add floors to be processed
+                        floor_q.add(this.current_request.getOriginFloor());
+                        floor_q.add(this.current_request.getDestinationFloor());
+                    }
+
+                    this.state = ElevatorState.Moving;
+
+                    break;
+                case ElevatorState.Moving:
+                    this.moveTo(floor_q.removeFirst()); // Go to the origin floor for pickup
+                    this.state = ElevatorState.DoorsOpen;
+                    break;
+                case ElevatorState.DoorsOpen:
+                    this.openDoors(); // Let in passenger
+                    this.state = ElevatorState.DoorsClosed;
+                    break;
+                case ElevatorState.DoorsClosed:
+                    this.closeDoors(); // Get ready to leave
+
+                    if (this.floor_q.isEmpty()) {
+                        this.state = ElevatorState.Idle; // Needs new request
+                        this.completion_q.putMessage(this.current_request); // Echo back request to signify completion
+                    } else {
+                        this.state = ElevatorState.Moving; // More floors to move to
+                    }
+
+                    break;
             }
-
-            this.moveTo(rqst.getOriginFloor()); // Go to the origin floor for pickup
-            this.openDoors(); // Let in passenger
-            this.closeDoors(); // Get ready to leave
-            this.moveTo(rqst.getDestinationFloor()); // Go to destination
-            this.openDoors(); // Let out passenger
-            this.closeDoors(); // Get ready to leave
-
-            this.completion_q.putMessage(rqst); // Echo back request to signify completion
         }
     }
 

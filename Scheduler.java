@@ -54,30 +54,39 @@ public class Scheduler implements Runnable {
 
         // While there are still messages
         while (true) {
-            this.state = SchedulerState.Idle;
+            switch (this.state) {
+                case SchedulerState.Idle:
+                    if (!this.floorOutgoing.isEmpty() || !this.elevatorOutgoing.isEmpty()) {
+                        this.state = SchedulerState.Thinking;
+                    }
+                    break;
+                case SchedulerState.Thinking:
 
-            // If there is a message from the floor, forward it to the elevator subsystem
-            if (!this.floorOutgoing.isEmpty()) {
-                this.state = SchedulerState.Thinking;
-                System.out.println("Scheduler forwarded floor message.");
-                this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
+                    // If there is a message from the floor, forward it to the elevator subsystem
+                    if (!this.floorOutgoing.isEmpty()) {
+                        this.state = SchedulerState.Thinking;
+                        System.out.println("Scheduler forwarded floor message.");
+                        this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
+                    }
+
+                    // If there is a message from the elevator subsystem, forward it to the floor
+                    if (!this.elevatorOutgoing.isEmpty()) {
+                        this.state = SchedulerState.Thinking;
+                        System.out.println("Scheduler forwarded elevator message.");
+
+                        ElevatorRequest message = this.elevatorOutgoing.getMessage();
+                        if (message == null) {
+                            this.floorIncoming.putMessage(null);
+                            System.out.println("Scheduler exited.");
+                            return;
+                        }
+                        this.floorIncoming.putMessage(message);
+                    }
+                    this.state = SchedulerState.Idle;
+                    break;
             }
 
-            // If there is a message from the elevator subsystem, forward it to the floor
-            if (!this.elevatorOutgoing.isEmpty()) {
-                this.state = SchedulerState.Thinking;
-                System.out.println("Scheduler forwarded elevator message.");
-
-                ElevatorRequest message = this.elevatorOutgoing.getMessage();
-                if (message == null) {
-                    this.floorIncoming.putMessage(null);
-                    System.out.println("Scheduler exited.");
-                    return;
-                }
-                this.floorIncoming.putMessage(message);
-            }
-            this.state = SchedulerState.Idle;
-
+            // Add some delay
             try {
                 Thread.sleep(4);
             } catch (InterruptedException e) {
