@@ -2,6 +2,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.nio.ByteBuffer;
 
 /**
  * Represents a single line of the input data, which is a request for the
@@ -34,7 +35,8 @@ public class ElevatorRequest {
     private int destination;
 
     /**
-     * Provides a means to parse the input file's elevator request timestamps into Java's LocalTime object.
+     * Provides a means to parse the input file's elevator request timestamps into
+     * Java's LocalTime object.
      */
     private static final DateTimeFormatter PARSER = new DateTimeFormatterBuilder()
             .appendPattern("H:m:s")
@@ -45,7 +47,8 @@ public class ElevatorRequest {
     /**
      * Constructs an elevator request dataclass from a line of the input file.
      *
-     * @param input_line A line from the input file in the format [timestamp] [origin] [destination] [direction].
+     * @param input_line A line from the input file in the format [timestamp]
+     *                   [origin] [destination] [direction].
      *                   Example: "14:05:15.2 2 Up 4"
      */
     public ElevatorRequest(String input_line) {
@@ -54,6 +57,21 @@ public class ElevatorRequest {
         this.origin = Integer.parseInt(elements[1]);
         this.direction = Direction.valueOf(elements[2]);
         this.destination = Integer.parseInt(elements[3]);
+    }
+
+    /**
+     * Constructs an elevator request from a byte array.
+     *
+     * @param bytes The byte array in which the elevator request is encoded.
+     */
+    public ElevatorRequest(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+        buffer.put(bytes);
+        this.origin = buffer.getInt();
+        this.destination = buffer.getInt();
+        this.direction = Direction.values()[buffer.getInt()];
+        buffer.compact();
+        this.timestamp = LocalTime.parse(new String(buffer.array()));
     }
 
     /**
@@ -113,5 +131,19 @@ public class ElevatorRequest {
                 && this.origin == ((ElevatorRequest) obj).getOriginFloor()
                 && this.timestamp.equals(((ElevatorRequest) obj).getTimestamp())
                 && this.direction == ((ElevatorRequest) obj).direction;
+    }
+
+    /**
+     * Encodes the ElevatorRequest as bytes.
+     * 
+     * @return A byte array of the encoded elevator request.
+     */
+    public byte[] getBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+        buffer.putInt(this.origin);
+        buffer.putInt(this.destination);
+        buffer.putInt(this.direction.ordinal());
+        buffer.put(this.timestamp.toString().getBytes());
+        return buffer.array();
     }
 }

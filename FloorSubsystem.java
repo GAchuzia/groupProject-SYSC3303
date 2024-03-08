@@ -1,7 +1,12 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.InetAddress;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
+import java.io.IOException;
 
 /**
  * This class represents the floor subsystem, which will read the elevator usage
@@ -14,71 +19,59 @@ import java.util.Scanner;
  * @author Yousef Hammad, 101217858
  * @version 0.0.0
  */
-public class FloorSubsystem implements Runnable {
+public class FloorSubsystem {
 
-    /** Reads the input file. */
-    private Scanner reader;
+    static final int PORT = 2001;
 
-    /** Queue to put elevator request messages on. */
-    private MessageQueue<ElevatorRequest> incoming;
+    static final int SCHEDULER_PORT = 2002;
 
-    /** Queue to read messages from. */
-    private MessageQueue<ElevatorRequest> outgoing;
+    static final int BUFFER_LEN = 100;
 
-    /**
-     * Constructs the floor subsystem.
-     * 
-     * @param file_path The file to read the input requests from for the simulation.
-     * @param incoming  The message queue with incoming messages for the
-     *                  FloorSubsystem.
-     * @param outgoing  The message queue with outgoing messages from the
-     *                  FloorSubsystem.
-     */
-    public FloorSubsystem(String file_path, MessageQueue<ElevatorRequest> incoming,
-            MessageQueue<ElevatorRequest> outgoing) throws FileNotFoundException {
-        File file = new File(file_path);
-        this.reader = new Scanner(file);
-        this.incoming = incoming;
-        this.outgoing = outgoing;
-    }
+    static final String INPUT_FILE = "./testdata.txt";
 
     /** Runs the primary logic of the FloorSubsystem. */
-    public void run() {
+    public static void main(String[] args) throws FileNotFoundException, SocketException, IOException {
+
+        // Create socket for sending and receiving.
+        DatagramSocket channel = new DatagramSocket(PORT);
+
+        // The message buffer for receiving new UDP messages
+        DatagramPacket message = null;
+
+        // Reads the input file.
+        File file = new File(INPUT_FILE);
+        Scanner reader = new Scanner(file);
 
         // Send all messages
-        while (this.reader.hasNextLine()) {
+        while (reader.hasNextLine()) {
             try {
-                ElevatorRequest rqst = new ElevatorRequest(this.reader.nextLine());
+
+                ElevatorRequest rqst = new ElevatorRequest(reader.nextLine());
                 System.out.println("Floor put request on queue: " + rqst);
-                this.outgoing.putMessage(rqst);
+                byte[] byte_rqst = rqst.getBytes();
+                // TODO Use inet address other than localhost
+                channel.send(
+                        new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(), SCHEDULER_PORT));
+
+                // Short sleep to delay requests
                 try {
-                    Thread.sleep(4);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     continue;
                 }
+
             } catch (DateTimeParseException e) {
                 System.out.println("Failed to parse input line timestamp: " + e);
             }
         }
-        this.reader.close();
-        this.outgoing.putMessage(null); // Signal end of stream, tell other subsystems to kill themselves
+        reader.close();
 
         // Look for incoming messages
         while (true) {
-            while (!this.incoming.isEmpty()) {
-                ElevatorRequest message = this.incoming.getMessage();
-                if (message == null) {
-                    System.out.println("Floor subsystem exited.");
-                    return;
-                }
-                System.out.println("Floor got message: " + message);
-            }
 
-            try {
-                Thread.sleep(3);
-            } catch (InterruptedException e) {
-                continue;
-            }
+            message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+            channel.receive(message);
+            System.out.println("Floor got message: " + message);
         }
     }
 }
