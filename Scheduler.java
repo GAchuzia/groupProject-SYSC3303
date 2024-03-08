@@ -1,3 +1,5 @@
+import java.net.DatagramSocket;
+
 /**
  * The scheduler that will be responsible for assigning the correct elevators to
  * the correct floor.
@@ -10,68 +12,43 @@
  * @version 0.0.0
  */
 
-public class Scheduler implements Runnable {
+public class Scheduler {
 
-    /** The message queue for sending messages to the FloorSubsystem. */
-    private MessageQueue<ElevatorRequest> floorIncoming;
+    /** The current state of the Scheduler (starts in Idle). */
+    static SchedulerState state = SchedulerState.Idle;
 
-    /** The message queue for receiving messages from the FloorSubsystem. */
-    private MessageQueue<ElevatorRequest> floorOutgoing;
+    /** The port for sending and receiving from the floor subsystem. */
+    static int FLOOR_PORT = 2003;
 
-    /** The message queue for sending messages to the ElevatorSubsystem. */
-    private MessageQueue<ElevatorRequest> elevatorIncoming;
-
-    /** The message queue for receiving messages from the ElevatorSubsystem. */
-    private MessageQueue<ElevatorRequest> elevatorOutgoing;
-
-    /** The current state of the Scheduler. */
-    private SchedulerState state;
-
-    /**
-     * Constructs a new Scheduler with message queues for communicating with other
-     * subsystems.
-     * 
-     * @param floorIncoming    The message queue for sending messages to the
-     *                         FloorSubsystem.
-     * @param floorOutgoing    The message queue for receiving messages from the
-     *                         FloorSubsystem.
-     * @param elevatorIncoming The message queue for sending messages to the
-     *                         ElevatorSubsystem.
-     * @param elevatorOutgoing The message queue for receiving messages from the
-     *                         ElevatorSubsystem.
-     */
-    public Scheduler(MessageQueue<ElevatorRequest> floorIncoming, MessageQueue<ElevatorRequest> floorOutgoing,
-            MessageQueue<ElevatorRequest> elevatorIncoming, MessageQueue<ElevatorRequest> elevatorOutgoing) {
-        this.floorIncoming = floorIncoming;
-        this.floorOutgoing = floorOutgoing;
-        this.elevatorIncoming = elevatorIncoming;
-        this.elevatorOutgoing = elevatorOutgoing;
-        this.state = SchedulerState.Idle;
-    }
+    /** The port for sending and receiving from the elevator system. */
+    static int ELEVATOR_PORT = 2004;
 
     /** Executes the main logical loop of the Scheduler subsystem. */
-    public void run() {
+    public static void main(String[] args) {
+
+        // Create socket for receiving and sending
+        DatagramSocket floor_socket = new DatagramSocket(FLOOR_PORT);
+        DatagramSocket elevator_socket = new DatagramSocket(ELEVATOR_PORT);
 
         // While there are still messages
         while (true) {
-            switch (this.state) {
+            switch (state) {
                 case SchedulerState.Idle:
-                    if (!this.floorOutgoing.isEmpty() || !this.elevatorOutgoing.isEmpty()) {
-                        this.state = SchedulerState.Thinking;
-                    }
+                    // TODO: Get UDP messages
+                    state = SchedulerState.Thinking;
                     break;
                 case SchedulerState.Thinking:
 
                     // If there is a message from the floor, forward it to the elevator subsystem
                     if (!this.floorOutgoing.isEmpty()) {
-                        this.state = SchedulerState.Thinking;
+                        state = SchedulerState.Thinking;
                         System.out.println("Scheduler forwarded floor message.");
                         this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
                     }
 
                     // If there is a message from the elevator subsystem, forward it to the floor
                     if (!this.elevatorOutgoing.isEmpty()) {
-                        this.state = SchedulerState.Thinking;
+                        state = SchedulerState.Thinking;
                         System.out.println("Scheduler forwarded elevator message.");
 
                         ElevatorRequest message = this.elevatorOutgoing.getMessage();
@@ -82,7 +59,7 @@ public class Scheduler implements Runnable {
                         }
                         this.floorIncoming.putMessage(message);
                     }
-                    this.state = SchedulerState.Idle;
+                    state = SchedulerState.Idle;
                     break;
             }
 
