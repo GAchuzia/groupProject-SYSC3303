@@ -1,3 +1,8 @@
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.DatagramPacket;
+import java.io.IOException;
+
 /**
  * The scheduler that will be responsible for assigning the correct elevators to
  * the correct floor.
@@ -10,87 +15,66 @@
  * @version 0.0.0
  */
 
-public class Scheduler implements Runnable {
+public class Scheduler {
 
-    /** The message queue for sending messages to the FloorSubsystem. */
-    private MessageQueue<ElevatorRequest> floorIncoming;
+    /** The current state of the Scheduler (starts in Idle). */
+    static SchedulerState state = SchedulerState.Idle;
 
-    /** The message queue for receiving messages from the FloorSubsystem. */
-    private MessageQueue<ElevatorRequest> floorOutgoing;
+    /** The port for sending and receiving messages. */
+    static final int PORT = 2002;
 
-    /** The message queue for sending messages to the ElevatorSubsystem. */
-    private MessageQueue<ElevatorRequest> elevatorIncoming;
+    /** The port for sending to the floor subsystem. */
+    static final int FLOOR_PORT = 2001;
 
-    /** The message queue for receiving messages from the ElevatorSubsystem. */
-    private MessageQueue<ElevatorRequest> elevatorOutgoing;
+    /** The port for sending to the elevator system. */
+    static final int ELEVATOR_PORT = 2004;
 
-    /** The current state of the Scheduler. */
-    private SchedulerState state;
-
-    /**
-     * Constructs a new Scheduler with message queues for communicating with other
-     * subsystems.
-     * 
-     * @param floorIncoming    The message queue for sending messages to the
-     *                         FloorSubsystem.
-     * @param floorOutgoing    The message queue for receiving messages from the
-     *                         FloorSubsystem.
-     * @param elevatorIncoming The message queue for sending messages to the
-     *                         ElevatorSubsystem.
-     * @param elevatorOutgoing The message queue for receiving messages from the
-     *                         ElevatorSubsystem.
-     */
-    public Scheduler(MessageQueue<ElevatorRequest> floorIncoming, MessageQueue<ElevatorRequest> floorOutgoing,
-            MessageQueue<ElevatorRequest> elevatorIncoming, MessageQueue<ElevatorRequest> elevatorOutgoing) {
-        this.floorIncoming = floorIncoming;
-        this.floorOutgoing = floorOutgoing;
-        this.elevatorIncoming = elevatorIncoming;
-        this.elevatorOutgoing = elevatorOutgoing;
-        this.state = SchedulerState.Idle;
-    }
+    /** The length of the buffer for receiving UDP messages. */
+    static final int BUFFER_LEN = 100;
 
     /** Executes the main logical loop of the Scheduler subsystem. */
-    public void run() {
+    public static void main(String[] args) throws SocketException, IOException {
+
+        // Create socket for receiving and sending
+        DatagramSocket channel = new DatagramSocket(PORT);
+
+        // The message buffer for receiving new UDP messages
+        DatagramPacket message = null;
 
         // While there are still messages
         while (true) {
-            switch (this.state) {
+            switch (state) {
+
                 case SchedulerState.Idle:
-                    if (!this.floorOutgoing.isEmpty() || !this.elevatorOutgoing.isEmpty()) {
-                        this.state = SchedulerState.Thinking;
-                    }
+                    message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+                    channel.receive(message);
+                    state = SchedulerState.Thinking;
                     break;
+
                 case SchedulerState.Thinking:
 
-                    // If there is a message from the floor, forward it to the elevator subsystem
-                    if (!this.floorOutgoing.isEmpty()) {
-                        this.state = SchedulerState.Thinking;
-                        System.out.println("Scheduler forwarded floor message.");
-                        this.elevatorIncoming.putMessage(this.floorOutgoing.getMessage());
+                    switch (message.getPort()) {
+                        // If there is a message from the floor, forward it to the elevator subsystem
+                        case FLOOR_PORT:
+                            state = SchedulerState.Thinking;
+                            System.out.println("Scheduler forwarded floor message.");
+                            // TODO: handle IPs from different computers
+                            message.setPort(ELEVATOR_PORT);
+                            channel.send(message);
+                            break;
+
+                        // If there is a message from the elevator subsystem, forward it to the floor
+                        case ELEVATOR_PORT:
+                            state = SchedulerState.Thinking;
+                            System.out.println("Scheduler forwarded elevator message.");
+                            message.setPort(FLOOR_PORT);
+                            channel.send(message);
+                            break;
                     }
 
-                    // If there is a message from the elevator subsystem, forward it to the floor
-                    if (!this.elevatorOutgoing.isEmpty()) {
-                        this.state = SchedulerState.Thinking;
-                        System.out.println("Scheduler forwarded elevator message.");
-
-                        ElevatorRequest message = this.elevatorOutgoing.getMessage();
-                        if (message == null) {
-                            this.floorIncoming.putMessage(null);
-                            System.out.println("Scheduler exited.");
-                            return;
-                        }
-                        this.floorIncoming.putMessage(message);
-                    }
-                    this.state = SchedulerState.Idle;
+                    // Set state back to idle
+                    state = SchedulerState.Idle;
                     break;
-            }
-
-            // Add some delay
-            try {
-                Thread.sleep(4);
-            } catch (InterruptedException e) {
-                continue;
             }
         }
     }
