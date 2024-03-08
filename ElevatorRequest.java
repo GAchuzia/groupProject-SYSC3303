@@ -2,6 +2,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
@@ -21,14 +22,17 @@ public class ElevatorRequest {
      * The time that the elevator request was made.
      */
     private LocalTime timestamp;
+
     /**
      * The direction that the requester wants to travel in.
      */
     private Direction direction;
+
     /**
      * The origin floor for the elevator request.
      */
     private int origin;
+
     /**
      * The destination floor for the elevator request.
      */
@@ -64,14 +68,25 @@ public class ElevatorRequest {
      *
      * @param bytes The byte array in which the elevator request is encoded.
      */
-    public ElevatorRequest(byte[] bytes) {
+    public ElevatorRequest(byte[] bytes) throws UnsupportedEncodingException {
         ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+
         buffer.put(bytes);
+        buffer.position(0); // Start parsing from beginning
+
         this.origin = buffer.getInt();
         this.destination = buffer.getInt();
         this.direction = Direction.values()[buffer.getInt()];
-        buffer.compact();
-        this.timestamp = LocalTime.parse(new String(buffer.array()));
+
+        buffer.compact(); // Compact array so remaining data is timestamp
+
+        // Remove excess null terminating characters
+        byte[] timestamp_bytes = buffer.array();
+        int i = 0;
+        for (; timestamp_bytes[i] != 0; i++)
+            ;
+        String timestamp_text = new String(timestamp_bytes, 0, i, "US-ASCII");
+        this.timestamp = LocalTime.parse(timestamp_text);
     }
 
     /**

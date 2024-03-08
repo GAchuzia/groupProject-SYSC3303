@@ -27,7 +27,7 @@ public class Scheduler {
     static final int FLOOR_PORT = 2001;
 
     /** The port for sending to the elevator system. */
-    static final int ELEVATOR_PORT = 2004;
+    static final int ELEVATOR_PORT = 2003;
 
     /** The length of the buffer for receiving UDP messages. */
     static final int BUFFER_LEN = 100;

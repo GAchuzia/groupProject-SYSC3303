@@ -1,4 +1,8 @@
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.ArrayList;
+import java.io.IOException;
+import java.net.SocketException;
 
 /**
  * Represents the subsystem containing the elevators.
@@ -10,79 +14,52 @@ import java.util.ArrayList;
  * @author Yousef Hammad, 101217858
  * @version 0.0.0
  */
-public class ElevatorSubsystem implements Runnable {
+public class ElevatorSubsystem {
 
-    /** Queue to read incoming messages from. */
-    private MessageQueue<ElevatorRequest> incoming;
+    /** Port for sending and receiving messages. */
+    public static final int PORT = 2003;
 
-    /** Queue to put outgoing messages to. */
-    private MessageQueue<ElevatorRequest> outgoing;
+    /** Length of buffer in bytes for receiving UDP messages. */
+    public static final int BUFFER_LEN = 100;
 
-    /** A list of all the elevators controlled by this subsystem. */
-    private Thread[] elevators;
-
-    /**
-     * A list of all the message queues that the elevators can receives instructions
-     * on.
-     */
-    private ArrayList<MessageQueue<ElevatorRequest>> elevators_in;
-
-    /**
-     * Constructs the elevator subsystem.
-     * 
-     * @param incoming      The message queue containing messages for the
-     *                      ElevatorSubsystem.
-     * @param outgoing      The message queue containing messages from the
-     *                      ElevatorSubsystem.
-     * @param num_elevators The number of elevators that this system controls.
-     */
-    public ElevatorSubsystem(MessageQueue<ElevatorRequest> incoming, MessageQueue<ElevatorRequest> outgoing,
-            int num_elevators) {
-        this.incoming = incoming;
-        this.outgoing = outgoing;
-
-        // Initialize all elevators
-        this.elevators = new Thread[num_elevators];
-        this.elevators_in = new ArrayList<>();
-        for (int i = 0; i < num_elevators; i++) {
-            this.elevators_in.add(new MessageQueue<>());
-            this.elevators[i] = new Thread(new Elevator(this.elevators_in.get(i), outgoing));
-        }
-
-    }
+    /** Number of elevators in the simulation. */
+    public static final int NUM_ELEVATORS = 1;
 
     /** Runs the primary logic of the ElevatorSubsystem. */
-    public void run() {
+    public static void main(String[] args) throws IOException, SocketException {
 
-        // Start all elevators
-        for (int i = 0; i < this.elevators.length; i++) {
-            this.elevators[i].start();
+        // Create socket for receiving requests
+        DatagramSocket channel = new DatagramSocket(PORT);
+
+        // Create outgoing message queue for elevators TODO: make this UDP
+        MessageQueue<ElevatorRequest> outgoing = new MessageQueue<>();
+
+        // Initialize all elevators
+        Thread[] elevators = new Thread[NUM_ELEVATORS];
+        ArrayList<MessageQueue<ElevatorRequest>> elevators_in = new ArrayList<>();
+        for (int i = 0; i < NUM_ELEVATORS; i++) {
+            elevators_in.add(new MessageQueue<>());
+            elevators[i] = new Thread(new Elevator(elevators_in.get(i), outgoing));
         }
 
+        // Start all elevators
+        for (int i = 0; i < elevators.length; i++) {
+            elevators[i].start();
+        }
+
+        // Process requests from scheduler
+        DatagramPacket message = null;
         while (true) {
-            ElevatorRequest request = this.incoming.getMessage();
 
-            // Destroy subystem
-            if (request == null) {
-                System.out.println("Elevator system exited.");
-
-                // Kill all elevator threads
-                for (int i = 0; i < this.elevators.length; i++) {
-                    this.elevators_in.get(i).putMessage(null);
-                }
-
-                this.outgoing.putMessage(null); // Signal to other subsystems that it's over
-                return;
-            }
+            message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+            channel.receive(message);
+            ElevatorRequest request = new ElevatorRequest(message.getData());
 
             // Handle request (forward it to the only elevator that currently exists)
             // WARNING: assumes a single elevator
-            this.elevators_in.get(0).putMessage(request);
-            try {
-                Thread.sleep(3);
-            } catch (InterruptedException e) {
-                continue;
-            }
+            elevators_in.get(0).putMessage(request);
+
+            // TODO: Read back messages from the elevators
         }
     }
 }
