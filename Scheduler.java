@@ -69,7 +69,6 @@ public class Scheduler {
 
                             // TODO: handle IPs from different computers
                             channel.send(message);
-
                             // TODO: Schedule based on elevator availabilty
                             // For now just sending to elevator 0 every time
                             ElevatorRequest request = new ElevatorRequest(message.getData());
@@ -102,11 +101,11 @@ public class Scheduler {
 
                             // Complete messages are sent to floor
                             if (response.isComplete()) {
+                                elevatorNum = response.getElevator();
+                                list.set(elevatorNum, response.getDestinationFloor());
                                 message.setPort(FloorSubsystem.PORT);
                                 channel.send(message);
                                 System.out.println("Scheduler forwarded elevator message.");
-                                elevatorNum = response.getElevator();
-                                list.set(elevatorNum, response.getDestinationFloor());
                             }
 
                             break;
