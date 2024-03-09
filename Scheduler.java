@@ -72,6 +72,7 @@ public class Scheduler {
                             System.out.println("Scheduler forwarded elevator message.");
                             message.setPort(FloorSubsystem.PORT);
                             channel.send(message);
+                            // TODO: record elevator whereabouts somewhere to inform scheduling decisions
                             break;
                     }
 

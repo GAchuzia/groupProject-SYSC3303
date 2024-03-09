@@ -53,14 +53,19 @@ public class ElevatorSubsystem {
 
             DatagramPacket message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
             channel.receive(message);
-            System.out.println("RECEIVED!");
-            ElevatorRequest request = new ElevatorRequest(message.getData());
 
             // Forward message
-            message.setPort(2007 + request.getElevator()); // Set destination port to correct elevator
-            channel.send(message);
+            if (message.getPort() == Scheduler.PORT) {
+                ElevatorRequest request = new ElevatorRequest(message.getData());
+                message.setPort(2007 + request.getElevator()); // Set destination port to correct elevator
+                channel.send(message);
+            }
 
-            // TODO: Read back messages from the elevators
+            // Message came from an elevator and it's a status update
+            else {
+                message.setPort(Scheduler.PORT);
+                channel.send(message);
+            }
         }
     }
 }
