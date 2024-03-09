@@ -23,12 +23,6 @@ public class Scheduler {
     /** The port for sending and receiving messages. */
     static final int PORT = 2002;
 
-    /** The port for sending to the floor subsystem. */
-    static final int FLOOR_PORT = 2001;
-
-    /** The port for sending to the elevator system. */
-    static final int ELEVATOR_PORT = 2003;
-
     /** The length of the buffer for receiving UDP messages. */
     static final int BUFFER_LEN = 100;
 
@@ -55,7 +49,7 @@ public class Scheduler {
 
                     switch (message.getPort()) {
                         // If there is a message from the floor, forward it to the elevator subsystem
-                        case FLOOR_PORT:
+                        case FloorSubsystem.PORT:
                             state = SchedulerState.Thinking;
 
                             // TODO: handle IPs from different computers
@@ -66,17 +60,17 @@ public class Scheduler {
                             ElevatorRequest request = new ElevatorRequest(message.getData());
                             request.setElevator(0);
                             message.setData(request.getBytes()); // Re-encode message
-                            message.setPort(ELEVATOR_PORT);
+                            message.setPort(ElevatorSubsystem.PORT);
                             channel.send(message);
 
                             System.out.println("Scheduler forwarded floor message.");
                             break;
 
                         // If there is a message from the elevator subsystem, forward it to the floor
-                        case ELEVATOR_PORT:
+                        case ElevatorSubsystem.PORT:
                             state = SchedulerState.Thinking;
                             System.out.println("Scheduler forwarded elevator message.");
-                            message.setPort(FLOOR_PORT);
+                            message.setPort(FloorSubsystem.PORT);
                             channel.send(message);
                             break;
                     }

@@ -189,6 +189,7 @@ public class Elevator implements Runnable {
 
                     // All requests echo back request to signify completion
                     try {
+                        this.current_packet.setPort(ElevatorSubsystem.PORT);
                         channel.send(this.current_packet);
                     } catch (IOException e) {
                         e.printStackTrace();

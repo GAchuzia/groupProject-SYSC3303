@@ -23,8 +23,6 @@ public class FloorSubsystem {
 
     static final int PORT = 2001;
 
-    static final int SCHEDULER_PORT = 2002;
-
     static final int BUFFER_LEN = 100;
 
     static final String INPUT_FILE = "./testdata.txt";
@@ -51,7 +49,7 @@ public class FloorSubsystem {
                 byte[] byte_rqst = rqst.getBytes();
                 // TODO Use inet address other than localhost
                 channel.send(
-                        new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(), SCHEDULER_PORT));
+                        new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(), Scheduler.PORT));
 
                 // Short sleep to delay requests
                 try {
