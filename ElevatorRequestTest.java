@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
@@ -47,5 +48,29 @@ class ElevatorRequestTest {
     @Test
     void testBadConstruction() {
         assertThrows(DateTimeParseException.class, () -> new ElevatorRequest("this is a bad string"));
+    }
+
+    /**
+     * Check that ElevatorRequest can be constructed from a byte array
+     */
+    @Test
+    void testByteConstruction(){
+        ElevatorRequest byteRequest = null;
+        try {
+            byteRequest = new ElevatorRequest(REQUEST.getBytes());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(REQUEST, byteRequest);
+    }
+
+    /**
+     * Check that byte array request can be obtained
+     */
+    @Test
+    void testGetByteArray(){
+        byte[] bytes = REQUEST.getBytes();
+        assertNotNull(bytes);
+        assertEquals(100, bytes.length);
     }
 }
