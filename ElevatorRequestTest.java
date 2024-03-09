@@ -39,7 +39,8 @@ class ElevatorRequestTest {
      */
     @Test
     void testToString() {
-        assertEquals("Timestamp: 14:05:15.200 Direction: Up To: 4 From: 2", REQUEST.toString());
+        REQUEST.markComplete(); // Marks request as complete
+        assertEquals("Timestamp: 14:05:15.200 Direction: Up To: 4 From: 2 | Complete", REQUEST.toString());
     }
 
     /**

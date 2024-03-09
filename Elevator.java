@@ -116,6 +116,12 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Calls the private moveTo(int) method internally, made for testing purposes
+     */
+    public void moveElevatorTo(int destination){
+        moveTo(destination);
+    }
+    /**
      * Opens the elevator doors.
      */
     private void openDoors() {
