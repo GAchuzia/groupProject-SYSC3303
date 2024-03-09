@@ -57,10 +57,19 @@ public class Scheduler {
                         // If there is a message from the floor, forward it to the elevator subsystem
                         case FLOOR_PORT:
                             state = SchedulerState.Thinking;
-                            System.out.println("Scheduler forwarded floor message.");
+
                             // TODO: handle IPs from different computers
+                            channel.send(message);
+
+                            // TODO: Schedule based on elevator availabilty
+                            // For now just sending to elevator 0 every time
+                            ElevatorRequest request = new ElevatorRequest(message.getData());
+                            request.setElevator(0);
+                            message.setData(request.getBytes()); // Re-encode message
                             message.setPort(ELEVATOR_PORT);
                             channel.send(message);
+
+                            System.out.println("Scheduler forwarded floor message.");
                             break;
 
                         // If there is a message from the elevator subsystem, forward it to the floor
