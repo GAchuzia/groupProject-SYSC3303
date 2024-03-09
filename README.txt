@@ -67,13 +67,10 @@ ElevatorTest.
 Yousef Hammad: Developed the scheduler and elevator subsystem state machine diagrams
 
 Iteration 3:
-
 Saja Fawagreh: Updated the sequence, state machine, class diagram and the README.txt.
 Javeria Sohail: Updated the sequence, state machine, class diagram and the README.txt.
-Grant Achuzia:
+Grant Achuzia: Update tests for BLANK methods.
 Matteo Golin:
-ElevatorTest.
-Yousef Hammad:
 
 === Setup Instructions ===
 
