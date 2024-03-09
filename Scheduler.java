@@ -2,6 +2,9 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.DatagramPacket;
 import java.io.IOException;
+import java.util.ArrayList;
+
+import static java.lang.Math.abs;
 
 /**
  * The scheduler that will be responsible for assigning the correct elevators to
@@ -26,6 +29,14 @@ public class Scheduler {
     /** The length of the buffer for receiving UDP messages. */
     static final int BUFFER_LEN = 100;
 
+    /** The current elevator chosen by the Scheduler to take the request (starts with elevator 0) */
+    static int chosenElevator = -1;
+
+    static int originFloor;
+
+    static int elevatorNum;
+    static ArrayList<Integer> list = new ArrayList<>(4);
+
     /** Executes the main logical loop of the Scheduler subsystem. */
     public static void main(String[] args) throws SocketException, IOException {
 
@@ -34,6 +45,10 @@ public class Scheduler {
 
         // The message buffer for receiving new UDP messages
         DatagramPacket message = null;
+
+        for (int i = 0; i < 4; i++) {
+            list.add(0);
+        }
 
         // While there are still messages
         while (true) {
@@ -58,7 +73,18 @@ public class Scheduler {
                             // TODO: Schedule based on elevator availabilty
                             // For now just sending to elevator 0 every time
                             ElevatorRequest request = new ElevatorRequest(message.getData());
-                            request.setElevator(0);
+                            int minDiff = 8;
+                            for (int i = 0; i < 4; i++) {
+                                if (list.get(i) != -1 ){
+                                    int diff = abs(list.get(i) - originFloor);
+                                    if(diff < minDiff){
+                                        chosenElevator = i;
+                                        minDiff = diff;
+                                    }
+                                }
+                            }
+                            list.set(chosenElevator, -1);
+                            request.setElevator(chosenElevator);
                             message.setData(request.getBytes()); // Re-encode message
                             message.setPort(ElevatorSubsystem.PORT);
                             channel.send(message);
@@ -79,6 +105,8 @@ public class Scheduler {
                                 message.setPort(FloorSubsystem.PORT);
                                 channel.send(message);
                                 System.out.println("Scheduler forwarded elevator message.");
+                                elevatorNum = response.getElevator();
+                                list.set(elevatorNum, response.getDestinationFloor());
                             }
 
                             break;
