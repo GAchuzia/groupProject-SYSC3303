@@ -39,6 +39,11 @@ public class ElevatorRequest {
     private int destination;
 
     /**
+     * The ID of the elevator this request is associated with.
+     */
+    private int elevator;
+
+    /**
      * Provides a means to parse the input file's elevator request timestamps into
      * Java's LocalTime object.
      */
@@ -61,6 +66,7 @@ public class ElevatorRequest {
         this.origin = Integer.parseInt(elements[1]);
         this.direction = Direction.valueOf(elements[2]);
         this.destination = Integer.parseInt(elements[3]);
+        this.elevator = -1; // No ID set when created from file line
     }
 
     /**
@@ -76,6 +82,7 @@ public class ElevatorRequest {
 
         this.origin = buffer.getInt();
         this.destination = buffer.getInt();
+        this.elevator = buffer.getInt();
         this.direction = Direction.values()[buffer.getInt()];
 
         buffer.compact(); // Compact array so remaining data is timestamp
@@ -126,6 +133,24 @@ public class ElevatorRequest {
     }
 
     /**
+     * Sets the ID of the elevator this request is associated with.
+     * 
+     * @param elevator The ID of the elevator to associate this request with.
+     */
+    public void setElevator(int elevator) {
+        this.elevator = elevator;
+    }
+
+    /**
+     * Gets the ID of the elevator this request is associated with.
+     * 
+     * @return the ID of the elevator this request is associated with.
+     */
+    public int getElevator() {
+        return this.elevator;
+    }
+
+    /**
      * Creates the string representation of an elevator request.
      *
      * @return The string representation of an elevator request.
@@ -157,6 +182,7 @@ public class ElevatorRequest {
         ByteBuffer buffer = ByteBuffer.allocate(100);
         buffer.putInt(this.origin);
         buffer.putInt(this.destination);
+        buffer.putInt(this.elevator);
         buffer.putInt(this.direction.ordinal());
         buffer.put(this.timestamp.toString().getBytes());
         return buffer.array();

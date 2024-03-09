@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.io.*;
+import java.net.*;
 
 /**
  * Represents a physical or simulated elevator.
@@ -33,18 +35,6 @@ public class Elevator implements Runnable {
     private ElevatorState state;
 
     /**
-     * The message queue for the elevator to receive requests from the
-     * ElevatorSubystem.
-     */
-    private MessageQueue<ElevatorRequest> request_q;
-
-    /**
-     * The message queue for the elevator to send completion messages back out to
-     * the ElevatorSubystem.
-     */
-    private MessageQueue<ElevatorRequest> completion_q;
-
-    /**
      * Keeps track of the floors the elevator needs to visit.
      */
     private ArrayList<Integer> floor_q;
@@ -54,20 +44,35 @@ public class Elevator implements Runnable {
      */
     private ElevatorRequest current_request;
 
+    /** The port this elevator uses to communicate over UDP. */
+    private int port;
+
+    /** Socket used to both send and receive information */
+    private DatagramSocket channel;
+
+    /** The DatagramPacket of the current request. */
+    private DatagramPacket current_packet;
+
+    /** The length of the buffer for receiving UDP packets in bytes. */
+    private static final int BUFFER_LEN = 100;
+
     /**
      * Constructs a new elevator.
      *
-     * @param requests   The message queue for the elevator to receive requests on.
-     * @param completion The message queue for the elevator to notify the monitoring
-     *                   system of its task completion.
+     * @param socketPort The port at which we will be communicating to the elevator
+     *                   with.
      */
-    public Elevator(MessageQueue<ElevatorRequest> requests, MessageQueue<ElevatorRequest> completion) {
-        this.request_q = requests;
-        this.completion_q = completion;
+    public Elevator(int port) throws SocketException {
+
+        // Construct a datagram socket and bind it to the port passed in the constructor
+        this.port = port;
+        this.channel = new DatagramSocket(port);
+
         this.id = ELEVATOR_COUNT;
         this.floor = 1; // Assume all elevators start on the ground floor
         this.state = ElevatorState.Idle; // Elevators start in the idle state
         this.floor_q = new ArrayList<>();
+        this.current_request = null;
         ELEVATOR_COUNT++;
     }
 
@@ -130,42 +135,68 @@ public class Elevator implements Runnable {
         while (true) {
 
             switch (this.state) {
+
                 case ElevatorState.Idle:
 
-                    if (this.floor_q.isEmpty()) {
-                        this.current_request = this.request_q.getMessage(); // Get any incoming request
-
-                        // Handle kill message
-                        if (this.current_request == null) {
-                            return;
-                        }
-
-                        // Add floors to be processed
-                        floor_q.add(this.current_request.getOriginFloor());
-                        floor_q.add(this.current_request.getDestinationFloor());
+                    if (!this.floor_q.isEmpty()) {
+                        this.state = ElevatorState.Moving;
+                        break;
                     }
 
-                    this.state = ElevatorState.Moving;
+                    // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
+                    // length of the byte array).
+                    this.current_packet = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+                    System.out.println("Elevator " + this.id + ": Waiting for new elevator request...\n");
 
+                    // Receive the packet from the scheduler
+                    try {
+                        channel.receive(this.current_packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+
+                    // Parse packet
+                    try {
+                        this.current_request = new ElevatorRequest(this.current_packet.getData());
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    // Add floors to be processed
+                    floor_q.add(this.current_request.getOriginFloor());
+                    floor_q.add(this.current_request.getDestinationFloor());
                     break;
+
                 case ElevatorState.Moving:
-                    this.moveTo(floor_q.removeFirst()); // Go to the origin floor for pickup
+                    this.moveTo(floor_q.removeFirst());
                     this.state = ElevatorState.DoorsOpen;
                     break;
+
                 case ElevatorState.DoorsOpen:
-                    this.openDoors(); // Let in passenger
+                    this.openDoors();
                     this.state = ElevatorState.DoorsClosed;
                     break;
-                case ElevatorState.DoorsClosed:
-                    this.closeDoors(); // Get ready to leave
 
-                    if (this.floor_q.isEmpty()) {
-                        this.state = ElevatorState.Idle; // Needs new request
-                        this.completion_q.putMessage(this.current_request); // Echo back request to signify completion
-                    } else {
-                        this.state = ElevatorState.Moving; // More floors to move to
+                case ElevatorState.DoorsClosed:
+                    this.closeDoors();
+
+                    // More floors to move to
+                    if (!this.floor_q.isEmpty()) {
+                        this.state = ElevatorState.Moving;
+                        break;
                     }
 
+                    // All requests echo back request to signify completion
+                    try {
+                        channel.send(this.current_packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+
+                    // Go to idle state to get more requests
+                    this.state = ElevatorState.Idle;
                     break;
             }
         }
@@ -187,6 +218,15 @@ public class Elevator implements Runnable {
      */
     public int getId() {
         return this.id;
+    }
+
+    /**
+     * Gets the port number that this elevator uses to communicate.
+     * 
+     * @return the port number that this elevator uses to communicate.
+     */
+    public int getPort() {
+        return this.port;
     }
 
 }

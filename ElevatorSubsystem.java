@@ -25,21 +25,22 @@ public class ElevatorSubsystem {
     /** Number of elevators in the simulation. */
     public static final int NUM_ELEVATORS = 1;
 
+    /**
+     * The port number at which elevator ports begin. Elevator ports are
+     * ELEVATOR_PORT_START + the elevator ID.
+     */
+    public static final int ELEVATOR_PORT_START = 2007;
+
     /** Runs the primary logic of the ElevatorSubsystem. */
     public static void main(String[] args) throws IOException, SocketException {
 
         // Create socket for receiving requests
         DatagramSocket channel = new DatagramSocket(PORT);
 
-        // Create outgoing message queue for elevators TODO: make this UDP
-        MessageQueue<ElevatorRequest> outgoing = new MessageQueue<>();
-
         // Initialize all elevators
         Thread[] elevators = new Thread[NUM_ELEVATORS];
-        ArrayList<MessageQueue<ElevatorRequest>> elevators_in = new ArrayList<>();
         for (int i = 0; i < NUM_ELEVATORS; i++) {
-            elevators_in.add(new MessageQueue<>());
-            elevators[i] = new Thread(new Elevator(elevators_in.get(i), outgoing));
+            elevators[i] = new Thread(new Elevator(ELEVATOR_PORT_START + i));
         }
 
         // Start all elevators
@@ -55,9 +56,9 @@ public class ElevatorSubsystem {
             channel.receive(message);
             ElevatorRequest request = new ElevatorRequest(message.getData());
 
-            // Handle request (forward it to the only elevator that currently exists)
-            // WARNING: assumes a single elevator
-            elevators_in.get(0).putMessage(request);
+            // Forward message
+            message.setPort(2007 + request.getElevator()); // Set destination port to correct elevator
+            channel.send(message);
 
             // TODO: Read back messages from the elevators
         }
