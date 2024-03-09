@@ -23,7 +23,7 @@ public class ElevatorSubsystem {
     public static final int BUFFER_LEN = 100;
 
     /** Number of elevators in the simulation. */
-    public static final int NUM_ELEVATORS = 1;
+    public static final int NUM_ELEVATORS = 4;
 
     /**
      * The port number at which elevator ports begin. Elevator ports are
@@ -49,11 +49,11 @@ public class ElevatorSubsystem {
         }
 
         // Process requests from scheduler
-        DatagramPacket message = null;
         while (true) {
 
-            message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+            DatagramPacket message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
             channel.receive(message);
+            System.out.println("RECEIVED!");
             ElevatorRequest request = new ElevatorRequest(message.getData());
 
             // Forward message
