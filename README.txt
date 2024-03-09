@@ -70,6 +70,14 @@ Matteo Golin: Wrote the state machine code for the Elevator and Scheduler classe
 ElevatorTest.
 Yousef Hammad: Developed the scheduler and elevator subsystem state machine diagrams
 
+Iteration 3:
+
+Saja Fawagreh:
+Javeria Sohail:
+Grant Achuzia: Update tests for BLANK methods.
+Matteo Golin:
+Yousef Hammad:
+
 === Setup Instructions ===
 
 Compile all Java files and use the command `java Main` to run the main project. You can also run Main.java from the
