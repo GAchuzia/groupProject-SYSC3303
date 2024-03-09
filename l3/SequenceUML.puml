@@ -1,0 +1,48 @@
+@startuml
+'autonumber
+
+participant "Floor" as Floor
+participant "Scheduler" as Scheduler
+participant "ElevatorSubsystem" as ElevatorSubsystem
+participant "Elevator" as Elevator
+
+activate Floor
+' Floor sends a ride request to Scheduler
+Floor -> Scheduler : UDP[request(time, originFloor, destinationFloor, direction)]
+
+activate Scheduler
+' Scheduler processes the request and sends it to ElevatorSubsystem
+Scheduler -> ElevatorSubsystem : UDP[request(time, originFloor, destinationFloor, direction)]
+
+activate ElevatorSubsystem
+' ElevatorSubsystem decides and forwards the request to the specific Elevator
+ElevatorSubsystem -> Elevator : UDP[request(time, originFloor, destinationFloor, direction)]
+
+activate Elevator
+' Elevator processes the request, moves, and then sends status update back to ElevatorSubsystem
+Elevator -> ElevatorSubsystem : UDP[StatusUpdate(elevatorId, currentFloor, state)]
+
+' ElevatorSubsystem updates Scheduler with the Elevator's status
+ElevatorSubsystem -> Scheduler : UDP[ElevatorStatus(elevatorId, currentFloor, state)]
+
+' Scheduler may update Floor with the status or arrival of the elevator
+Scheduler -> Floor : UDP[ElevatorStatus(elevatorId, currentFloor, state)]
+deactivate Floor
+
+' After operations, Elevator continues to send status updates as necessary
+Elevator -> ElevatorSubsystem : UDP[StatusUpdate(elevatorId, currentFloor, state)]
+
+' Termination sequence
+' Scheduler sends a termination command to all subsystems
+Scheduler -> ElevatorSubsystem : UDP[Kill]
+
+deactivate Scheduler
+
+'ElevatorSubsystem forwards the termination command to Elevator
+ElevatorSubsystem -> Elevator : UDP[Kill]
+deactivate Elevator
+
+destroy Elevator
+destroy ElevatorSubsystem
+
+@enduml

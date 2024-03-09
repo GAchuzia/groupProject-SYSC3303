@@ -36,10 +36,6 @@ SchedulerTest.java: Test suite to verify the functionality of the Scheduler clas
 
 ElevatorState.java: Represents the state of the elevator (Idle, Moving, DoorsOpen, DoorsClosed).
 
-Main.java: Initializes each subsystem into a separate thread and runs the simulator. Currently messages are generated
-from the FloorSubsystem using the testdata.txt file, and passed along through the Scheduler to the ElevatorSubsystem
-before being passed back again.
-
 ClassUML.png: Diagram depicting the relationships between the varying classes in the elevator simulator.
 
 SequenceUML.png: Diagram showing the sequential interaction between objects in the elevator simulator.
@@ -69,6 +65,12 @@ Grant Achuzia: Updated the ElevatorSubsystemTest file to work with 1 elevator. A
 Matteo Golin: Wrote the state machine code for the Elevator and Scheduler classes, and helped add a test case for the
 ElevatorTest.
 Yousef Hammad: Developed the scheduler and elevator subsystem state machine diagrams
+
+Iteration 3:
+Saja Fawagreh: Updated the sequence and class diagram and the README.txt.
+Javeria Sohail: Updated the sequence and class diagram and the README.txt.
+Grant Achuzia: Update tests for BLANK methods.
+Matteo Golin:
 
 === Setup Instructions ===
 
