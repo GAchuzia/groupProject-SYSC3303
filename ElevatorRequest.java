@@ -43,6 +43,9 @@ public class ElevatorRequest {
      */
     private int elevator;
 
+    /** Tracks whether or not this request is complete. */
+    private boolean complete = false;
+
     /**
      * Provides a means to parse the input file's elevator request timestamps into
      * Java's LocalTime object.
@@ -52,6 +55,26 @@ public class ElevatorRequest {
             .appendLiteral(".")
             .appendFraction(ChronoField.MILLI_OF_SECOND, 1, 3, false)
             .toFormatter();
+
+    /**
+     * Constructs a new ElevatorRequest that describes the current location of an
+     * elevator.
+     * 
+     * @param elevator    The elevator ID that this request is associated with.
+     * @param origin      The current floor that the elevator is on.
+     * @param destination The floor the elevator is heading towards.
+     */
+    public ElevatorRequest(int elevator, int origin, int destination) {
+        this.elevator = elevator;
+        this.origin = origin;
+        this.destination = destination;
+        if (origin - destination > 0) {
+            this.direction = Direction.Down;
+        } else {
+            this.direction = Direction.Up;
+        }
+        this.timestamp = LocalTime.now();
+    }
 
     /**
      * Constructs an elevator request dataclass from a line of the input file.
@@ -83,6 +106,7 @@ public class ElevatorRequest {
         this.origin = buffer.getInt();
         this.destination = buffer.getInt();
         this.elevator = buffer.getInt();
+        this.complete = buffer.getInt() == 1;
         this.direction = Direction.values()[buffer.getInt()];
 
         buffer.compact(); // Compact array so remaining data is timestamp
@@ -151,14 +175,31 @@ public class ElevatorRequest {
     }
 
     /**
+     * Checks if this request has been completed.
+     * 
+     * @return True if this request is complete, false otherwise.
+     */
+    public boolean isComplete() {
+        return this.complete;
+    }
+
+    /**
+     * Marks this request as complete.
+     */
+    public void markComplete() {
+        this.complete = true;
+    }
+
+    /**
      * Creates the string representation of an elevator request.
      *
      * @return The string representation of an elevator request.
      */
     @Override
     public String toString() {
+        String completeness = this.complete ? "Complete" : "Incomplete";
         String self = "Timestamp: " + this.timestamp + " Direction: " + this.direction;
-        self += " To: " + this.destination + " From: " + this.origin;
+        self += " To: " + this.destination + " From: " + this.origin + " | " + completeness;
         return self;
     }
 
@@ -183,6 +224,7 @@ public class ElevatorRequest {
         buffer.putInt(this.origin);
         buffer.putInt(this.destination);
         buffer.putInt(this.elevator);
+        buffer.putInt(this.complete ? 1 : 0);
         buffer.putInt(this.direction.ordinal());
         buffer.put(this.timestamp.toString().getBytes());
         return buffer.array();

@@ -69,10 +69,18 @@ public class Scheduler {
                         // If there is a message from the elevator subsystem, forward it to the floor
                         case ElevatorSubsystem.PORT:
                             state = SchedulerState.Thinking;
-                            System.out.println("Scheduler forwarded elevator message.");
-                            message.setPort(FloorSubsystem.PORT);
-                            channel.send(message);
+
+                            // Check if the message is a status update or complete request
                             // TODO: record elevator whereabouts somewhere to inform scheduling decisions
+                            ElevatorRequest response = new ElevatorRequest(message.getData());
+
+                            // Complete messages are sent to floor
+                            if (response.isComplete()) {
+                                message.setPort(FloorSubsystem.PORT);
+                                channel.send(message);
+                                System.out.println("Scheduler forwarded elevator message.");
+                            }
+
                             break;
                     }
 

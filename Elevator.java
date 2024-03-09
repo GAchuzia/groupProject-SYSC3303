@@ -90,6 +90,20 @@ public class Elevator implements Runnable {
 
         System.out.println("Elevator #" + this.id + " moving from floor " + this.floor + " to " + destination);
 
+        // Send update on elevator location
+        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
+        byte[] status_b = status.getBytes();
+        DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
+        packet.setPort(ElevatorSubsystem.PORT);
+
+        try {
+            packet.setAddress(InetAddress.getLocalHost());
+            this.channel.send(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         // Sleep 50ms per floor traversed
         try {
             Thread.sleep(50 * Math.abs(destination - this.floor));
@@ -187,8 +201,10 @@ public class Elevator implements Runnable {
                         break;
                     }
 
-                    // All requests echo back request to signify completion
+                    // Echo back request marked complete
                     try {
+                        this.current_request.markComplete();
+                        this.current_packet.setData(this.current_request.getBytes());
                         this.current_packet.setPort(ElevatorSubsystem.PORT);
                         channel.send(this.current_packet);
                     } catch (IOException e) {

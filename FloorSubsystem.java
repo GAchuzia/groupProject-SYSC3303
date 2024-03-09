@@ -69,7 +69,8 @@ public class FloorSubsystem {
 
             message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
             channel.receive(message);
-            System.out.println("Floor got message: " + message);
+            ElevatorRequest response = new ElevatorRequest(message.getData());
+            System.out.println("Floor got message: " + response);
         }
     }
 }
