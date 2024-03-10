@@ -72,6 +72,7 @@ public class Scheduler {
                             // TODO: Schedule based on elevator availabilty
                             // For now just sending to elevator 0 every time
                             ElevatorRequest request = new ElevatorRequest(message.getData());
+                            originFloor = request.getOriginFloor();
                             int minDiff = 8;
                             for (int i = 0; i < 4; i++) {
                                 if (list.get(i) != -1 ){
