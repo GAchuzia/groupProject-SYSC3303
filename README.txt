@@ -67,10 +67,11 @@ ElevatorTest.
 Yousef Hammad: Developed the scheduler and elevator subsystem state machine diagrams
 
 Iteration 3:
-Saja Fawagreh: Updated the sequence and class diagram and the README.txt.
-Javeria Sohail: Updated the sequence and class diagram and the README.txt.
+Saja Fawagreh: Updated the sequence and class diagram and the README.txt. Also added the scheduler algorithm.
+Javeria Sohail: Updated the sequence and class diagram and the README.txt. Also added the scheduler algorithm
 Grant Achuzia: Update tests for ElevatorTest.java and ElevatorRequest.java. Comment out tests that used message queues.
 Matteo Golin:
+Yousef Hammad: Worked on Elevator and ElevatorSubsystem.
 
 === Setup Instructions ===
 
