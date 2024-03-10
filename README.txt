@@ -69,12 +69,11 @@ Yousef Hammad: Developed the scheduler and elevator subsystem state machine diag
 Iteration 3:
 Saja Fawagreh: Updated the sequence and class diagram and the README.txt. Also added the scheduler algorithm.
 Javeria Sohail: Updated the sequence and class diagram and the README.txt. Also added the scheduler algorithm
-Grant Achuzia: Update tests for ElevatorTest.java and ElevatorRequest.java. Comment out tests that used message queues.
-Matteo Golin:
+Grant Achuzia: Updated tests for ElevatorTest.java and ElevatorRequest.java. Comment out tests that used message queues.
+Matteo Golin: Updated Scheduler, ElevatorSubsystem, and FloorSubsystem classes to communicate using UDP. Fixed ElevatorRequest decoding bug.
 Yousef Hammad: Worked on Elevator and ElevatorSubsystem.
 
 === Setup Instructions ===
 
-Compile all Java files and use the command `java Main` to run the main project. You can also run Main.java from the
-IntelliJ IDE.
+Compile all Java files and run the main functions for Scheduler.java, ElevatorSubsystem.java, and FloorSubsystem.java on separate terminals.
 To run tests, you can run any individual test in the IntelliJ IDE using the JUnit integration it provides.
