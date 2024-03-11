@@ -116,12 +116,6 @@ public class Elevator implements Runnable {
     }
 
     /**
-     * Calls the private moveTo(int) method internally, made for testing purposes
-     */
-    public void moveElevatorTo(int destination){
-        moveTo(destination);
-    }
-    /**
      * Opens the elevator doors.
      */
     private void openDoors() {
@@ -250,6 +244,15 @@ public class Elevator implements Runnable {
      */
     public int getPort() {
         return this.port;
+    }
+
+    /**
+     * Gets the current state of the elevator.
+     * 
+     * @return the current state of the elevator.
+     */
+    public ElevatorState getState() {
+        return this.state;
     }
 
 }

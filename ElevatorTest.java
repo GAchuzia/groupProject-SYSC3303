@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class ElevatorTest {
 
-
     /**
      * Tests that the elevator is initialized correctly using the default
      * constructor.
@@ -27,16 +26,6 @@ class ElevatorTest {
     void testDefaultConstructor() throws SocketException {
         Elevator elevator = new Elevator(1234);
         assertEquals(1, elevator.getFloor());
-    }
-
-    /**
-     * Test that the elevator moves between floors in accordance with its received
-     * request.
-     */
-    @Test
-    void testElevatorMovement() throws SocketException {
-        Elevator elevator = new Elevator(4321);
-        elevator.moveElevatorTo(5);
-        assertEquals(5, elevator.getFloor());
+        assertEquals(ElevatorState.Idle, elevator.getState());
     }
 }

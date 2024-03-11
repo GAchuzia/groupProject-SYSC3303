@@ -24,7 +24,8 @@ class ElevatorRequestTest {
     static final ElevatorRequest REQUEST = new ElevatorRequest("14:05:15.2 2 Up 4");
 
     /**
-     * Check that the fields of the elevator request can be correctly filled from a parsed input string.
+     * Check that the fields of the elevator request can be correctly filled from a
+     * parsed input string.
      */
     @Test
     void testParsing() {
@@ -35,7 +36,8 @@ class ElevatorRequestTest {
     }
 
     /**
-     * Check that the string representation of the elevator request is generated correctly.
+     * Check that the string representation of the elevator request is generated
+     * correctly.
      */
     @Test
     void testToString() {
@@ -44,7 +46,8 @@ class ElevatorRequestTest {
     }
 
     /**
-     * Check that passing a bad input string to the ElevatorRequest constructor results in an error.
+     * Check that passing a bad input string to the ElevatorRequest constructor
+     * results in an error.
      */
     @Test
     void testBadConstruction() {
@@ -55,7 +58,7 @@ class ElevatorRequestTest {
      * Check that ElevatorRequest can be constructed from a byte array
      */
     @Test
-    void testByteConstruction(){
+    void testByteConstruction() {
         ElevatorRequest byteRequest = null;
         try {
             byteRequest = new ElevatorRequest(REQUEST.getBytes());
@@ -69,7 +72,7 @@ class ElevatorRequestTest {
      * Check that byte array request can be obtained
      */
     @Test
-    void testGetByteArray(){
+    void testGetByteArray() {
         byte[] bytes = REQUEST.getBytes();
         assertNotNull(bytes);
         assertEquals(100, bytes.length);
