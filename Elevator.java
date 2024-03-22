@@ -1,4 +1,5 @@
-import java.util.ArrayList;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.io.*;
 import java.net.*;
 
@@ -37,7 +38,7 @@ public class Elevator implements Runnable {
     /**
      * Keeps track of the floors the elevator needs to visit.
      */
-    private ArrayList<Integer> floor_q;
+    private NavigableSet<Integer> floor_q;
 
     /**
      * The current request being handled by the Elevator.
@@ -52,6 +53,9 @@ public class Elevator implements Runnable {
 
     /** The DatagramPacket of the current request. */
     private DatagramPacket current_packet;
+
+    /** The direction that the elevator is currently moving in. */
+    private Direction direction;
 
     /** The length of the buffer for receiving UDP packets in bytes. */
     private static final int BUFFER_LEN = 100;
@@ -70,8 +74,9 @@ public class Elevator implements Runnable {
 
         this.id = ELEVATOR_COUNT;
         this.floor = 1; // Assume all elevators start on the ground floor
+        this.direction = Direction.Up; // Can only move since on ground floor
         this.state = ElevatorState.Idle; // Elevators start in the idle state
-        this.floor_q = new ArrayList<>();
+        this.floor_q = new TreeSet<>();
         this.current_request = null;
         ELEVATOR_COUNT++;
     }
@@ -142,6 +147,39 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Gets the next floor to move to according to the floors that need to be
+     * visited and the elevator's current direction.
+     * 
+     * @return The next floor that the elevator should move to; null if there is no
+     *         floor in the direction the elevator
+     *         is moving.
+     */
+    private Integer nextFloor() {
+        switch (this.direction) {
+            case Direction.Up:
+                return this.floor_q.higher(this.floor);
+            case Direction.Down:
+                return this.floor_q.lower(this.floor);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Swaps the elevator's direction to the opposite.
+     */
+    private void toggleDirection() {
+        switch (this.direction) {
+            case Direction.Up:
+                this.direction = Direction.Down;
+                break;
+            case Direction.Down:
+                this.direction = Direction.Up;
+                break;
+        }
+    }
+
+    /**
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
@@ -152,9 +190,18 @@ public class Elevator implements Runnable {
 
                 case ElevatorState.Idle:
 
-                    if (!this.floor_q.isEmpty()) {
-                        this.state = ElevatorState.Moving;
-                        break;
+                    // If there are still floors to visit, don't wait for new requests longer than
+                    // 50ms
+                    // This will still get new requests for handling multiple at once, but it won't
+                    // wait too long
+                    try {
+                        if (!this.floor_q.isEmpty()) {
+                            channel.setSoTimeout(50);
+                        } else {
+                            channel.setSoTimeout(0);
+                        }
+                    } catch (SocketException e) {
+                        throw new RuntimeException(e);
                     }
 
                     // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
@@ -183,7 +230,13 @@ public class Elevator implements Runnable {
                     break;
 
                 case ElevatorState.Moving:
-                    this.moveTo(floor_q.removeFirst());
+
+                    // If there are no floors in our direction, then go the other way
+                    if (this.nextFloor() == null) {
+                        this.toggleDirection();
+                    }
+
+                    this.moveTo(this.nextFloor());
                     this.state = ElevatorState.DoorsOpen;
                     break;
 
