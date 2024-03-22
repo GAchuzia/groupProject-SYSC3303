@@ -299,4 +299,13 @@ public class Elevator implements Runnable {
         return this.port;
     }
 
+    /**
+     * Gets the current state of the elevator.
+     * 
+     * @return the current state of the elevator.
+     */
+    public ElevatorState getState() {
+        return this.state;
+    }
+
 }

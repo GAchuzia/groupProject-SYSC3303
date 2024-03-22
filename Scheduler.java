@@ -2,6 +2,9 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.DatagramPacket;
 import java.io.IOException;
+import java.util.ArrayList;
+
+import static java.lang.Math.abs;
 
 /**
  * The scheduler that will be responsible for assigning the correct elevators to
@@ -26,6 +29,18 @@ public class Scheduler {
     /** The length of the buffer for receiving UDP messages. */
     static final int BUFFER_LEN = 100;
 
+    /** The index of the currently selected elevator to handle the request, initialized to 0. */
+    static int chosenElevator = 0;
+
+    /** The floor number where the request originated. */
+    static int originFloor;
+
+    /** The number of the most recently used elevator reaching its destination. */
+    static int elevatorNum;
+
+    /** A list tracking the current floors of all available elevators, initialized with 4 elements set to 0. */
+    static ArrayList<Integer> list = new ArrayList<>(4);
+
     /** Executes the main logical loop of the Scheduler subsystem. */
     public static void main(String[] args) throws SocketException, IOException {
 
@@ -34,6 +49,11 @@ public class Scheduler {
 
         // The message buffer for receiving new UDP messages
         DatagramPacket message = null;
+
+        // Pre-fill the elevator list with initial floor values (0).
+        for (int i = 0; i < 4; i++) {
+            list.add(0);
+        }
 
         // While there are still messages
         while (true) {
@@ -55,10 +75,25 @@ public class Scheduler {
                             // TODO: handle IPs from different computers
                             channel.send(message);
 
-                            // TODO: Schedule based on elevator availabilty
-                            // For now just sending to elevator 0 every time
+                            // Selects the nearest available elevator to the request origin.
                             ElevatorRequest request = new ElevatorRequest(message.getData());
-                            request.setElevator(0);
+                            originFloor = request.getOriginFloor();
+                            int minDiff = 8; // Initialize with the maximum possible difference.
+                            for (int i = 0; i < 4; i++) {
+                                // Consider only available elevators. Here, '-1' indicates an elevator is en route to a destination and not available.
+                                if (list.get(i) != -1) {
+                                    int diff = abs(list.get(i) - originFloor); // Calculate the floor difference to find the closest elevator.
+                                    if (diff < minDiff) {
+                                        chosenElevator = i; // Update the chosen elevator to the current closest one.
+                                        minDiff = diff; // Update the minimum difference found.
+                                    }
+                                }
+                            }
+
+
+                            // When it finds the closest available elevator, it sets the current floor to -1 as it will be busy
+                            list.set(chosenElevator, -1);
+                            request.setElevator(chosenElevator);
                             message.setData(request.getBytes()); // Re-encode message
                             message.setPort(ElevatorSubsystem.PORT);
                             channel.send(message);
@@ -71,13 +106,19 @@ public class Scheduler {
                             state = SchedulerState.Thinking;
 
                             // Check if the message is a status update or complete request
-                            // TODO: record elevator whereabouts somewhere to inform scheduling decisions
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
-                            // Complete messages are sent to floor
+                            // Check if the elevator has completed its task.
                             if (response.isComplete()) {
+                                elevatorNum = response.getElevator(); // Identify the elevator that has completed the request.
+
+                                // Update the elevator's current floor to reflect its new position.
+                                list.set(elevatorNum, response.getDestinationFloor());
+
+                                // Set the message destination to the Floor Subsystem to notify completion.
                                 message.setPort(FloorSubsystem.PORT);
-                                channel.send(message);
+                                channel.send(message); // Forward the completion message to the Floor Subsystem.
+
                                 System.out.println("Scheduler forwarded elevator message.");
                             }
 
