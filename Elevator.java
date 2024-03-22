@@ -308,4 +308,13 @@ public class Elevator implements Runnable {
         return this.state;
     }
 
+    /**
+     * Get the direction of the elevator.
+     *
+     * @return The direction of the elevator.
+     */
+    public int getDirection() {
+        return this.direction;
+    }
+
 }
