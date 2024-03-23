@@ -15,4 +15,10 @@ public enum ElevatorState {
 
     /** Represents the state when the elevator doors are closed. */
     DoorsClosed,
+
+    /**
+     * Represents the state when the elevator encountered a non-recoverable fault
+     * and is shut down.
+     */
+    Halted,
 }

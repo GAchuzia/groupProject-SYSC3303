@@ -66,6 +66,9 @@ public class Elevator implements Runnable {
     /** The length of the buffer for receiving UDP packets in bytes. */
     private static final int BUFFER_LEN = 100;
 
+    /** The random number generator for creating faults. */
+    private Random number_gen;
+
     /**
      * Constructs a new elevator.
      *
@@ -84,6 +87,7 @@ public class Elevator implements Runnable {
         this.state = ElevatorState.Idle; // Elevators start in the idle state
         this.floor_q = new TreeSet<>();
         this.current_request = null;
+        this.number_gen = new Random();
         ELEVATOR_COUNT++;
     }
 
@@ -116,8 +120,9 @@ public class Elevator implements Runnable {
      *
      * @param destination  The destination floor number to move to.
      * @param randomNumber the random number to generate the fault for the timer
+     * @return True if the movement was successful, false if a fault occurred.
      */
-    private void moveTo(int destination, int randomNumber) {
+    private boolean moveTo(int destination, int randomNumber) {
 
         // Remove floor from list to be processed
         this.floor_q.remove(destination);
@@ -125,14 +130,15 @@ public class Elevator implements Runnable {
         // Already there
         if (destination == this.floor) {
             this.state = ElevatorState.Idle;
-            return;
+            return true;
         }
 
         System.out.println("Elevator #" + this.id + " moving from floor " + this.floor + " to " + destination);
 
-        // if the random number generator is 0, this means there is a timer fault
-        if (randomNumber == 0) {
+        // 20% chance of having a timer fault
+        if (randomNumber <= 2) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
+            this.state = ElevatorState.Halted;
 
             // Notify the scheduler that we're shutting down.
             ElevatorRequest notif = new ElevatorRequest(this.id, this.floor, destination);
@@ -147,7 +153,7 @@ public class Elevator implements Runnable {
                 e.printStackTrace();
                 System.exit(1);
             }
-            return;
+            return false;
         }
 
         // Move floors
@@ -168,6 +174,7 @@ public class Elevator implements Runnable {
                 System.exit(1);
             }
         }
+        return true;
     }
 
     /**
@@ -176,17 +183,11 @@ public class Elevator implements Runnable {
     private void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
-        // if the random number generated is 1, this means the door is stuck closed
-        if (randomNumber == 1) {
+        // 30% chance that the door is stuck closed
+        while (randomNumber <= 3) {
             System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
-
-            // keep generating a new random number that is NOT equal to 1
-            Random random2 = new Random();
-            int randomNumber2 = random2.nextInt(3) + 1;
-            while (randomNumber2 == 1) {
-                System.out.println("Elevator #" + this.id + " door is still closed. Trying again...");
-                randomNumber2 = random2.nextInt(3) + 1;
-            }
+            // Keep generating a new random number until doors are opened
+            randomNumber = this.nextRandomNum();
         }
 
         try {
@@ -205,17 +206,11 @@ public class Elevator implements Runnable {
     private void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
-        // if the random number generated is 1, this means the door is stuck open
-        if (randomNumber == 1) {
+        // 30% chance that the door is stuck open
+        while (randomNumber <= 3) {
             System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
-
-            // keep generating a new random number that is NOT equal to 1
-            Random random2 = new Random();
-            int randomNumber2 = random2.nextInt(3) + 1;
-            while (randomNumber2 == 1) {
-                System.out.println("Elevator #" + this.id + " door is still open. Trying again...");
-                randomNumber2 = random2.nextInt(3) + 1;
-            }
+            // Keep generating a new random number until doors are closed
+            randomNumber = this.nextRandomNum();
         }
 
         try {
@@ -262,15 +257,23 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Returns the next random number in the stream.
+     * 
+     * @return A random number between 1 and 10.
+     */
+    private int nextRandomNum() {
+        return number_gen.nextInt(10) + 1;
+    }
+
+    /**
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
 
-        // random variable that will randomly trigger the fault
-        Random random = new Random();
-        int randomNumber = random.nextInt(3) + 1;
-
         while (true) {
+
+            // The next random number for this iteration
+            int randomNumber = this.nextRandomNum();
 
             switch (this.state) {
 
@@ -326,8 +329,12 @@ public class Elevator implements Runnable {
                         this.toggleDirection();
                     }
 
-                    this.moveTo(this.nextFloor(), randomNumber);
-                    this.state = ElevatorState.DoorsOpen;
+                    // Check if moving was successful or if a fault was generated
+                    if (this.moveTo(this.nextFloor(), randomNumber)) {
+                        this.state = ElevatorState.DoorsOpen;
+                    } else {
+                        this.state = ElevatorState.Halted;
+                    }
                     break;
 
                 case ElevatorState.DoorsOpen:
@@ -358,6 +365,8 @@ public class Elevator implements Runnable {
                     // Go to idle state to get more requests
                     this.state = ElevatorState.Idle;
                     break;
+                case ElevatorState.Halted:
+                    return; // Turn off the elevator
             }
         }
     }
