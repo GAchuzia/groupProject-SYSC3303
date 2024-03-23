@@ -78,8 +78,6 @@ public class Scheduler {
                         case FloorSubsystem.PORT:
                             state = SchedulerState.Thinking;
 
-                            channel.send(message);
-
                             // Selects the nearest available elevator to the request origin.
                             ElevatorRequest request = new ElevatorRequest(message.getData());
                             originFloor = request.getOriginFloor();
