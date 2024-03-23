@@ -46,10 +46,8 @@ public class ElevatorRequest {
     /** Tracks whether or not this request is complete. */
     private boolean complete = false;
 
-    /** track wheather there is a fault with the elevator timer . */
+    /** Track whether there is a fault with the elevator timer. */
     private boolean timerFault = false;
-
-
 
     /**
      * Provides a means to parse the input file's elevator request timestamps into
@@ -112,6 +110,7 @@ public class ElevatorRequest {
         this.destination = buffer.getInt();
         this.elevator = buffer.getInt();
         this.complete = buffer.getInt() == 1;
+        this.timerFault = buffer.getInt() == 1;
         this.direction = Direction.values()[buffer.getInt()];
 
         buffer.compact(); // Compact array so remaining data is timestamp
@@ -202,7 +201,6 @@ public class ElevatorRequest {
         this.timerFault = true;
     }
 
-
     /**
      * Creates the string representation of an elevator request.
      *
@@ -238,6 +236,7 @@ public class ElevatorRequest {
         buffer.putInt(this.destination);
         buffer.putInt(this.elevator);
         buffer.putInt(this.complete ? 1 : 0);
+        buffer.putInt(this.timerFault ? 1 : 0);
         buffer.putInt(this.direction.ordinal());
         buffer.put(this.timestamp.toString().getBytes());
         return buffer.array();
