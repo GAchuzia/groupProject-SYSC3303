@@ -134,14 +134,14 @@ public class Elevator implements Runnable {
 
         System.out.println("Elevator #" + this.id + " moving from floor " + this.floor + " to " + destination);
 
-        // 20% chance of having a timer fault
-        if (randomNumber <= 2) {
+        // 5% chance of having a timer fault
+        if (randomNumber <= 5) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
             this.state = ElevatorState.Halted;
 
             // Notify the scheduler that we're shutting down.
-            ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
-            status.markTimerFault();
+            ElevatorRequest status = this.current_request;
+            status.setTimerFault(true);
             byte[] status_b = status.getBytes();
             DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
             packet.setPort(ElevatorSubsystem.PORT);
@@ -184,7 +184,7 @@ public class Elevator implements Runnable {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
         // 30% chance that the door is stuck closed
-        while (randomNumber <= 3) {
+        while (randomNumber <= 30) {
             System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
             // Keep generating a new random number until doors are opened
             randomNumber = this.nextRandomNum();
@@ -207,7 +207,7 @@ public class Elevator implements Runnable {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
         // 30% chance that the door is stuck open
-        while (randomNumber <= 3) {
+        while (randomNumber <= 30) {
             System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
             // Keep generating a new random number until doors are closed
             randomNumber = this.nextRandomNum();
@@ -259,10 +259,10 @@ public class Elevator implements Runnable {
     /**
      * Returns the next random number in the stream.
      * 
-     * @return A random number between 1 and 10.
+     * @return A random number between 1 and 100.
      */
     private int nextRandomNum() {
-        return number_gen.nextInt(10) + 1;
+        return number_gen.nextInt(100) + 1;
     }
 
     /**

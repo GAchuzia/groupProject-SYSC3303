@@ -104,6 +104,8 @@ public class Scheduler {
 
                             System.out
                                     .println("Scheduler forwarded floor message to elevator " + request.getElevator());
+                            // Set state back to idle
+                            state = SchedulerState.Idle;
                             break;
 
                         // If there is a message from the elevator subsystem, forward it to the floor
@@ -118,6 +120,13 @@ public class Scheduler {
                                 list.set(response.getElevator(), -1); // Mark the elevator unavailable
                                 System.out.println(
                                         "Scheduler notified that elevator " + response.getElevator() + " shut down.");
+                                System.out.println("Re-assigning request to new elevator.");
+
+                                // Trick state machine into thinking this is a new request
+                                response.setTimerFault(false);
+                                message.setData(response.getBytes());
+                                message.setPort(FloorSubsystem.PORT);
+                                state = SchedulerState.Thinking;
                                 break;
                             }
 
@@ -126,19 +135,18 @@ public class Scheduler {
                                 message.setPort(FloorSubsystem.PORT);
                                 channel.send(message); // Forward the completion message to the Floor Subsystem.
                                 System.out.println("Scheduler forwarded elevator message to floor.");
+                                // Set state back to idle
+                                state = SchedulerState.Idle;
                                 break;
                             }
 
                             // It's a status update
                             // Update the elevator's current floor to reflect its new position.
                             list.set(response.getElevator(), response.getOriginFloor());
-                            System.out.println("Scheduler received status from elevator " + response.getElevator());
+                            // Set state back to idle
+                            state = SchedulerState.Idle;
                             break;
                     }
-
-                    // Set state back to idle
-                    state = SchedulerState.Idle;
-                    break;
             }
         }
     }

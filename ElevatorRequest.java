@@ -195,10 +195,12 @@ public class ElevatorRequest {
     }
 
     /**
-     * Marks a timer fault.
+     * Sets the timer fault flag.
+     * 
+     * @param val The new value for the flag.
      */
-    public void markTimerFault() {
-        this.timerFault = true;
+    public void setTimerFault(boolean val) {
+        this.timerFault = val;
     }
 
     /**
