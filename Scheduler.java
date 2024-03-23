@@ -56,7 +56,7 @@ public class Scheduler {
         // The message buffer for receiving new UDP messages
         DatagramPacket message = null;
 
-        // Pre-fill the elevator list with initial floor values (ground floor).
+        // Pre-fill the elevator list with current floor values (ground floor).
         for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
             list.add(1);
         }
@@ -99,9 +99,6 @@ public class Scheduler {
                                 }
                             }
 
-                            // When it finds the closest available elevator, it sets the current floor to -1
-                            // as it will be busy
-                            list.set(chosenElevator, -1);
                             request.setElevator(chosenElevator);
                             message.setData(request.getBytes()); // Re-encode message
                             message.setPort(ElevatorSubsystem.PORT);
@@ -117,18 +114,13 @@ public class Scheduler {
                             // Check if the message is a status update or complete request
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
-                            // Check if the elevator has completed its task.
+                            // Update the elevator's current floor to reflect its new position.
+                            list.set(response.getElevator(), response.getOriginFloor());
+
                             if (response.isComplete()) {
-                                elevatorNum = response.getElevator(); // Identify the elevator that has completed the
-                                                                      // request.
-
-                                // Update the elevator's current floor to reflect its new position.
-                                list.set(elevatorNum, response.getDestinationFloor());
-
                                 // Set the message destination to the Floor Subsystem to notify completion.
                                 message.setPort(FloorSubsystem.PORT);
                                 channel.send(message); // Forward the completion message to the Floor Subsystem.
-
                                 System.out.println("Scheduler forwarded elevator message.");
                             }
 

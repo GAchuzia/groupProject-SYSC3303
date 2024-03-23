@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.Random;
 
-
 /**
  * Represents a physical or simulated elevator.
  *
@@ -84,9 +83,32 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Sends a UDP packet containing the elevator's current position to the elevator
+     * subsystem.
+     * 
+     * @param destination The destination the elevator is heading to.
+     */
+    private void sendLocationUpdate(int destination) {
+
+        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
+        byte[] status_b = status.getBytes();
+        DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
+        packet.setPort(ElevatorSubsystem.PORT);
+
+        try {
+            packet.setAddress(InetAddress.getLocalHost());
+            this.channel.send(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+    }
+
+    /**
      * Moves the elevator to the destination floor.
      *
-     * @param destination The destination floor number to move to.
+     * @param destination  The destination floor number to move to.
      * @param randomNumber the random number to generate the fault for the timer
      */
     private void moveTo(int destination, int randomNumber) {
@@ -102,22 +124,8 @@ public class Elevator implements Runnable {
 
         System.out.println("Elevator #" + this.id + " moving from floor " + this.floor + " to " + destination);
 
-        // Send update on elevator location
-        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
-        byte[] status_b = status.getBytes();
-        DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
-        packet.setPort(ElevatorSubsystem.PORT);
-
-        try {
-            packet.setAddress(InetAddress.getLocalHost());
-            this.channel.send(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        //if the random number generator is 0, this means there is a timer fault
-        if (randomNumber == 0){
+        // if the random number generator is 0, this means there is a timer fault
+        if (randomNumber == 0) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
 
             // Echo back request to shut down corresponding elevator
@@ -132,14 +140,19 @@ public class Elevator implements Runnable {
             }
         }
 
-        else{
-            // Sleep 50ms per floor traversed
-            try {
-                Thread.sleep(50 * Math.abs(destination - this.floor));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                System.exit(1);
+        else {
+
+            for (int i = 0; i < Math.abs(destination - this.floor); i++) {
+                try {
+                    // Sleep 1s per floor traversed
+                    Thread.sleep(1000);
+                    this.sendLocationUpdate(destination);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
             }
+
             this.floor = destination;
         }
     }
@@ -150,14 +163,14 @@ public class Elevator implements Runnable {
     private void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
-        //if the random number generated is 1, this means the door is stuck closed
-        if (randomNumber == 1){
+        // if the random number generated is 1, this means the door is stuck closed
+        if (randomNumber == 1) {
             System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
 
-            //keep generating a new random number that is NOT equal to 1
+            // keep generating a new random number that is NOT equal to 1
             Random random2 = new Random();
             int randomNumber2 = random2.nextInt(3) + 1;
-            while (randomNumber2 == 1){
+            while (randomNumber2 == 1) {
                 System.out.println("Elevator #" + this.id + " door is still closed. Trying again...");
                 randomNumber2 = random2.nextInt(3) + 1;
             }
@@ -171,7 +184,6 @@ public class Elevator implements Runnable {
         }
         System.out.println("Elevator #" + this.id + " door opened");
 
-
     }
 
     /**
@@ -180,15 +192,14 @@ public class Elevator implements Runnable {
     private void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
-
-        //if the random number generated is 1, this means the door is stuck open
-        if (randomNumber == 1){
+        // if the random number generated is 1, this means the door is stuck open
+        if (randomNumber == 1) {
             System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
 
-            //keep generating a new random number that is NOT equal to 1
+            // keep generating a new random number that is NOT equal to 1
             Random random2 = new Random();
             int randomNumber2 = random2.nextInt(3) + 1;
-            while (randomNumber2 == 1){
+            while (randomNumber2 == 1) {
                 System.out.println("Elevator #" + this.id + " door is still open. Trying again...");
                 randomNumber2 = random2.nextInt(3) + 1;
             }
@@ -242,7 +253,7 @@ public class Elevator implements Runnable {
      */
     public void run() {
 
-        //random variable that will randomly trigger the fault
+        // random variable that will randomly trigger the fault
         Random random = new Random();
         int randomNumber = random.nextInt(3) + 1;
 
@@ -269,7 +280,7 @@ public class Elevator implements Runnable {
                     // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
                     // length of the byte array).
                     DatagramPacket packet_buffer = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
-                    System.out.println("Elevator " + this.id + ": Waiting for new elevator request...\n");
+                    System.out.println("Elevator #" + this.id + ": Waiting for new elevator request...");
 
                     // Receive the packet from the scheduler
                     try {
