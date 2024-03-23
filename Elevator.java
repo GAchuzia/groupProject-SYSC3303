@@ -19,7 +19,12 @@ public class Elevator implements Runnable {
     /**
      * Counts the number of elevators that have been created.
      */
-    static private int ELEVATOR_COUNT = 0;
+    private static int ELEVATOR_COUNT = 0;
+
+    /**
+     * The time it takes to travel between two floors in milliseconds.
+     */
+    private static final int TIME_BETWEEN_FLOORS = 2000;
 
     /**
      * The unique identifier of this elevator.
@@ -90,6 +95,7 @@ public class Elevator implements Runnable {
      */
     private void sendLocationUpdate(int destination) {
 
+        System.out.println("Elevator #" + this.id + " at floor " + this.floor + " and going to " + destination);
         ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
@@ -145,17 +151,23 @@ public class Elevator implements Runnable {
         }
 
         // Move floors
-        for (int i = 0; i < Math.abs(destination - this.floor); i++) {
+        while (Math.abs(destination - this.floor) > 0) {
             try {
-                // Sleep 1s per floor traversed
-                Thread.sleep(1000);
+                // Mimic time between floors
+                Thread.sleep(TIME_BETWEEN_FLOORS);
+
+                if (this.direction == Direction.Up) {
+                    this.floor++;
+                } else {
+                    this.floor--;
+                }
+
                 this.sendLocationUpdate(destination);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
         }
-        this.floor = destination;
     }
 
     /**

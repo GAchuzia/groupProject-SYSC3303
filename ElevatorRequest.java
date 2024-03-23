@@ -202,6 +202,16 @@ public class ElevatorRequest {
     }
 
     /**
+     * Returns whether or not the elevator had a timer fault.
+     * 
+     * @return True if the request has marked an elevator with a fault, false
+     *         otherwise.
+     */
+    public boolean getTimerFault() {
+        return this.timerFault;
+    }
+
+    /**
      * Creates the string representation of an elevator request.
      *
      * @return The string representation of an elevator request.

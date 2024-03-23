@@ -104,7 +104,8 @@ public class Scheduler {
                             message.setPort(ElevatorSubsystem.PORT);
                             channel.send(message);
 
-                            System.out.println("Scheduler forwarded floor message.");
+                            System.out
+                                    .println("Scheduler forwarded floor message to elevator " + request.getElevator());
                             break;
 
                         // If there is a message from the elevator subsystem, forward it to the floor
@@ -114,16 +115,24 @@ public class Scheduler {
                             // Check if the message is a status update or complete request
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
-                            // Update the elevator's current floor to reflect its new position.
-                            list.set(response.getElevator(), response.getOriginFloor());
-
-                            if (response.isComplete()) {
-                                // Set the message destination to the Floor Subsystem to notify completion.
-                                message.setPort(FloorSubsystem.PORT);
-                                channel.send(message); // Forward the completion message to the Floor Subsystem.
-                                System.out.println("Scheduler forwarded elevator message.");
+                            // Check if the elevator is shutting down
+                            if (response.getTimerFault()) {
+                                list.set(response.getElevator(), -1); // Mark the elevator unavailable
+                                System.out.println(
+                                        "Scheduler notified that elevator " + response.getElevator() + " shut down.");
                             }
 
+                            // Set the message destination to the Floor Subsystem to notify completion.
+                            if (response.isComplete()) {
+                                message.setPort(FloorSubsystem.PORT);
+                                channel.send(message); // Forward the completion message to the Floor Subsystem.
+                                System.out.println("Scheduler forwarded elevator message to floor.");
+                                break;
+                            }
+
+                            // It's a status update
+                            // Update the elevator's current floor to reflect its new position.
+                            list.set(response.getElevator(), response.getOriginFloor());
                             break;
                     }
 
