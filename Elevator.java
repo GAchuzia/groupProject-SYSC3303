@@ -112,7 +112,6 @@ public class Elevator implements Runnable {
             e.printStackTrace();
             System.exit(1);
         }
-
     }
 
     /**
@@ -141,15 +140,16 @@ public class Elevator implements Runnable {
             this.state = ElevatorState.Halted;
 
             // Notify the scheduler that we're shutting down.
-            ElevatorRequest notif = new ElevatorRequest(this.id, this.floor, destination);
-            notif.markTimerFault();
-            DatagramPacket p = new DatagramPacket(notif.getBytes(), notif.getBytes().length);
-            p.setPort(ElevatorSubsystem.PORT);
+            ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
+            status.markTimerFault();
+            byte[] status_b = status.getBytes();
+            DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
+            packet.setPort(ElevatorSubsystem.PORT);
 
             try {
-                p.setAddress(InetAddress.getLocalHost());
-                channel.send(this.current_packet);
-            } catch (IOException e) {
+                packet.setAddress(InetAddress.getLocalHost());
+                this.channel.send(packet);
+            } catch (Exception e) {
                 e.printStackTrace();
                 System.exit(1);
             }

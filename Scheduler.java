@@ -120,6 +120,7 @@ public class Scheduler {
                                 list.set(response.getElevator(), -1); // Mark the elevator unavailable
                                 System.out.println(
                                         "Scheduler notified that elevator " + response.getElevator() + " shut down.");
+                                break;
                             }
 
                             // Set the message destination to the Floor Subsystem to notify completion.
@@ -133,6 +134,7 @@ public class Scheduler {
                             // It's a status update
                             // Update the elevator's current floor to reflect its new position.
                             list.set(response.getElevator(), response.getOriginFloor());
+                            System.out.println("Scheduler received status from elevator " + response.getElevator());
                             break;
                     }
 

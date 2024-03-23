@@ -47,13 +47,12 @@ public class FloorSubsystem {
                 ElevatorRequest rqst = new ElevatorRequest(reader.nextLine());
                 System.out.println("Floor put request on queue: " + rqst);
                 byte[] byte_rqst = rqst.getBytes();
-                // TODO Use inet address other than localhost
                 channel.send(
                         new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(), Scheduler.PORT));
 
                 // Short sleep to delay requests
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     continue;
                 }
