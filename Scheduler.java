@@ -29,7 +29,10 @@ public class Scheduler {
     /** The length of the buffer for receiving UDP messages. */
     static final int BUFFER_LEN = 100;
 
-    /** The index of the currently selected elevator to handle the request, initialized to 0. */
+    /**
+     * The index of the currently selected elevator to handle the request,
+     * initialized to 0.
+     */
     static int chosenElevator = 0;
 
     /** The floor number where the request originated. */
@@ -38,7 +41,10 @@ public class Scheduler {
     /** The number of the most recently used elevator reaching its destination. */
     static int elevatorNum;
 
-    /** A list tracking the current floors of all available elevators, initialized with 4 elements set to 0. */
+    /**
+     * A list tracking the current floors of all available elevators, initialized
+     * with 4 elements set to 0.
+     */
     static ArrayList<Integer> list = new ArrayList<>(4);
 
     /** Executes the main logical loop of the Scheduler subsystem. */
@@ -50,9 +56,9 @@ public class Scheduler {
         // The message buffer for receiving new UDP messages
         DatagramPacket message = null;
 
-        // Pre-fill the elevator list with initial floor values (0).
-        for (int i = 0; i < 4; i++) {
-            list.add(0);
+        // Pre-fill the elevator list with initial floor values (ground floor).
+        for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
+            list.add(1);
         }
 
         // While there are still messages
@@ -72,17 +78,20 @@ public class Scheduler {
                         case FloorSubsystem.PORT:
                             state = SchedulerState.Thinking;
 
-                            // TODO: handle IPs from different computers
                             channel.send(message);
 
                             // Selects the nearest available elevator to the request origin.
                             ElevatorRequest request = new ElevatorRequest(message.getData());
                             originFloor = request.getOriginFloor();
-                            int minDiff = 8; // Initialize with the maximum possible difference.
-                            for (int i = 0; i < 4; i++) {
-                                // Consider only available elevators. Here, '-1' indicates an elevator is en route to a destination and not available.
+
+                            int minDiff = 10000; // Initialize with the maximum possible difference.
+                            for (int i = 0; i < list.size(); i++) {
+
+                                // Consider only available elevators. Here, '-1' indicates an elevator is not
+                                // available
                                 if (list.get(i) != -1) {
-                                    int diff = abs(list.get(i) - originFloor); // Calculate the floor difference to find the closest elevator.
+                                    // Calculate the floor difference to find the closest elevator.
+                                    int diff = abs(list.get(i) - originFloor);
                                     if (diff < minDiff) {
                                         chosenElevator = i; // Update the chosen elevator to the current closest one.
                                         minDiff = diff; // Update the minimum difference found.
@@ -90,8 +99,8 @@ public class Scheduler {
                                 }
                             }
 
-
-                            // When it finds the closest available elevator, it sets the current floor to -1 as it will be busy
+                            // When it finds the closest available elevator, it sets the current floor to -1
+                            // as it will be busy
                             list.set(chosenElevator, -1);
                             request.setElevator(chosenElevator);
                             message.setData(request.getBytes()); // Re-encode message
@@ -110,7 +119,8 @@ public class Scheduler {
 
                             // Check if the elevator has completed its task.
                             if (response.isComplete()) {
-                                elevatorNum = response.getElevator(); // Identify the elevator that has completed the request.
+                                elevatorNum = response.getElevator(); // Identify the elevator that has completed the
+                                                                      // request.
 
                                 // Update the elevator's current floor to reflect its new position.
                                 list.set(elevatorNum, response.getDestinationFloor());
