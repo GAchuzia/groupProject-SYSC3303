@@ -73,6 +73,13 @@ Grant Achuzia: Updated tests for ElevatorTest.java and ElevatorRequest.java. Com
 Matteo Golin: Updated Scheduler, ElevatorSubsystem, and FloorSubsystem classes to communicate using UDP. Fixed ElevatorRequest decoding bug.
 Yousef Hammad: Worked on Elevator and ElevatorSubsystem.
 
+Iteration 4:
+Saja Fawagreh:
+Javeria Sohail:
+Grant Achuzia:
+Matteo Golin:
+Yousef Hammad:
+
 === Setup Instructions ===
 
 Compile all Java files and run the main functions for Scheduler.java, ElevatorSubsystem.java, and FloorSubsystem.java on separate terminals.
