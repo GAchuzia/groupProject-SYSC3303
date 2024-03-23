@@ -2,6 +2,8 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.io.*;
 import java.net.*;
+import java.util.Random;
+
 
 /**
  * Represents a physical or simulated elevator.
@@ -85,8 +87,9 @@ public class Elevator implements Runnable {
      * Moves the elevator to the destination floor.
      *
      * @param destination The destination floor number to move to.
+     * @param randomNumber the random number to generate the fault for the timer
      */
-    private void moveTo(int destination) {
+    private void moveTo(int destination, int randomNumber) {
 
         // Remove floor from list to be processed
         this.floor_q.remove(destination);
@@ -113,41 +116,92 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
 
-        // Sleep 50ms per floor traversed
-        try {
-            Thread.sleep(50 * Math.abs(destination - this.floor));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            System.exit(1);
+        //if the random number generator is 0, this means there is a timer fault
+        if (randomNumber == 0){
+            System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
+
+            // Echo back request to shut down corresponding elevator
+            try {
+                this.current_request.markTimerFault();
+                this.current_packet.setData(this.current_request.getBytes());
+                this.current_packet.setPort(ElevatorSubsystem.PORT);
+                channel.send(this.current_packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
 
-        this.floor = destination;
+        else{
+            // Sleep 50ms per floor traversed
+            try {
+                Thread.sleep(50 * Math.abs(destination - this.floor));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+            this.floor = destination;
+        }
     }
 
     /**
      * Opens the elevator doors.
      */
-    private void openDoors() {
+    private void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
+
+        //if the random number generated is 1, this means the door is stuck closed
+        if (randomNumber == 1){
+            System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
+
+            //keep generating a new random number that is NOT equal to 1
+            Random random2 = new Random();
+            int randomNumber2 = random2.nextInt(3) + 1;
+            while (randomNumber2 == 1){
+                System.out.println("Elevator #" + this.id + " door is still closed. Trying again...");
+                randomNumber2 = random2.nextInt(3) + 1;
+            }
+        }
+
         try {
             Thread.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(1);
         }
+        System.out.println("Elevator #" + this.id + " door opened");
+
+
     }
 
     /**
      * Closes the elevator doors.
      */
-    private void closeDoors() {
+    private void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
+
+
+        //if the random number generated is 1, this means the door is stuck open
+        if (randomNumber == 1){
+            System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
+
+            //keep generating a new random number that is NOT equal to 1
+            Random random2 = new Random();
+            int randomNumber2 = random2.nextInt(3) + 1;
+            while (randomNumber2 == 1){
+                System.out.println("Elevator #" + this.id + " door is still open. Trying again...");
+                randomNumber2 = random2.nextInt(3) + 1;
+            }
+        }
+
         try {
             Thread.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(1);
         }
+        System.out.println("Elevator #" + this.id + " door closed");
+
     }
 
     /**
@@ -187,6 +241,10 @@ public class Elevator implements Runnable {
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
+
+        //random variable that will randomly trigger the fault
+        Random random = new Random();
+        int randomNumber = random.nextInt(3) + 1;
 
         while (true) {
 
@@ -244,17 +302,17 @@ public class Elevator implements Runnable {
                         this.toggleDirection();
                     }
 
-                    this.moveTo(this.nextFloor());
+                    this.moveTo(this.nextFloor(), randomNumber);
                     this.state = ElevatorState.DoorsOpen;
                     break;
 
                 case ElevatorState.DoorsOpen:
-                    this.openDoors();
+                    this.openDoors(randomNumber);
                     this.state = ElevatorState.DoorsClosed;
                     break;
 
                 case ElevatorState.DoorsClosed:
-                    this.closeDoors();
+                    this.closeDoors(randomNumber);
 
                     // More floors to move to
                     if (!this.floor_q.isEmpty()) {
