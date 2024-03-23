@@ -46,6 +46,11 @@ public class ElevatorRequest {
     /** Tracks whether or not this request is complete. */
     private boolean complete = false;
 
+    /** track wheather there is a fault with the elevator timer . */
+    private boolean timerFault = false;
+
+
+
     /**
      * Provides a means to parse the input file's elevator request timestamps into
      * Java's LocalTime object.
@@ -189,6 +194,14 @@ public class ElevatorRequest {
     public void markComplete() {
         this.complete = true;
     }
+
+    /**
+     * Marks a timer fault.
+     */
+    public void markTimerFault() {
+        this.timerFault = true;
+    }
+
 
     /**
      * Creates the string representation of an elevator request.
