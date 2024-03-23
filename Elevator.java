@@ -128,33 +128,34 @@ public class Elevator implements Runnable {
         if (randomNumber == 0) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
 
-            // Echo back request to shut down corresponding elevator
+            // Notify the scheduler that we're shutting down.
+            ElevatorRequest notif = new ElevatorRequest(this.id, this.floor, destination);
+            notif.markTimerFault();
+            DatagramPacket p = new DatagramPacket(notif.getBytes(), notif.getBytes().length);
+            p.setPort(ElevatorSubsystem.PORT);
+
             try {
-                this.current_request.markTimerFault();
-                this.current_packet.setData(this.current_request.getBytes());
-                this.current_packet.setPort(ElevatorSubsystem.PORT);
+                p.setAddress(InetAddress.getLocalHost());
                 channel.send(this.current_packet);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
+            return;
         }
 
-        else {
-
-            for (int i = 0; i < Math.abs(destination - this.floor); i++) {
-                try {
-                    // Sleep 1s per floor traversed
-                    Thread.sleep(1000);
-                    this.sendLocationUpdate(destination);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
+        // Move floors
+        for (int i = 0; i < Math.abs(destination - this.floor); i++) {
+            try {
+                // Sleep 1s per floor traversed
+                Thread.sleep(1000);
+                this.sendLocationUpdate(destination);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.exit(1);
             }
-
-            this.floor = destination;
         }
+        this.floor = destination;
     }
 
     /**
