@@ -87,6 +87,10 @@ public class Elevator implements Runnable {
      * @param destination The destination floor number to move to.
      */
     private void moveTo(int destination) {
+
+        // Remove floor from list to be processed
+        this.floor_q.remove(destination);
+
         // Already there
         if (destination == this.floor) {
             this.state = ElevatorState.Idle;
@@ -206,16 +210,20 @@ public class Elevator implements Runnable {
 
                     // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
                     // length of the byte array).
-                    this.current_packet = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+                    DatagramPacket packet_buffer = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
                     System.out.println("Elevator " + this.id + ": Waiting for new elevator request...\n");
 
                     // Receive the packet from the scheduler
                     try {
-                        channel.receive(this.current_packet);
+                        channel.receive(packet_buffer);
+                    } catch (SocketTimeoutException ignore) {
+                        this.state = ElevatorState.Moving;
+                        continue; // Skip to next iteration
                     } catch (IOException e) {
                         e.printStackTrace();
                         System.exit(1);
                     }
+                    this.current_packet = packet_buffer; // Only set when we've received something for sure
 
                     // Parse packet
                     try {
@@ -313,7 +321,7 @@ public class Elevator implements Runnable {
      *
      * @return The direction of the elevator.
      */
-    public int getDirection() {
+    public Direction getDirection() {
         return this.direction;
     }
 
