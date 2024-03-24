@@ -24,8 +24,8 @@ ElevatorSubsystem.java: Listens for messages on its incoming message queue, prin
 on its outgoing queue.
 ElevatorSubsystemTest.java: Test suite to verify the functionality of the ElevatorSubsystem class.
 
-FloorSubsystem.java: Reads input data from a file and puts ElevatorRequests on its outgoing message queue. It listens for
-messages on its incoming message queue which it prints to the console.
+FloorSubsystem.java: Reads input data from a file and puts ElevatorRequests on its outgoing message queue. It listens
+for messages on its incoming message queue which it prints to the console.
 FloorSubsystemTest.java: Test suite to verify the functionality of the FloorSubsystem class.
 
 MessageQueue.java: Implements a message queue used for synchronized communication between subsystems/threads.
@@ -70,23 +70,22 @@ Iteration 3:
 Saja Fawagreh: Updated the sequence and class diagram and the README.txt. Also added the scheduler algorithm.
 Javeria Sohail: Updated the sequence and class diagram and the README.txt. Also added the scheduler algorithm
 Grant Achuzia: Updated tests for ElevatorTest.java and ElevatorRequest.java. Comment out tests that used message queues.
-Matteo Golin: Updated Scheduler, ElevatorSubsystem, and FloorSubsystem classes to communicate using UDP. Fixed ElevatorRequest decoding bug.
+Matteo Golin: Updated Scheduler, ElevatorSubsystem, and FloorSubsystem classes to communicate using UDP. Fixed
+ElevatorRequest decoding bug.
 Yousef Hammad: Worked on Elevator and ElevatorSubsystem.
 
 Iteration 4:
 Saja Fawagreh: Updated the sequence and class diagrams, as well as the state machines for the Elevator Subsystem and
 Scheduler Subsystem, and the README.txt.
-
 Javeria Sohail: Updated the sequence and class diagrams, as well as the state machines for the Elevator Subsystem and
 Scheduler Subsystem, and the README.txt.
-
-Grant Achuzia:
+Grant Achuzia: Updated tests for the Elevator class.
 Matteo Golin: Implemented the scheduler algorithm for responding to elevator shutdowns, and helped in the random fault
 activation within the Elevator class.
-
 Yousef Hammad: Updated the Elevator and the ElevatorState class
 
 === Setup Instructions ===
 
-Compile all Java files and run the main functions for Scheduler.java, ElevatorSubsystem.java, and FloorSubsystem.java on separate terminals.
+Compile all Java files and run the main functions for Scheduler.java, ElevatorSubsystem.java, and FloorSubsystem.java on
+separate terminals.
 To run tests, you can run any individual test in the IntelliJ IDE using the JUnit integration it provides.
