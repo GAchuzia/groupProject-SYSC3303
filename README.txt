@@ -74,10 +74,16 @@ Matteo Golin: Updated Scheduler, ElevatorSubsystem, and FloorSubsystem classes t
 Yousef Hammad: Worked on Elevator and ElevatorSubsystem.
 
 Iteration 4:
-Saja Fawagreh: Updated the sequence and class diagrams, as well as the state machines for the Elevator Subsystem and Scheduler Subsystem, and the README.txt.
-Javeria Sohail: Updated the sequence and class diagrams, as well as the state machines for the Elevator Subsystem and Scheduler Subsystem, and the README.txt.
+Saja Fawagreh: Updated the sequence and class diagrams, as well as the state machines for the Elevator Subsystem and
+Scheduler Subsystem, and the README.txt.
+
+Javeria Sohail: Updated the sequence and class diagrams, as well as the state machines for the Elevator Subsystem and
+Scheduler Subsystem, and the README.txt.
+
 Grant Achuzia:
-Matteo Golin:
+Matteo Golin: Implemented the scheduler algorithm for responding to elevator shutdowns, and helped in the random fault
+activation within the Elevator class.
+
 Yousef Hammad: Updated the Elevator and the ElevatorState class
 
 === Setup Instructions ===
