@@ -1,10 +1,9 @@
-import static org.junit.jupiter.api.Assertions.*;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
 import org.junit.jupiter.api.Test;
-import java.io.IOException;
-import java.io.PrintStream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import java.io.*;
 import java.net.*;
+
 
 /**
  * Test suite for testing the functionality of the Elevator class.
@@ -17,60 +16,76 @@ import java.net.*;
  * @version 0.0.0
  */
 public class ElevatorTest {
-    @Test
-    public void testSendLocationUpdate(){
-        // In progress
-    }
+
 
     @Test
-    public void testMoveTo() throws IOException {
-        // Create an Elevator instance
-        Elevator elevator = new Elevator(1234);
+    public void testMoveTo() throws SocketException{
+        Elevator elevator = new Elevator(2003);
+        assertEquals(1, elevator.getFloor()); // Check that we start on first floor
 
-        // Call the moveTo method with a destination floor
-        boolean result = elevator.moveTo(5, 0);
+        int destinationFloor =4;
+        int randomNumber = elevator.nextRandomNum();
+        boolean result = elevator.moveTo(destinationFloor, randomNumber);
 
-        // Assert that the elevator moved successfully
-        assertTrue(result);
-    }
+        if (randomNumber <= 5) {
+            assertEquals(ElevatorState.Halted, elevator.getState());
+        }  else {
+            // If randomNumber > 5, elevator should have moved to destinationFloor
+            assertEquals(destinationFloor, elevator.getFloor());
+            assertEquals(ElevatorState.Idle, elevator.getState());
+        }
+  }
 
     @Test
     public void testOpenDoors() throws SocketException {
-        // Create an Elevator instance
-        Elevator elevator = new Elevator(1234);
+        Elevator elevator = new Elevator(2004);
+        ByteArrayOutputStream streamOutput = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(streamOutput));
 
-        // Call the openDoors method
-        elevator.openDoors(0); // Simulate no fault
+        int randomNumber = 31; // Set randomNumber to a value greater than 30 to ensure doors open
+        elevator.openDoors(randomNumber);
+
+        // Check that proper open door message prints
+        assertTrue(streamOutput.toString().contains("Elevator #" + elevator.getId() + " door opened"));
     }
 
     @Test
     public void testCloseDoors() throws SocketException {
-        // Create an Elevator instance
-        Elevator elevator = new Elevator(1234);
+        Elevator elevator = new Elevator(2005);
+        ByteArrayOutputStream streamOutput = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(streamOutput));
 
-        // Call the closeDoors method
-        elevator.closeDoors(0); // Simulate no faults
+        int randomNumber = 31; // Set randomNumber to a value greater than 30 to ensure doors close
+        elevator.closeDoors(randomNumber);
+
+        // Check that proper closed door message prints
+        assertTrue(streamOutput.toString().contains("Elevator #" + elevator.getId() + " door closed"));
     }
 
     @Test
-    public void testNextFloor(){
-        // In progress
+    public void testNextFloorUp() throws SocketException {
+        Elevator elevator = new Elevator(2006);
+        elevator.floor_q.add(10);
+        elevator.floor_q.add(15);
+
+        elevator.floor = 11;
+        elevator.direction = Direction.Up;
+
+        assertEquals(Integer.valueOf(15), elevator.nextFloor());
     }
 
     @Test
-    public void testToggleDirection(){
-        // In progress
+    public void testToggleDirection() throws SocketException {
+        Elevator elevator = new Elevator(2007);
+
+        // Initial direction to Up
+        elevator.direction = Direction.Up;
+        elevator.toggleDirection();
+        assertEquals(Direction.Down, elevator.direction);
+
+        // Initial direction to Down
+        elevator.direction = Direction.Down;
+        elevator.toggleDirection();
+        assertEquals(Direction.Up, elevator.direction);
     }
-    @Test
-    public void testNextRandomNum() throws SocketException {
-        // Create an Elevator instance
-        Elevator elevator = new Elevator(1234);
-
-        // Call the nextRandomNum method
-        int randomNumber = elevator.nextRandomNum();
-
-        // Assert that the random number is between 1 and 100
-        assertTrue(randomNumber >= 1 && randomNumber <= 100);
-    }
-
 }

@@ -34,7 +34,7 @@ public class Elevator implements Runnable {
     /**
      * The floor that the elevator is currently on.
      */
-    private int floor;
+    int floor;
 
     /**
      * The current state of the elevator.
@@ -44,7 +44,7 @@ public class Elevator implements Runnable {
     /**
      * Keeps track of the floors the elevator needs to visit.
      */
-    private NavigableSet<Integer> floor_q;
+    NavigableSet<Integer> floor_q;
 
     /**
      * The current request being handled by the Elevator.
@@ -61,7 +61,7 @@ public class Elevator implements Runnable {
     private DatagramPacket current_packet;
 
     /** The direction that the elevator is currently moving in. */
-    private Direction direction;
+    Direction direction;
 
     /** The length of the buffer for receiving UDP packets in bytes. */
     private static final int BUFFER_LEN = 100;
@@ -231,7 +231,7 @@ public class Elevator implements Runnable {
      *         floor in the direction the elevator
      *         is moving.
      */
-    private Integer nextFloor() {
+    Integer nextFloor() {
         switch (this.direction) {
             case Direction.Up:
                 return this.floor_q.higher(this.floor);
@@ -245,7 +245,7 @@ public class Elevator implements Runnable {
     /**
      * Swaps the elevator's direction to the opposite.
      */
-    private void toggleDirection() {
+    void toggleDirection() {
         switch (this.direction) {
             case Direction.Up:
                 this.direction = Direction.Down;
