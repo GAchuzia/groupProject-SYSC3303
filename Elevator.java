@@ -121,7 +121,7 @@ public class Elevator implements Runnable {
      * @param randomNumber the random number to generate the fault for the timer
      * @return True if the movement was successful, false if a fault occurred.
      */
-    private boolean moveTo(int destination, int randomNumber) {
+    boolean moveTo(int destination, int randomNumber) {
 
         // Remove floor from list to be processed
         this.floor_q.remove(destination);
@@ -180,7 +180,7 @@ public class Elevator implements Runnable {
     /**
      * Opens the elevator doors.
      */
-    private void openDoors(int randomNumber) {
+    void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
         // 30% chance that the door is stuck closed
@@ -203,7 +203,7 @@ public class Elevator implements Runnable {
     /**
      * Closes the elevator doors.
      */
-    private void closeDoors(int randomNumber) {
+    void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
         // 30% chance that the door is stuck open
@@ -261,7 +261,7 @@ public class Elevator implements Runnable {
      * 
      * @return A random number between 1 and 100.
      */
-    private int nextRandomNum() {
+    int nextRandomNum() {
         return number_gen.nextInt(100) + 1;
     }
 
