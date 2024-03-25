@@ -34,7 +34,7 @@ public class Elevator implements Runnable {
     /**
      * The floor that the elevator is currently on.
      */
-    int floor;
+    private int floor;
 
     /**
      * The current state of the elevator.
@@ -44,7 +44,7 @@ public class Elevator implements Runnable {
     /**
      * Keeps track of the floors the elevator needs to visit.
      */
-    NavigableSet<Integer> floor_q;
+    private NavigableSet<Integer> floor_q;
 
     /**
      * The current request being handled by the Elevator.
@@ -61,7 +61,7 @@ public class Elevator implements Runnable {
     private DatagramPacket current_packet;
 
     /** The direction that the elevator is currently moving in. */
-    Direction direction;
+    private Direction direction;
 
     /** The length of the buffer for receiving UDP packets in bytes. */
     private static final int BUFFER_LEN = 100;

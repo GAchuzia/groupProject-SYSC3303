@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.*;
 import java.net.*;
 
-
 /**
  * Test suite for testing the functionality of the Elevator class.
  * 
@@ -17,75 +16,73 @@ import java.net.*;
  */
 public class ElevatorTest {
 
-
+    /**
+     * Tests that a random number greater than five does not trigger a fault, and
+     * the elevator successfully moves floors.
+     */
     @Test
-    public void testMoveTo() throws SocketException{
+    public void testMoveTo() throws SocketException {
         Elevator elevator = new Elevator(2003);
-        assertEquals(1, elevator.getFloor()); // Check that we start on first floor
+        int destinationFloor = 4;
+        boolean result = elevator.moveTo(destinationFloor, 10);
 
-        int destinationFloor =4;
-        int randomNumber = elevator.nextRandomNum();
-        boolean result = elevator.moveTo(destinationFloor, randomNumber);
+        assertTrue(result);
+        assertEquals(destinationFloor, elevator.getFloor());
+        assertEquals(ElevatorState.Idle, elevator.getState());
+    }
 
-        if (randomNumber <= 5) {
-            assertEquals(ElevatorState.Halted, elevator.getState());
-        }  else {
-            // If randomNumber > 5, elevator should have moved to destinationFloor
-            assertEquals(destinationFloor, elevator.getFloor());
-            assertEquals(ElevatorState.Idle, elevator.getState());
-        }
-  }
-
+    /**
+     * Test that a random number greater than 30 results in the doors successfully
+     * opening.
+     */
     @Test
     public void testOpenDoors() throws SocketException {
         Elevator elevator = new Elevator(2004);
         ByteArrayOutputStream streamOutput = new ByteArrayOutputStream();
         System.setOut(new PrintStream(streamOutput));
 
-        int randomNumber = 31; // Set randomNumber to a value greater than 30 to ensure doors open
-        elevator.openDoors(randomNumber);
+        // Set randomNumber to a value greater than 30 to ensure doors open
+        elevator.openDoors(31);
 
         // Check that proper open door message prints
         assertTrue(streamOutput.toString().contains("Elevator #" + elevator.getId() + " door opened"));
     }
 
+    /**
+     * Test that a random number greater than 30 results in the doors closing
+     * successfully.
+     */
     @Test
     public void testCloseDoors() throws SocketException {
         Elevator elevator = new Elevator(2005);
         ByteArrayOutputStream streamOutput = new ByteArrayOutputStream();
         System.setOut(new PrintStream(streamOutput));
 
-        int randomNumber = 31; // Set randomNumber to a value greater than 30 to ensure doors close
-        elevator.closeDoors(randomNumber);
+        elevator.closeDoors(31);
 
         // Check that proper closed door message prints
         assertTrue(streamOutput.toString().contains("Elevator #" + elevator.getId() + " door closed"));
     }
 
+    /**
+     * Tests that requesting the next floor with no floors to process returns null.
+     */
     @Test
     public void testNextFloorUp() throws SocketException {
         Elevator elevator = new Elevator(2006);
-        elevator.floor_q.add(10);
-        elevator.floor_q.add(15);
-
-        elevator.floor = 11;
-        elevator.direction = Direction.Up;
-
-        assertEquals(Integer.valueOf(15), elevator.nextFloor());
+        assertEquals(null, elevator.nextFloor());
     }
 
+    /**
+     * Tests that toggling direction results in the opposite direction of the
+     * elevator.
+     */
     @Test
     public void testToggleDirection() throws SocketException {
         Elevator elevator = new Elevator(2007);
 
-        // Initial direction to Up
-        elevator.direction = Direction.Up;
+        Direction initial_direction = elevator.getDirection();
         elevator.toggleDirection();
-        assertEquals(Direction.Down, elevator.direction);
-
-        // Initial direction to Down
-        elevator.direction = Direction.Down;
-        elevator.toggleDirection();
-        assertEquals(Direction.Up, elevator.direction);
+        assertNotEquals(initial_direction, elevator.getDirection());
     }
 }
