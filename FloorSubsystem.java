@@ -52,7 +52,7 @@ public class FloorSubsystem {
 
                 // Short sleep to delay requests
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     continue;
                 }

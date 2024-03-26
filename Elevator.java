@@ -1,4 +1,3 @@
-import java.util.NavigableSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -42,11 +41,6 @@ public class Elevator implements Runnable {
      * The current state of the elevator.
      */
     private ElevatorState state;
-
-    /**
-     * Keeps track of the floors the elevator needs to visit.
-     */
-    NavigableSet<Integer> floor_q;
 
     /**
      * The list of requests currently being handled by the Elevator.
@@ -311,6 +305,17 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Checks if the elevator is currently at a floor that needs to be stopped at.
+     * 
+     * @return True if the current floor is a stop that needs to be serviced, false
+     *         otherwise.
+     */
+    boolean atStop() {
+        // TODO
+        return true;
+    }
+
+    /**
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
@@ -321,12 +326,12 @@ public class Elevator implements Runnable {
 
                 case ElevatorState.Idle:
 
-                    // If there are still floors to visit, don't wait for new requests longer than
-                    // 50ms
+                    // If there are still requests to process, don't wait for new requests longer
+                    // than 50ms
                     // This will still get new requests for handling multiple at once, but it won't
                     // wait too long
                     try {
-                        if (!this.floor_q.isEmpty()) {
+                        if (!this.requests_in_progress.isEmpty()) {
                             channel.setSoTimeout(50);
                         } else {
                             channel.setSoTimeout(0);
@@ -338,7 +343,7 @@ public class Elevator implements Runnable {
                     // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
                     // length of the byte array).
                     DatagramPacket new_packet = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
-                    System.out.println("Elevator #" + this.id + ": Waiting for new elevator request...");
+                    System.out.println("Elevator #" + this.id + " Waiting for new elevator request...");
 
                     // Receive the packet from the scheduler
                     try {
@@ -354,6 +359,7 @@ public class Elevator implements Runnable {
                     // Parse packet
                     try {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
+                        System.out.println("Elevator #" + this.id + " got request " + new_request);
 
                         // Add floors to be processed
                         floor_q.add(new_request.getOriginFloor());
@@ -381,8 +387,7 @@ public class Elevator implements Runnable {
 
                     // Check if we are currently on a floor that is part of an ongoing request so we
                     // can track completion
-                    if (this.floor_q.contains(this.floor)) {
-                        this.floor_q.remove(this.floor);
+                    if (this.atStop()) {
                         // Go open doors since someone needs to get on/off here
                         this.state = ElevatorState.DoorsOpen;
                         break;
