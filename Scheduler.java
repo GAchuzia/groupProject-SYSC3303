@@ -112,7 +112,6 @@ public class Scheduler {
                         case ElevatorSubsystem.PORT:
                             state = SchedulerState.Thinking;
 
-                            // Check if the message is a status update or complete request
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
                             // Check if the elevator is shutting down

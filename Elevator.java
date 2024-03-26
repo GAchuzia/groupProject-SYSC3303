@@ -50,7 +50,7 @@ public class Elevator implements Runnable {
     /**
      * The list of requests currently being handled by the Elevator.
      */
-    private ArrayList<ElevatorRequest> requests_in_progress;
+    private ArrayList<RequestProgressWrapper> requests_in_progress;
 
     /** The port this elevator uses to communicate over UDP. */
     private int port;
@@ -154,7 +154,6 @@ public class Elevator implements Runnable {
             case Direction.Down:
                 // Shut down elevator if it tries to go below the ground floor
                 if (this.floor - 1 < 1) {
-                    this.state = Elevator.Halted;
                     System.out.println("Elevator tried to go below ground floor.");
                     this.sendShutdownNotice();
                     return false;
@@ -175,7 +174,6 @@ public class Elevator implements Runnable {
         // 5% chance of having a timer fault
         if (randomNumber <= 5) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
-            this.state = ElevatorState.Halted;
             this.sendShutdownNotice();
             return false;
         }
@@ -231,25 +229,6 @@ public class Elevator implements Runnable {
     }
 
     /**
-     * Gets the next floor to move to according to the floors that need to be
-     * visited and the elevator's current direction.
-     * 
-     * @return The next floor that the elevator should move to; null if there is no
-     *         floor in the direction the elevator
-     *         is moving.
-     */
-    Integer nextFloor() {
-        switch (this.direction) {
-            case Direction.Up:
-                return this.floor_q.higher(this.floor);
-            case Direction.Down:
-                return this.floor_q.lower(this.floor);
-            default:
-                return null;
-        }
-    }
-
-    /**
      * Swaps the elevator's direction to the opposite.
      */
     void toggleDirection() {
@@ -273,14 +252,57 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Checks if there are still floors to visit in the elevator's current
+     * direction.
+     * 
+     * @return True if there are destination floors to visit in the direction the
+     *         elevator is moving, false otherwise.
+     */
+    boolean floorsInDirection() {
+        switch (this.direction) {
+            case Direction.Up:
+                return this.floor_q.higher(this.floor) != null;
+            case Direction.Down:
+                return this.floor_q.lower(this.floor) != null;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Given the elevator's current floor, mark requests that are in progress as
+     * partially complete. If any request is
+     * fully complete, send it back to the floor subsystem.
+     */
+    void updateRequests() {
+
+        // Update progress for all requests
+        for (RequestProgressWrapper r : this.requests_in_progress) {
+            r.updateProgress(this.floor);
+
+            // If the request is now complete, send the completion back to the floor
+            if (!r.isComplete()) {
+                continue;
+            }
+            byte[] data = r.getRequest().getBytes();
+            DatagramPacket packet = new DatagramPacket(data, data.length);
+            packet.setPort(ElevatorSubsystem.PORT);
+            try {
+                packet.setAddress(InetAddress.getLocalHost());
+                this.channel.send(packet);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+    }
+
+    /**
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
 
         while (true) {
-
-            // The next random number for this iteration
-            int randomNumber = this.nextRandomNum();
 
             switch (this.state) {
 
@@ -319,7 +341,7 @@ public class Elevator implements Runnable {
                     // Parse packet
                     try {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
-                        this.requests_in_progress.add(new_request);
+                        this.requests_in_progress.add(new RequestProgressWrapper(new_request));
                     } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
@@ -332,46 +354,39 @@ public class Elevator implements Runnable {
                 case ElevatorState.Moving:
 
                     // If there are no floors in our direction, then go the other way
-                    if (this.nextFloor() == null) {
+                    if (!this.floorsInDirection()) {
                         this.toggleDirection();
                     }
 
                     // Check if moving was successful or if a fault was generated
-                    if (this.moveTo(this.nextFloor(), randomNumber)) {
-                        this.state = ElevatorState.DoorsOpen;
-                    } else {
+                    if (!this.move(this.nextRandomNum())) {
                         this.state = ElevatorState.Halted;
                     }
+
+                    // Check if we are currently on a floor that is part of an ongoing request so we
+                    // can track completion
+                    if (this.floor_q.contains(this.floor)) {
+                        this.floor_q.remove(this.floor);
+                        this.updateRequests();
+                        // Go open doors since someone needs to get on/off here
+                        this.state = ElevatorState.DoorsOpen;
+                        break;
+                    }
+
+                    // At this point we're not at a destination floor, but we've moved successfully.
+                    // That means it's time to move again.
+                    this.state = ElevatorState.Moving;
                     break;
 
                 case ElevatorState.DoorsOpen:
-                    this.openDoors(randomNumber);
+                    this.openDoors(this.nextRandomNum());
                     this.state = ElevatorState.DoorsClosed;
                     break;
 
                 case ElevatorState.DoorsClosed:
-                    this.closeDoors(randomNumber);
-
-                    // More floors to move to
-                    if (!this.floor_q.isEmpty()) {
-                        this.state = ElevatorState.Moving;
-                        break;
-                    }
-
-                    // Echo back request marked complete
-                    try {
-                        this.current_request.markComplete();
-                        this.current_packet.setData(this.current_request.getBytes());
-                        this.current_packet.setPort(ElevatorSubsystem.PORT);
-                        channel.send(this.current_packet);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        System.exit(1);
-                    }
-
-                    // Go to idle state to get more requests
-                    this.state = ElevatorState.Idle;
+                    this.closeDoors(this.nextRandomNum());
                     break;
+
                 case ElevatorState.Halted:
                     return; // Turn off the elevator
             }
