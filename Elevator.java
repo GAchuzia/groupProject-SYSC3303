@@ -1,4 +1,5 @@
 import java.util.NavigableSet;
+import java.util.ArrayList;
 import java.util.TreeSet;
 import java.io.*;
 import java.net.*;
@@ -47,18 +48,15 @@ public class Elevator implements Runnable {
     NavigableSet<Integer> floor_q;
 
     /**
-     * The current request being handled by the Elevator.
+     * The list of requests currently being handled by the Elevator.
      */
-    private ElevatorRequest current_request;
+    private ArrayList<ElevatorRequest> requests_in_progress;
 
     /** The port this elevator uses to communicate over UDP. */
     private int port;
 
     /** Socket used to both send and receive information */
     private DatagramSocket channel;
-
-    /** The DatagramPacket of the current request. */
-    private DatagramPacket current_packet;
 
     /** The direction that the elevator is currently moving in. */
     Direction direction;
@@ -86,21 +84,19 @@ public class Elevator implements Runnable {
         this.direction = Direction.Up; // Can only move since on ground floor
         this.state = ElevatorState.Idle; // Elevators start in the idle state
         this.floor_q = new TreeSet<>();
-        this.current_request = null;
         this.number_gen = new Random();
+        this.requests_in_progress = new ArrayList<>();
         ELEVATOR_COUNT++;
     }
 
     /**
      * Sends a UDP packet containing the elevator's current position to the elevator
-     * subsystem.
-     * 
-     * @param destination The destination the elevator is heading to.
+     * subsystem. The elevator's current floor occupies the origin and destination
+     * fields.
      */
-    private void sendLocationUpdate(int destination) {
+    private void sendLocationUpdate() {
 
-        System.out.println("Elevator #" + this.id + " at floor " + this.floor + " and going to " + destination);
-        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, destination);
+        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor);
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
         packet.setPort(ElevatorSubsystem.PORT);
@@ -115,37 +111,19 @@ public class Elevator implements Runnable {
     }
 
     /**
-     * Moves the elevator to the destination floor.
-     *
-     * @param destination  The destination floor number to move to.
-     * @param randomNumber the random number to generate the fault for the timer
-     * @return True if the movement was successful, false if a fault occurred.
+     * Notifies the scheduler that the elevator has shut down and re-routes all of
+     * the elevator requests.
      */
-    boolean moveTo(int destination, int randomNumber) {
+    private void sendShutdownNotice() {
+        for (ElevatorRequest r : this.requests_in_progress) {
 
-        // Remove floor from list to be processed
-        this.floor_q.remove(destination);
-
-        // Already there
-        if (destination == this.floor) {
-            this.state = ElevatorState.Idle;
-            return true;
-        }
-
-        System.out.println("Elevator #" + this.id + " moving from floor " + this.floor + " to " + destination);
-
-        // 5% chance of having a timer fault
-        if (randomNumber <= 5) {
-            System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
-            this.state = ElevatorState.Halted;
-
-            // Notify the scheduler that we're shutting down.
-            ElevatorRequest status = this.current_request;
-            status.setTimerFault(true);
-            byte[] status_b = status.getBytes();
-            DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
+            // Mark each request as being incomplete due to a timer fault
+            r.setTimerFault(true);
+            byte[] r_b = r.getBytes();
+            DatagramPacket packet = new DatagramPacket(r_b, r_b.length);
             packet.setPort(ElevatorSubsystem.PORT);
 
+            // Send request to elevator subsystem for routing
             try {
                 packet.setAddress(InetAddress.getLocalHost());
                 this.channel.send(packet);
@@ -153,27 +131,56 @@ public class Elevator implements Runnable {
                 e.printStackTrace();
                 System.exit(1);
             }
+        }
+    }
+
+    /**
+     * Moves the elevator to the destination floor.
+     *
+     * @param direction    The direction to move in.
+     * @param randomNumber the random number to generate the fault for the timer
+     * @return True if the movement was successful, false if a fault occurred.
+     */
+    boolean move(int randomNumber) {
+
+        // Move in the correct direction
+        int old_floor = this.floor;
+        switch (this.direction) {
+
+            case Direction.Up:
+                this.floor++;
+                break;
+
+            case Direction.Down:
+                // Shut down elevator if it tries to go below the ground floor
+                if (this.floor - 1 < 1) {
+                    this.state = Elevator.Halted;
+                    System.out.println("Elevator tried to go below ground floor.");
+                    this.sendShutdownNotice();
+                    return false;
+                }
+                this.floor--;
+        }
+
+        System.out.println("Elevator #" + this.id + " moving from floor " + old_floor + " to " + this.floor);
+
+        // Sleep for 1 second to simulate movement
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // 5% chance of having a timer fault
+        if (randomNumber <= 5) {
+            System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
+            this.state = ElevatorState.Halted;
+            this.sendShutdownNotice();
             return false;
         }
 
-        // Move floors
-        while (Math.abs(destination - this.floor) > 0) {
-            try {
-                // Mimic time between floors
-                Thread.sleep(TIME_BETWEEN_FLOORS);
-
-                if (this.direction == Direction.Up) {
-                    this.floor++;
-                } else {
-                    this.floor--;
-                }
-
-                this.sendLocationUpdate(destination);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }
+        this.sendLocationUpdate(destination); // Update scheduler with new location
         return true;
     }
 
@@ -295,31 +302,31 @@ public class Elevator implements Runnable {
 
                     // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
                     // length of the byte array).
-                    DatagramPacket packet_buffer = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+                    DatagramPacket new_packet = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
                     System.out.println("Elevator #" + this.id + ": Waiting for new elevator request...");
 
                     // Receive the packet from the scheduler
                     try {
-                        channel.receive(packet_buffer);
+                        channel.receive(new_packet);
                     } catch (SocketTimeoutException ignore) {
                         this.state = ElevatorState.Moving;
-                        continue; // Skip to next iteration
+                        continue; // Skip to next iteration if we time out
                     } catch (IOException e) {
                         e.printStackTrace();
                         System.exit(1);
                     }
-                    this.current_packet = packet_buffer; // Only set when we've received something for sure
 
                     // Parse packet
                     try {
-                        this.current_request = new ElevatorRequest(this.current_packet.getData());
+                        ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
+                        this.requests_in_progress.add(new_request);
                     } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
 
                     // Add floors to be processed
-                    floor_q.add(this.current_request.getOriginFloor());
-                    floor_q.add(this.current_request.getDestinationFloor());
+                    floor_q.add(new_request.getOriginFloor());
+                    floor_q.add(new_request.getDestinationFloor());
                     break;
 
                 case ElevatorState.Moving:
