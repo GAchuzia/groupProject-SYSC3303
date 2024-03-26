@@ -198,7 +198,7 @@ public class Elevator implements Runnable {
         }
 
         try {
-            Thread.sleep(1);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(1);
@@ -221,7 +221,7 @@ public class Elevator implements Runnable {
         }
 
         try {
-            Thread.sleep(1);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(1);
