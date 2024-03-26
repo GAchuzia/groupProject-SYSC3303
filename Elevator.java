@@ -1,5 +1,6 @@
 import java.util.NavigableSet;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.TreeSet;
 import java.io.*;
 import java.net.*;
@@ -174,8 +175,8 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
 
-        // 5% chance of having a timer fault
-        if (randomNumber <= 5) {
+        // 1% chance of having a timer fault
+        if (randomNumber <= 1) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
             this.sendShutdownNotice();
             return false;
@@ -191,8 +192,8 @@ public class Elevator implements Runnable {
     void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
-        // 30% chance that the door is stuck closed
-        while (randomNumber <= 30) {
+        // 3% chance that the door is stuck closed
+        while (randomNumber <= 3) {
             System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
             // Keep generating a new random number until doors are opened
             randomNumber = this.nextRandomNum();
@@ -214,8 +215,8 @@ public class Elevator implements Runnable {
     void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
-        // 30% chance that the door is stuck open
-        while (randomNumber <= 30) {
+        // 3% chance that the door is stuck open
+        while (randomNumber <= 3) {
             System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
             // Keep generating a new random number until doors are closed
             randomNumber = this.nextRandomNum();
@@ -284,18 +285,27 @@ public class Elevator implements Runnable {
             r.updateProgress(this.floor);
 
             // If the request is now complete, send the completion back to the floor
-            if (!r.isComplete()) {
-                continue;
+            if (r.isComplete()) {
+
+                System.out.println("Elevator #" + this.id + " completed request " + r.getRequest());
+
+                byte[] data = r.getRequest().getBytes();
+                DatagramPacket packet = new DatagramPacket(data, data.length);
+                packet.setPort(ElevatorSubsystem.PORT);
+                try {
+                    packet.setAddress(InetAddress.getLocalHost());
+                    this.channel.send(packet);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
             }
-            byte[] data = r.getRequest().getBytes();
-            DatagramPacket packet = new DatagramPacket(data, data.length);
-            packet.setPort(ElevatorSubsystem.PORT);
-            try {
-                packet.setAddress(InetAddress.getLocalHost());
-                this.channel.send(packet);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
+        }
+
+        // Remove all completed requests
+        for (Iterator<RequestProgressWrapper> it = this.requests_in_progress.iterator(); it.hasNext();) {
+            if (it.next().isComplete()) {
+                it.remove();
             }
         }
     }
@@ -373,7 +383,6 @@ public class Elevator implements Runnable {
                     // can track completion
                     if (this.floor_q.contains(this.floor)) {
                         this.floor_q.remove(this.floor);
-                        this.updateRequests();
                         // Go open doors since someone needs to get on/off here
                         this.state = ElevatorState.DoorsOpen;
                         break;
@@ -391,6 +400,8 @@ public class Elevator implements Runnable {
 
                 case ElevatorState.DoorsClosed:
                     this.closeDoors(this.nextRandomNum());
+                    this.updateRequests(); // Update requests after every drop-off/pick-up
+                    this.state = ElevatorState.Idle; // Check for a new request before moving
                     break;
 
                 case ElevatorState.Halted:
