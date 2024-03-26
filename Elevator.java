@@ -162,14 +162,14 @@ public class Elevator implements Runnable {
 
         // Sleep for 1 second to simulate movement
         try {
-            Thread.sleep(1000);
+            Thread.sleep(TIME_BETWEEN_FLOORS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
         // 1% chance of having a timer fault
-        if (randomNumber <= 1) {
+        if (randomNumber <= 5) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
             this.sendShutdownNotice();
             return false;
@@ -404,6 +404,7 @@ public class Elevator implements Runnable {
                     // Check if moving was successful or if a fault was generated
                     if (!this.move(this.nextRandomNum())) {
                         this.state = ElevatorState.Halted;
+                        break;
                     }
 
                     // Check if we are currently on a floor that is part of an ongoing request so we
