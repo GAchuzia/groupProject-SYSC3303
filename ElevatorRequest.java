@@ -204,6 +204,15 @@ public class ElevatorRequest {
     }
 
     /**
+     * Sets the direction of the elevator request.
+     * 
+     * @param direction The new direction of the request.
+     */
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    /**
      * Returns whether or not the elevator had a timer fault.
      * 
      * @return True if the request has marked an elevator with a fault, false

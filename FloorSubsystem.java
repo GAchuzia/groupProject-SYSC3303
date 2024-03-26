@@ -21,11 +21,17 @@ import java.io.IOException;
  */
 public class FloorSubsystem {
 
+    /** Port number for receiving UDP packets. */
     static final int PORT = 2001;
 
+    /** Byte buffer length for receiving UDP packets. */
     static final int BUFFER_LEN = 100;
 
+    /** The input file containing the list of requests. */
     static final String INPUT_FILE = "./testdata.txt";
+
+    /** Time between each request in milliseconds. */
+    static final int TIME_BETWEEN_REQUESTS = 5000;
 
     /** Runs the primary logic of the FloorSubsystem. */
     public static void main(String[] args) throws FileNotFoundException, SocketException, IOException {
@@ -52,7 +58,7 @@ public class FloorSubsystem {
 
                 // Short sleep to delay requests
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(TIME_BETWEEN_REQUESTS);
                 } catch (InterruptedException e) {
                     continue;
                 }

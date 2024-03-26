@@ -29,12 +29,6 @@ public class Scheduler {
     /** The length of the buffer for receiving UDP messages. */
     static final int BUFFER_LEN = 100;
 
-    /**
-     * The index of the currently selected elevator to handle the request,
-     * initialized to 0.
-     */
-    static int chosenElevator = 0;
-
     /** The floor number where the request originated. */
     static int originFloor;
 
@@ -42,10 +36,9 @@ public class Scheduler {
     static int elevatorNum;
 
     /**
-     * A list tracking the current floors of all available elevators, initialized
-     * with 4 elements set to 0.
+     * A list tracking the current floors of all available elevators.
      */
-    static ArrayList<Integer> list = new ArrayList<>(4);
+    static ElevatorStatus[] statuses = new ElevatorStatus[ElevatorSubsystem.NUM_ELEVATORS];
 
     /** Executes the main logical loop of the Scheduler subsystem. */
     public static void main(String[] args) throws SocketException, IOException {
@@ -57,8 +50,8 @@ public class Scheduler {
         DatagramPacket message = null;
 
         // Pre-fill the elevator list with current floor values (ground floor).
-        for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
-            list.add(1);
+        for (int i = 0; i < statuses.length; i++) {
+            statuses[i] = new ElevatorStatus();
         }
 
         // While there are still messages
@@ -78,32 +71,19 @@ public class Scheduler {
                         case FloorSubsystem.PORT:
                             state = SchedulerState.Thinking;
 
-                            // Selects the nearest available elevator to the request origin.
+                            // Selects the nearest available elevator with the correct direction
                             ElevatorRequest request = new ElevatorRequest(message.getData());
-                            originFloor = request.getOriginFloor();
 
-                            int minDiff = 10000; // Initialize with the maximum possible difference.
-                            for (int i = 0; i < list.size(); i++) {
-
-                                // Consider only available elevators. Here, '-1' indicates an elevator is not
-                                // available
-                                if (list.get(i) != -1) {
-                                    // Calculate the floor difference to find the closest elevator.
-                                    int diff = abs(list.get(i) - originFloor);
-                                    if (diff < minDiff) {
-                                        chosenElevator = i; // Update the chosen elevator to the current closest one.
-                                        minDiff = diff; // Update the minimum difference found.
-                                    }
-                                }
-                            }
-
+                            // Route the request
+                            int chosenElevator = selectElevator(request);
                             request.setElevator(chosenElevator);
                             message.setData(request.getBytes()); // Re-encode message
                             message.setPort(ElevatorSubsystem.PORT);
                             channel.send(message);
 
-                            System.out
-                                    .println("Scheduler forwarded floor message to elevator " + request.getElevator());
+                            System.out.println(
+                                    "Scheduler forwarded request [" + request + "] to elevator "
+                                            + request.getElevator());
                             // Set state back to idle
                             state = SchedulerState.Idle;
                             break;
@@ -112,12 +92,11 @@ public class Scheduler {
                         case ElevatorSubsystem.PORT:
                             state = SchedulerState.Thinking;
 
-                            // Check if the message is a status update or complete request
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
                             // Check if the elevator is shutting down
                             if (response.getTimerFault()) {
-                                list.set(response.getElevator(), -1); // Mark the elevator unavailable
+                                statuses[response.getElevator()].markShutDown();
                                 System.out.println(
                                         "Scheduler notified that elevator " + response.getElevator() + " shut down.");
                                 System.out.println("Re-assigning request to new elevator.");
@@ -140,15 +119,67 @@ public class Scheduler {
                                 break;
                             }
 
-                            // It's a status update
-                            // Update the elevator's current floor to reflect its new position.
-                            list.set(response.getElevator(), response.getOriginFloor());
+                            // It's a status update, so record elevator information
+                            int i = response.getElevator();
+                            statuses[i].setFloor(response.getOriginFloor());
+                            statuses[i].setDirection(response.getDirection());
+
                             // Set state back to idle
                             state = SchedulerState.Idle;
                             break;
                     }
             }
         }
+    }
+
+    /**
+     * Choose the best possible elevator to send the request to.
+     *
+     * If an elevator is moving up, and the pick-up floor is above it, send the
+     * message to it.
+     *
+     * If an elevator is moving down, and the pick-up floor is below it, send the
+     * message to it.
+     * 
+     * @param request The request to be routed.
+     * @return The ID of the elevator to route the request to.
+     */
+    public static int selectElevator(ElevatorRequest request) {
+
+        // Schedule based on pick-up location only
+        originFloor = request.getOriginFloor();
+
+        int chosenElevator = 0; // The elevator selected for this request (by default pick the first one)
+
+        for (int i = 0; i < statuses.length; i++) {
+
+            // Ignore shut-down elevators
+            if (statuses[i].isShutDown()) {
+                continue;
+            }
+
+            if (statuses[i].getDirection() == Direction.Up && (statuses[i].getFloor() <= originFloor)) {
+                chosenElevator = i;
+                break;
+            } else if (statuses[i].getDirection() == Direction.Down && (statuses[i].getFloor() >= originFloor)) {
+                chosenElevator = i;
+                break;
+            }
+        }
+
+        // If we picked the default option (0), ensure that it's not shut down.
+        // Otherwise, pick the next elevator that
+        // hasn't been shut down
+        if (chosenElevator == 0 && statuses[0].isShutDown()) {
+            for (int i = 0; i < statuses.length; i++) {
+                if (!statuses[i].isShutDown()) {
+                    chosenElevator = i;
+                    break;
+                }
+            }
+        }
+
+        return chosenElevator;
     }
 }
 
