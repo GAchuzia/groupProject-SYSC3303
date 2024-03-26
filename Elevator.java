@@ -28,6 +28,17 @@ public class Elevator implements Runnable {
     private static final int TIME_BETWEEN_FLOORS = 2000;
 
     /**
+     * The chances that the elevator will have a non-recoverable timer fault and
+     * shut down.
+     */
+    private static final int CHANCE_OF_TIMER_FAULT = 3;
+
+    /**
+     * The chances that the elevator will have to try to open/close its doors again.
+     */
+    private static final int CHANCE_OF_DOORS_STUCK = 5;
+
+    /**
      * The unique identifier of this elevator.
      */
     private final int id;
@@ -168,8 +179,8 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
 
-        // 1% chance of having a timer fault
-        if (randomNumber <= 5) {
+        // There is a chance of having a timer fault
+        if (randomNumber <= CHANCE_OF_TIMER_FAULT) {
             System.out.println("Elevator #" + this.id + " timer is stuck. Shutting down elevator...");
             this.sendShutdownNotice();
             return false;
@@ -185,8 +196,8 @@ public class Elevator implements Runnable {
     void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
-        // 3% chance that the door is stuck closed
-        while (randomNumber <= 3) {
+        // There is a chance that the door is stuck closed
+        while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
             System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
             // Keep generating a new random number until doors are opened
             randomNumber = this.nextRandomNum();
@@ -208,8 +219,8 @@ public class Elevator implements Runnable {
     void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
-        // 3% chance that the door is stuck open
-        while (randomNumber <= 3) {
+        // There is a chance that the door is stuck open
+        while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
             System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
             // Keep generating a new random number until doors are closed
             randomNumber = this.nextRandomNum();
