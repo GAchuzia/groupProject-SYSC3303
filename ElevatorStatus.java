@@ -73,4 +73,8 @@ public class ElevatorStatus {
     public void markShutDown() {
         this.shut_down = true;
     }
+
+    public String toString() {
+        return "Status(floor=" + this.floor + ", direction=" + this.direction + ", shut_down=" + this.shut_down + ")";
+    }
 }
