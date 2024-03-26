@@ -19,7 +19,7 @@ public class ElevatorStatus {
     public ElevatorStatus() {
         this.floor = 1; // Assume ground floor
         this.direction = Direction.Up; // The elevator can only go up from the ground floor
-        this.shut_down = true; // Assume elevator starts as active
+        this.shut_down = false; // Assume elevator starts as active
     }
 
     /**

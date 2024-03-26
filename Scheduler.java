@@ -158,18 +158,12 @@ public class Scheduler {
                 continue;
             }
 
-            switch (statuses[i].getDirection()) {
-                case Direction.Up:
-                    if (statuses[i].getFloor() <= originFloor) {
-                        chosenElevator = i;
-                    }
-                    break;
-
-                case Direction.Down:
-                    if (statuses[i].getFloor() >= originFloor) {
-                        chosenElevator = i;
-                    }
-                    break;
+            if (statuses[i].getDirection() == Direction.Up && (statuses[i].getFloor() <= originFloor)) {
+                chosenElevator = i;
+                break;
+            } else if (statuses[i].getDirection() == Direction.Down && (statuses[i].getFloor() >= originFloor)) {
+                chosenElevator = i;
+                break;
             }
         }
 
