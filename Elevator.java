@@ -97,6 +97,7 @@ public class Elevator implements Runnable {
     private void sendLocationUpdate() {
 
         ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor);
+        status.setDirection(this.direction); // Notify scheduler of direction of movement as well
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
         packet.setPort(ElevatorSubsystem.PORT);
@@ -115,7 +116,9 @@ public class Elevator implements Runnable {
      * the elevator requests.
      */
     private void sendShutdownNotice() {
-        for (ElevatorRequest r : this.requests_in_progress) {
+        for (RequestProgressWrapper w : this.requests_in_progress) {
+
+            ElevatorRequest r = w.getRequest(); // Extract request
 
             // Mark each request as being incomplete due to a timer fault
             r.setTimerFault(true);
@@ -178,7 +181,7 @@ public class Elevator implements Runnable {
             return false;
         }
 
-        this.sendLocationUpdate(destination); // Update scheduler with new location
+        this.sendLocationUpdate(); // Update scheduler with new location
         return true;
     }
 
@@ -341,14 +344,17 @@ public class Elevator implements Runnable {
                     // Parse packet
                     try {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
+
+                        // Add floors to be processed
+                        floor_q.add(new_request.getOriginFloor());
+                        floor_q.add(new_request.getDestinationFloor());
+
+                        // Add request to progress list
                         this.requests_in_progress.add(new RequestProgressWrapper(new_request));
                     } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
 
-                    // Add floors to be processed
-                    floor_q.add(new_request.getOriginFloor());
-                    floor_q.add(new_request.getDestinationFloor());
                     break;
 
                 case ElevatorState.Moving:
