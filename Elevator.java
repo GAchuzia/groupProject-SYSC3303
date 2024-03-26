@@ -78,7 +78,6 @@ public class Elevator implements Runnable {
         this.floor = 1; // Assume all elevators start on the ground floor
         this.direction = Direction.Up; // Can only move since on ground floor
         this.state = ElevatorState.Idle; // Elevators start in the idle state
-        this.floor_q = new TreeSet<>();
         this.number_gen = new Random();
         this.requests_in_progress = new ArrayList<>();
         ELEVATOR_COUNT++;
@@ -257,14 +256,28 @@ public class Elevator implements Runnable {
      *         elevator is moving, false otherwise.
      */
     boolean floorsInDirection() {
-        switch (this.direction) {
-            case Direction.Up:
-                return this.floor_q.higher(this.floor) != null;
-            case Direction.Down:
-                return this.floor_q.lower(this.floor) != null;
-            default:
-                return false;
+
+        for (RequestProgressWrapper r : this.requests_in_progress) {
+            switch (this.direction) {
+                case Direction.Up:
+                    if (this.floor < r.getRequest().getOriginFloor() && !r.wasPickedUp()) {
+                        return true;
+                    }
+                    if (this.floor < r.getRequest().getDestinationFloor() && (r.wasPickedUp() && !r.isComplete())) {
+                        return true;
+                    }
+                    break;
+                case Direction.Down:
+                    if (this.floor > r.getRequest().getOriginFloor() && !r.wasPickedUp()) {
+                        return true;
+                    }
+                    if (this.floor > r.getRequest().getDestinationFloor() && (r.wasPickedUp() && !r.isComplete())) {
+                        return true;
+                    }
+                    break;
+            }
         }
+        return false;
     }
 
     /**
@@ -311,8 +324,21 @@ public class Elevator implements Runnable {
      *         otherwise.
      */
     boolean atStop() {
-        // TODO
-        return true;
+
+        for (RequestProgressWrapper r : this.requests_in_progress) {
+
+            // This floor is the origin floor of a request who has not had a pick-up
+            if (this.floor == r.getRequest().getOriginFloor() && !r.wasPickedUp()) {
+                return true;
+            }
+
+            // This floor is the destination floor of a request who has not had a drop-off
+            if (this.floor == r.getRequest().getDestinationFloor() && (r.wasPickedUp() && !r.isComplete())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -360,11 +386,6 @@ public class Elevator implements Runnable {
                     try {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
                         System.out.println("Elevator #" + this.id + " got request " + new_request);
-
-                        // Add floors to be processed
-                        floor_q.add(new_request.getOriginFloor());
-                        floor_q.add(new_request.getDestinationFloor());
-
                         // Add request to progress list
                         this.requests_in_progress.add(new RequestProgressWrapper(new_request));
                     } catch (UnsupportedEncodingException e) {
