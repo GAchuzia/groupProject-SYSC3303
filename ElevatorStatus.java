@@ -1,5 +1,14 @@
+import java.nio.ByteBuffer;
+
 /**
  * For tracking the status of an elevator within the scheduler.
+ *
+ * @author Matteo Golin, 101220709
+ * @author Grant Achuzia, 101222695
+ * @author Saja Fawagreh, 101217326
+ * @author Javeria Sohail, 101197163
+ * @author Yousef Hammad, 101217858
+ * @version 0.0.0
  */
 public class ElevatorStatus {
 
@@ -12,6 +21,12 @@ public class ElevatorStatus {
     /** Whether or not the elevator has been shut down. */
     private boolean shut_down;
 
+    /** The number of riders currently on the elevator. */
+    private int riders;
+
+    /** The ID of the elevator this status is associated with. */
+    private int elevator_id;
+
     /**
      * Creates a new status object to track an elevator's position, starting the
      * elevator at the ground floor and moving in the upward direction.
@@ -20,6 +35,56 @@ public class ElevatorStatus {
         this.floor = 1; // Assume ground floor
         this.direction = Direction.Up; // The elevator can only go up from the ground floor
         this.shut_down = false; // Assume elevator starts as active
+        this.riders = 0; // No passengers to start
+    }
+
+    /**
+     * Creates a new status object from a byte array representing an encoded status
+     * object.
+     */
+    public ElevatorStatus(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+        buffer.put(bytes);
+        buffer.position(0);
+        this.floor = buffer.getInt();
+        this.direction = Direction.values()[buffer.getInt()];
+        this.shut_down = buffer.getInt() == 1;
+        this.riders = buffer.getInt();
+        this.elevator_id = buffer.getInt();
+    }
+
+    /**
+     * Get the elevator ID associated with this status.
+     * 
+     * @return The elevator ID associated with this status.
+     */
+    public int getElevator() {
+        return this.elevator_id;
+    }
+
+    /**
+     * Set the elevator ID associated with this status.
+     * 
+     * @param new_id The elevator ID to be associated with this status.
+     */
+    public void setElevator(int new_id) {
+        this.elevator_id = new_id;
+    }
+
+    /**
+     * Get the number of riders currently on the elevator.
+     * 
+     * @return The number of riders currently on the elevator.
+     */
+    public int getRiders() {
+        return this.riders;
+    }
+
+    /**
+     * Set the number of riders currently on the elevator.
+     */
+    public void setRiders(int riders) {
+        this.riders = riders;
     }
 
     /**
@@ -74,7 +139,24 @@ public class ElevatorStatus {
         this.shut_down = true;
     }
 
+    /** String representation of the state. */
     public String toString() {
-        return "Status(floor=" + this.floor + ", direction=" + this.direction + ", shut_down=" + this.shut_down + ")";
+        return "Status(id= " + this.elevator_id + ", floor=" + this.floor + ", direction=" + this.direction + ", shut_down=" + this.shut_down
+                + ", riders=" + this.riders + ")";
+    }
+
+    /**
+     * Encodes the status object as bytes for UDP transmission.
+     *
+     * @return An array of bytes representing the encoded status object.
+     */
+    public byte[] getBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(50);
+        buffer.putInt(this.floor);
+        buffer.putInt(this.direction.ordinal());
+        buffer.putInt(this.shut_down ? 1 : 0);
+        buffer.putInt(this.riders);
+        buffer.putInt(this.elevator_id);
+        return buffer.array();
     }
 }

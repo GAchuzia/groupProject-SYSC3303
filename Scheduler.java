@@ -94,6 +94,15 @@ public class Scheduler {
 
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
+                            // It's a status update, so record elevator information
+                            int i = response.getElevator();
+                            statuses[i].setElevator(i);
+                            statuses[i].setFloor(response.getOriginFloor());
+                            statuses[i].setDirection(response.getDirection());
+
+                            // Set state back to idle as a default option
+                            state = SchedulerState.Idle;
+
                             // Check if the elevator is shutting down
                             if (response.getTimerFault()) {
                                 statuses[response.getElevator()].markShutDown();
@@ -105,8 +114,7 @@ public class Scheduler {
                                 response.setTimerFault(false);
                                 message.setData(response.getBytes());
                                 message.setPort(FloorSubsystem.PORT);
-                                state = SchedulerState.Thinking;
-                                break;
+                                state = SchedulerState.Thinking; // Override state back to thinking
                             }
 
                             // Set the message destination to the Floor Subsystem to notify completion.
@@ -116,16 +124,15 @@ public class Scheduler {
                                 System.out.println("Scheduler forwarded elevator message to floor.");
                                 // Set state back to idle
                                 state = SchedulerState.Idle;
-                                break;
                             }
 
-                            // It's a status update, so record elevator information
-                            int i = response.getElevator();
-                            statuses[i].setFloor(response.getOriginFloor());
-                            statuses[i].setDirection(response.getDirection());
+                            // Forward the status update to the GUI
+                            byte[] data = statuses[i].getBytes();
+                            DatagramPacket update = new DatagramPacket(data, data.length);
+                            update.setPort(GUISubsystem.PORT);
+                            update.setAddress(message.getAddress());
+                            channel.send(update);
 
-                            // Set state back to idle
-                            state = SchedulerState.Idle;
                             break;
                     }
             }
