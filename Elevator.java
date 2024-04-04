@@ -17,6 +17,9 @@ import java.util.Random;
  */
 public class Elevator implements Runnable {
 
+    /** The maximum number of passengers that an elevator can hold. */
+    public static final int CAPACITY_LIMIT = 5;
+
     /**
      * Counts the number of elevators that have been created.
      */
@@ -102,6 +105,7 @@ public class Elevator implements Runnable {
     private void sendLocationUpdate() {
 
         ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor);
+        status.setRiders(this.requests_in_progress.size()); // Each request is one rider
         status.setDirection(this.direction); // Notify scheduler of direction of movement as well
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
