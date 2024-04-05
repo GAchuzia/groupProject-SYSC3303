@@ -160,8 +160,8 @@ public class Scheduler {
 
         for (int i = 0; i < statuses.length; i++) {
 
-            // Ignore shut-down elevators
-            if (statuses[i].isShutDown()) {
+            // Ignore shut-down elevators or elevators at capacity
+            if (statuses[i].isShutDown() || statuses[i].getRiders() >= Elevator.CAPACITY_LIMIT) {
                 continue;
             }
 
