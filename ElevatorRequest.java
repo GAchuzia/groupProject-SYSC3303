@@ -49,6 +49,9 @@ public class ElevatorRequest {
     /** Track whether there is a fault with the elevator timer. */
     private boolean timerFault = false;
 
+    /** The number of riders in the elevator this request is being processed by. */
+    private int riders;
+
     /**
      * Provides a means to parse the input file's elevator request timestamps into
      * Java's LocalTime object.
@@ -77,6 +80,7 @@ public class ElevatorRequest {
             this.direction = Direction.Up;
         }
         this.timestamp = LocalTime.now();
+        this.riders = 0;
     }
 
     /**
@@ -93,6 +97,7 @@ public class ElevatorRequest {
         this.direction = Direction.valueOf(elements[2]);
         this.destination = Integer.parseInt(elements[3]);
         this.elevator = -1; // No ID set when created from file line
+        this.riders = 0;
     }
 
     /**
@@ -112,6 +117,7 @@ public class ElevatorRequest {
         this.complete = buffer.getInt() == 1;
         this.timerFault = buffer.getInt() == 1;
         this.direction = Direction.values()[buffer.getInt()];
+        this.riders = buffer.getInt();
 
         buffer.compact(); // Compact array so remaining data is timestamp
 
@@ -223,6 +229,26 @@ public class ElevatorRequest {
     }
 
     /**
+     * Gets the number of riders on the elevator that this request is associated
+     * with.
+     *
+     * @return The number of riders on the elevator.
+     */
+    public int getRiders() {
+        return this.riders;
+    }
+
+    /**
+     * Sets the number of riders on the elevator that this request is associated
+     * with.
+     *
+     * @param count The new number of riders.
+     */
+    public void setRiders(int count) {
+        this.riders = count;
+    }
+
+    /**
      * Creates the string representation of an elevator request.
      *
      * @return The string representation of an elevator request.
@@ -259,6 +285,7 @@ public class ElevatorRequest {
         buffer.putInt(this.complete ? 1 : 0);
         buffer.putInt(this.timerFault ? 1 : 0);
         buffer.putInt(this.direction.ordinal());
+        buffer.putInt(this.riders);
         buffer.put(this.timestamp.toString().getBytes());
         return buffer.array();
     }
