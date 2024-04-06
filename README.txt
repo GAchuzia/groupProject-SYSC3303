@@ -86,6 +86,18 @@ Yousef Hammad: Updated the Elevator and the ElevatorState class
 
 === Setup Instructions ===
 
-Compile all Java files and run the main functions for Scheduler.java, ElevatorSubsystem.java, and FloorSubsystem.java on
-separate terminals.
-To run tests, you can run any individual test in the IntelliJ IDE using the JUnit integration it provides.
+=== Running from the Terminal ===
+
+To run the system from the terminal, you must first compile the entire project. A Makefile has been included, so typing
+the command make all from within the project directory will compile all the required components.
+
+To run each of the four required subsystems, you will need four terminal windows (one per subsystem). You may start them
+using the command `java SubsystemName`, where `SubsystemName` is the filename of the subsystem’s corresponding Java file,
+just without the `.java` extension. The file names are all listed above. Make sure to run the FloorSubsystem last,
+although the other subsystems can be started in any order.
+
+=== Running from within the IntelliJ IDE ===
+
+Running from within the IntelliJ IDE is far simpler. Simply open the four files corresponding to the subsystems
+mentioned above and click the green play button to compile and run them. Make sure that the Floor Subsystem is the last
+to be run.
