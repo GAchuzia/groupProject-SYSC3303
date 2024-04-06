@@ -47,7 +47,7 @@ public class GUISubsystem {
             ElevatorStatus status = new ElevatorStatus(p.getData());
 
             // Display
-            elevatorPanel.goToFloor(status.getFloor());
+            elevatorPanel.updateDisplay(status);
         }
     }
 
