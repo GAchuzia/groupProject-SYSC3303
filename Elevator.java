@@ -89,7 +89,7 @@ public class Elevator implements Runnable {
         this.channel = new DatagramSocket(port);
 
         this.id = ELEVATOR_COUNT;
-        this.floor = 1; // Assume all elevators start on the ground floor
+        this.floor = FloorSubsystem.GROUND_FLOOR; // Assume all elevators start on the ground floor
         this.direction = Direction.Up; // Can only move since on ground floor
         this.state = ElevatorState.Idle; // Elevators start in the idle state
         this.number_gen = new Random();

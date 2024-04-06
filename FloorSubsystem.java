@@ -33,9 +33,6 @@ public class FloorSubsystem {
     /** The ground floor of the building. */
     public static final int GROUND_FLOOR = 1;
 
-    /** The input file containing the list of requests. */
-    static final String INPUT_FILE = "./testdata.txt";
-
     /** Time between each request in milliseconds. */
     static final int TIME_BETWEEN_REQUESTS = 5000;
 
@@ -49,7 +46,7 @@ public class FloorSubsystem {
         DatagramPacket message = null;
 
         // Reads the input file.
-        File file = new File(INPUT_FILE);
+        File file = new File(args[0]);
         Scanner reader = new Scanner(file);
 
         // Send all messages
