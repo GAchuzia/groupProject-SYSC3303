@@ -125,6 +125,7 @@ public class Scheduler {
                                 System.out.println("Scheduler forwarded elevator message to floor.");
                                 // Set state back to idle
                                 state = SchedulerState.Idle;
+                                break;
                             }
 
                             // Forward the status update to the GUI
