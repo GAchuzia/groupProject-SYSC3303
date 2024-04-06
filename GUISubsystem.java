@@ -45,7 +45,6 @@ public class GUISubsystem {
 
             // Parse packet
             ElevatorStatus status = new ElevatorStatus(p.getData());
-            System.out.println(status);
 
             // Display
             elevatorPanel.updateDisplay(status);

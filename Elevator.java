@@ -104,8 +104,7 @@ public class Elevator implements Runnable {
      */
     private void sendLocationUpdate() {
 
-        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor);
-        status.setRiders(this.requests_in_progress.size()); // Each request is one rider
+        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size());
         status.setDirection(this.direction); // Notify scheduler of direction of movement as well
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);

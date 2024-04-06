@@ -99,6 +99,7 @@ public class Scheduler {
                             statuses[i].setElevator(i);
                             statuses[i].setFloor(response.getOriginFloor());
                             statuses[i].setDirection(response.getDirection());
+                            statuses[i].setRiders(response.getRiders());
 
                             // Set state back to idle as a default option
                             state = SchedulerState.Idle;

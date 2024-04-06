@@ -69,8 +69,9 @@ public class ElevatorRequest {
      * @param elevator    The elevator ID that this request is associated with.
      * @param origin      The current floor that the elevator is on.
      * @param destination The floor the elevator is heading towards.
+     * @param riders      The number of riders on the elevator;
      */
-    public ElevatorRequest(int elevator, int origin, int destination) {
+    public ElevatorRequest(int elevator, int origin, int destination, int riders) {
         this.elevator = elevator;
         this.origin = origin;
         this.destination = destination;
@@ -80,7 +81,7 @@ public class ElevatorRequest {
             this.direction = Direction.Up;
         }
         this.timestamp = LocalTime.now();
-        this.riders = 0;
+        this.riders = riders;
     }
 
     /**
