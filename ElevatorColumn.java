@@ -3,52 +3,40 @@ import java.awt.*;
 
 public class ElevatorColumn extends JPanel {
 
-    private int elevatorID;
-
     private JLabel floorLabel;
     private ElevatorSlider slider;
-    private JLabel doorsLabel;
-    private JLabel statusLabel;
+    private JLabel riderCounter;
 
     private static final ImageIcon UP_ICON = new ImageIcon("Icons/upArrowIcon.png");
     private static final ImageIcon DOWN_ICON = new ImageIcon("Icons/downArrowIcon.png");
 
-    public ElevatorColumn(int id) {
+    private static final int LABEL_WIDTH = 100;
+    private static final int LABEL_HEIGHT = 25;
+
+    public ElevatorColumn() {
 
         // Initialize the panel itself
         super(new GridLayout(4, 1));
         this.setBackground(Color.BLACK);
-        this.elevatorID = id; // To track which elevator this column represents
 
         // Create components for within panel
         this.slider = new ElevatorSlider();
 
-        this.floorLabel = new JLabel("1", JLabel.CENTER);
+        this.floorLabel = new JLabel("", JLabel.CENTER);
         this.floorLabel.setForeground(Color.white);
-        this.floorLabel.setPreferredSize(new Dimension(100, 25));
+        this.floorLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
         this.floorLabel.setIcon(UP_ICON);
+        this.goToFloor(1); // Start on ground floor (1)
 
-        this.doorsLabel = new JLabel("Doors open.", JLabel.CENTER);
-        this.doorsLabel.setForeground(Color.white);
-        this.doorsLabel.setPreferredSize(new Dimension(100, 25));
-
-        this.statusLabel = new JLabel("Waiting for request.", JLabel.CENTER);
-        this.statusLabel.setForeground(Color.white);
-        this.statusLabel.setPreferredSize(new Dimension(100, 25));
+        this.riderCounter = new JLabel("", JLabel.CENTER);
+        this.riderCounter.setForeground(Color.white);
+        this.riderCounter.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
+        this.updateRiderCount(0); // No riders at start time
 
         // Add in components
         this.add(this.floorLabel);
         this.add(this.slider);
-        this.add(this.doorsLabel);
-        this.add(this.statusLabel);
-    }
-
-    public void openDoors() {
-        this.doorsLabel.setText("Doors open.");
-    }
-
-    public void closeDoors() {
-        this.doorsLabel.setText("Doors closed.");
+        this.add(this.riderCounter);
     }
 
     public void goToFloor(int floor) {
@@ -56,8 +44,8 @@ public class ElevatorColumn extends JPanel {
         this.floorLabel.setText(String.valueOf(floor));
     }
 
-    public void updateStatus(String status) {
-        this.statusLabel.setText(status);
+    public void updateRiderCount(int riders) {
+        this.riderCounter.setText("Riders: " + riders);
     }
 
     public void setDirection(Direction direction) {

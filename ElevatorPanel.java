@@ -20,7 +20,7 @@ public class ElevatorPanel extends JPanel {
 
         // Create a panel for each elevator
         for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
-            this.columns[i] = new ElevatorColumn(i);
+            this.columns[i] = new ElevatorColumn();
             this.add(this.columns[i]);
         }
     }
@@ -29,6 +29,7 @@ public class ElevatorPanel extends JPanel {
         int i = status.getElevator();
         this.columns[i].goToFloor(status.getFloor());
         this.columns[i].setDirection(status.getDirection());
+        this.columns[i].updateRiderCount(status.getRiders());
     }
 }
 
