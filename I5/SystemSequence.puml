@@ -1,0 +1,67 @@
+@startuml
+participant FloorSubsystem
+participant Scheduler
+participant ElevatorSubsystem
+participant Elevator
+participant GUISubsystem
+
+loop requests_remaining
+activate FloorSubsystem
+FloorSubsystem -> Scheduler: UDP[ride request]
+deactivate FloorSubsystem
+activate Scheduler
+Scheduler -> ElevatorSubsystem: UDP[ride request]
+deactivate Scheduler
+activate ElevatorSubsystem
+ElevatorSubsystem -> Elevator: UDP[ride request]
+deactivate ElevatorSubsystem
+
+loop elevator.floor != request.destination
+    activate Elevator
+
+    loop elevator.doors_stuck
+        Elevator -> Elevator: retry_doors
+    end
+
+    alt timer_fault
+        Elevator -> ElevatorSubsystem: UDP[shutdown notice]
+        destroy Elevator
+        activate ElevatorSubsystem
+        ElevatorSubsystem -> Scheduler: UDP[shutdown notice]
+        deactivate ElevatorSubsystem
+        activate Scheduler
+        Scheduler -> GUISubsystem: UDP[shutdown notice]
+        activate GUISubsystem
+        deactivate Scheduler
+        deactivate GUISubsystem
+
+    else no_timer_fault
+
+        Elevator -> ElevatorSubsystem: UDP[status update]
+        activate Elevator
+        deactivate Elevator
+        activate ElevatorSubsystem
+        ElevatorSubsystem -> Scheduler: UDP[status update]
+        deactivate ElevatorSubsystem
+        activate Scheduler
+        Scheduler -> GUISubsystem: UDP[status update]
+        activate GUISubsystem
+        deactivate Scheduler
+        deactivate GUISubsystem
+    end
+end
+
+activate Elevator
+Elevator -> ElevatorSubsystem: UDP[completion]
+activate ElevatorSubsystem
+deactivate Elevator
+ElevatorSubsystem -> Scheduler: UDP[completion]
+deactivate ElevatorSubsystem
+activate Scheduler
+Scheduler -> FloorSubsystem: UDP[completion]
+activate FloorSubsystem
+deactivate Scheduler
+deactivate FloorSubsystem
+
+end
+@enduml
