@@ -71,4 +71,8 @@ public class ElevatorColumn extends JPanel {
         this.floorLabel.setIcon(direction == Direction.Up ? UP_ICON : DOWN_ICON);
     }
 
+    public void shutDown() {
+        this.floorLabel.setText("SHUT DOWN!");
+    }
+
 }

@@ -31,6 +31,9 @@ public class ElevatorPanel extends JPanel {
         this.columns[i].goToFloor(status.getFloor());
         this.columns[i].setDirection(status.getDirection());
         this.columns[i].updateRiderCount(status.getRiders());
+        if (status.isShutDown()) {
+            this.columns[i].shutDown();
+        }
     }
 }
 
