@@ -84,6 +84,14 @@ Matteo Golin: Implemented the scheduler algorithm for responding to elevator shu
 activation within the Elevator class.
 Yousef Hammad: Updated the Elevator and the ElevatorState class
 
+Iteration 5:
+Matteo Golin: Modified GUI, wrote GUISubsystem and hooked it up to scheduler, created sequence and state machine
+diagrams, implemented capacity limit.
+Grant Achuzia:
+Javeria Sohail:
+Saja Fawagreh:
+Yousef HammaD:
+
 === Setup Instructions ===
 
 === Running from the Terminal ===
