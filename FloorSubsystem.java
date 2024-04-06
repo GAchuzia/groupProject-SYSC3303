@@ -30,6 +30,9 @@ public class FloorSubsystem {
     /** The number of floors in the building. */
     public static final int NUM_FLOORS = 20;
 
+    /** The ground floor of the building. */
+    public static final int GROUND_FLOOR = 1;
+
     /** The input file containing the list of requests. */
     static final String INPUT_FILE = "./testdata.txt";
 

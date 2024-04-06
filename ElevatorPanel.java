@@ -4,8 +4,8 @@ import java.util.Hashtable;
 
 public class ElevatorPanel extends JPanel {
 
-    private static final int HEIGHT = 600;
-    private static final int COLUMN_WIDTH = 200;
+    private static final int HEIGHT = 900;
+    private static final int COLUMN_WIDTH = 300;
 
     /** Keeps track of the elevator columns for updating. */
     private ElevatorColumn columns[] = new ElevatorColumn[ElevatorSubsystem.NUM_ELEVATORS];
@@ -20,7 +20,7 @@ public class ElevatorPanel extends JPanel {
 
         // Create a panel for each elevator
         for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
-            this.columns[i] = new ElevatorColumn();
+            this.columns[i] = new ElevatorColumn(COLUMN_WIDTH, HEIGHT);
             this.add(this.columns[i]);
         }
     }
