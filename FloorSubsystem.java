@@ -6,6 +6,8 @@ import java.net.SocketException;
 import java.net.InetAddress;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.io.IOException;
 
 /**
@@ -49,36 +51,40 @@ public class FloorSubsystem {
         File file = new File(args[0]);
         Scanner reader = new Scanner(file);
 
-        // Send all messages
-        while (reader.hasNextLine()) {
-            try {
-
-                ElevatorRequest rqst = new ElevatorRequest(reader.nextLine());
-                System.out.println("Floor put request on queue: " + rqst);
-                byte[] byte_rqst = rqst.getBytes();
-                channel.send(
-                        new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(), Scheduler.PORT));
-
-                // Short sleep to delay requests
+        // Periodically read input file to simulate time between requests
+        Timer requester = new Timer();
+        requester.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
                 try {
-                    Thread.sleep(TIME_BETWEEN_REQUESTS);
-                } catch (InterruptedException e) {
-                    continue;
+                    nextRequest(reader, channel);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.exit(1);
                 }
-
-            } catch (DateTimeParseException e) {
-                System.out.println("Failed to parse input line timestamp: " + e);
             }
-        }
-        reader.close();
+        }, 0, TIME_BETWEEN_REQUESTS);
 
-        // Look for incoming messages
+        // Continually check for completed messages and print them
         while (true) {
-
             message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
             channel.receive(message);
             ElevatorRequest response = new ElevatorRequest(message.getData());
             System.out.println("Floor got message: " + response);
+
+        }
+    }
+
+    public static void nextRequest(Scanner reader, DatagramSocket socket) throws IOException {
+        if (reader.hasNextLine()) {
+            try {
+                ElevatorRequest rqst = new ElevatorRequest(reader.nextLine());
+                System.out.println("Floor put request on queue: " + rqst);
+                byte[] byte_rqst = rqst.getBytes();
+                socket.send(new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(),
+                        Scheduler.PORT));
+            } catch (DateTimeParseException e) {
+                System.out.println("Failed to parse input line timestamp: " + e);
+            }
         }
     }
 }
