@@ -30,7 +30,7 @@ public class FloorSubsystem {
     static final int BUFFER_LEN = 100;
 
     /** The number of floors in the building. */
-    public static final int NUM_FLOORS = 20;
+    public static final int NUM_FLOORS = 22;
 
     /** The ground floor of the building. */
     public static final int GROUND_FLOOR = 1;
