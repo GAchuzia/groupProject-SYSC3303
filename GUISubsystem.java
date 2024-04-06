@@ -2,6 +2,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.io.IOException;
 import java.net.SocketException;
+import javax.swing.*;
 
 /**
  * The scheduler that will be responsible for assigning the correct elevators to
@@ -26,6 +27,16 @@ public class GUISubsystem {
     public static void main(String[] args) throws SocketException, IOException {
         DatagramSocket channel = new DatagramSocket(PORT);
 
+        JFrame frame = new JFrame("Elevator GUI");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        ElevatorPanel elevatorPanel = new ElevatorPanel();
+        frame.add(elevatorPanel);
+
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
         while (true) {
 
             // Wait for packet from scheduler
@@ -35,8 +46,8 @@ public class GUISubsystem {
             // Parse packet
             ElevatorStatus status = new ElevatorStatus(p.getData());
 
-            // Print the status instead of displaying on GUI for now
-            System.out.println(status);
+            // Display
+            elevatorPanel.goToFloor(status.getFloor());
         }
     }
 
