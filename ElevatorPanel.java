@@ -4,7 +4,7 @@ import java.util.Hashtable;
 
 public class ElevatorPanel extends JPanel {
 
-    private static final int HEIGHT = 900;
+    private static final int HEIGHT = 700;
     private static final int COLUMN_WIDTH = 300;
 
     /** Keeps track of the elevator columns for updating. */
@@ -14,13 +14,14 @@ public class ElevatorPanel extends JPanel {
         super();
 
         // 1 row and enough columns for however many elevators
-        this.setLayout(new GridLayout(1, ElevatorSubsystem.NUM_ELEVATORS, 10, 10));
+        GridLayout layout = new GridLayout(1, ElevatorSubsystem.NUM_ELEVATORS, 10, 10);
+        this.setLayout(layout);
         this.setPreferredSize(new Dimension(COLUMN_WIDTH * ElevatorSubsystem.NUM_ELEVATORS, HEIGHT));
         this.setBackground(Color.black);
 
         // Create a panel for each elevator
         for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
-            this.columns[i] = new ElevatorColumn(COLUMN_WIDTH, HEIGHT);
+            this.columns[i] = new ElevatorColumn(i, COLUMN_WIDTH, HEIGHT - 20);
             this.add(this.columns[i]);
         }
     }

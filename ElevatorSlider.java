@@ -14,8 +14,6 @@ public class ElevatorSlider extends JSlider {
 
         Dimension size = new Dimension(width, height);
         this.setPreferredSize(size);
-        this.setMaximumSize(size);
-        this.setMinimumSize(size);
 
         this.setBackground(Color.BLACK);
         this.setPaintTicks(true);
