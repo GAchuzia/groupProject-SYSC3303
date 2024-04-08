@@ -27,7 +27,7 @@ public class ElevatorStatus {
     /** The ID of the elevator this status is associated with. */
     private int elevator_id;
 
-    private Object door;
+    private int door;
 
     private int destinationFloor;
     private int originFloor;
@@ -42,7 +42,7 @@ public class ElevatorStatus {
         this.direction = Direction.Up; // The elevator can only go up from the ground floor
         this.shut_down = false; // Assume elevator starts as active
         this.riders = 0; // No passengers to start
-        this.door = false;
+        this.door = 0;
         this.destinationFloor = 0;
         this.originFloor = 0;
         this.complete = false;
@@ -61,13 +61,7 @@ public class ElevatorStatus {
         this.shut_down = buffer.getInt() == 1;
         this.riders = buffer.getInt();
         this.elevator_id = buffer.getInt();
-        int d = buffer.getInt();
-        if(d <= -1){
-            this.door = d;
-        }
-        else {
-            this.door = d == 1;
-        }
+        this.door = buffer.getInt();
         this.destinationFloor = buffer.getInt();
         this.originFloor = buffer.getInt();
         this.complete = buffer.getInt() == 1;
@@ -125,7 +119,7 @@ public class ElevatorStatus {
         return this.direction;
     }
 
-    public Object getDoor() {
+    public int getDoor() {
         return this.door;
     }
     public int getDestinationFloor() {
@@ -165,7 +159,7 @@ public class ElevatorStatus {
     public void setComplete(boolean complete) {
         this.complete = complete;
     }
-    public void setDoor(Object door) {
+    public void setDoor(int door) {
         this.door = door;
     }
 
@@ -203,12 +197,7 @@ public class ElevatorStatus {
         buffer.putInt(this.shut_down ? 1 : 0);
         buffer.putInt(this.riders);
         buffer.putInt(this.elevator_id);
-        if (this.door instanceof Boolean) {
-            buffer.putInt((boolean) this.door ? 1 : 0);
-        }
-        else{
-            buffer.putInt((int) this.door);
-        }
+        buffer.putInt(this.door);
         buffer.putInt(this.destinationFloor);
         buffer.putInt(this.originFloor);
         buffer.putInt(this.complete ? 1 : 0);

@@ -1,15 +1,19 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.Hashtable;
 
+/**
+ * Represents a visual panel component for an elevator column in a GUI application.
+ * It displays the elevator's current status, including its ID, floor, direction, door status,
+ * and the number of riders. Additionally, it provides visual indicators for faults and shutdown states.
+ */
 public class ElevatorColumn extends JPanel {
 
-    private JLabel floorLabel;
-    private ElevatorSlider slider;
-    private JLabel riderCounter;
-    private JLabel idLabel;
-    private JLabel statusLabel;
-    private JLabel doorsLabel;
+    private JLabel floorLabel; // Displays current floor
+    private ElevatorSlider slider; // Visual representation of elevator movement
+    private JLabel riderCounter; // Displays number of riders
+    private JLabel idLabel; // Displays elevator ID
+    private JLabel statusLabel; // Displays current status or fault message
+    private JLabel doorsLabel; // Displays doors status (open or closed)
 
     private static final ImageIcon UP_ICON = new ImageIcon("Icons/upArrowIcon.png");
     private static final ImageIcon DOWN_ICON = new ImageIcon("Icons/downArrowIcon.png");
@@ -21,52 +25,61 @@ public class ElevatorColumn extends JPanel {
     private final static String DOORS_OPENS = "[|   |]";
     private final static String DOORS_CLOSED = "[|]";
 
+    /**
+     * Constructs an ElevatorColumn panel.
+     *
+     * @param id The identifier for the elevator.
+     * @param width The preferred width for the elevator panel.
+     * @param height The preferred height for the elevator panel.
+     */
     public ElevatorColumn(int id, int width, int height) {
-
         // Initialize the panel itself
         this.setPreferredSize(new Dimension(width, height));
         this.setBackground(Color.BLACK);
 
-        // Create components for within panel
-
         // Dimensions for all labels
         this.labelDimensions = new Dimension(width - 10, LABEL_HEIGHT);
 
-        // Remove enough height to also fit three labels
+        // Initialize slider to represent elevator movement
         this.slider = new ElevatorSlider(width, height - LABEL_HEIGHT * 3);
 
-        // Displays the elevator ID
+        // Initialize and set elevator ID label
         this.idLabel = this.newLabel("");
         this.idLabel.setText("Elevator #" + id);
 
-        // Displays current floor and direction
+        // Initialize floor label with UP_ICON by default
         this.floorLabel = this.newLabel("");
         this.floorLabel.setIcon(UP_ICON);
-        this.goToFloor(FloorSubsystem.GROUND_FLOOR); // Start on ground floor (1)
+        this.goToFloor(FloorSubsystem.GROUND_FLOOR); // Start on ground floor
 
-        // Displays how many riders are in the elevator
+        // Initialize rider counter with 0 riders
         this.riderCounter = this.newLabel("");
-        this.updateRiderCount(0); // No riders at start time
+        this.updateRiderCount(0);
 
-        // Add in components
+        // Initialize doors label
+        this.doorsLabel = newLabel(DOORS_CLOSED);
+        this.doorsLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        // Add labels, door and slider to panel
         this.add(this.idLabel);
         this.add(this.floorLabel);
         this.add(this.slider);
+        this.add(this.riderCounter);
+        this.add(doorsLabel);
 
-        // Adding doors label here so it appears above the rider counter
-        this.doorsLabel = newLabel(DOORS_CLOSED);
-        this.doorsLabel.setHorizontalAlignment(JLabel.CENTER);
-        this.add(doorsLabel); // Add doors label to the panel
-
-        this.add(this.riderCounter); // Now the doors label will be above this
-
+        // Initialize and add status label
         this.statusLabel = newLabel("<html><div style='text-align: center;'>Waiting for request</div></html>");
         this.statusLabel.setVerticalAlignment(JLabel.CENTER);
         this.statusLabel.setHorizontalAlignment(JLabel.CENTER);
-
         this.add(this.statusLabel);
     }
 
+    /**
+     * Creates and returns a new JLabel with specified text, centered alignment, and predefined styles.
+     *
+     * @param text The text to display on the label.
+     * @return A newly created JLabel with specified properties.
+     */
     private JLabel newLabel(String text) {
         JLabel label = new JLabel(text, JLabel.CENTER);
         label.setFont(LABEL_FONT);
@@ -76,35 +89,62 @@ public class ElevatorColumn extends JPanel {
         return label;
     }
 
+    /**
+     * Moves the elevator to a specified floor.
+     *
+     * @param floor The floor number to move the elevator to.
+     */
     public void goToFloor(int floor) {
         this.slider.setValue(floor);
         this.floorLabel.setText(String.valueOf(floor));
     }
 
+    /**
+     * Updates the display of the rider count in the elevator.
+     *
+     * @param riders The number of riders to display.
+     */
     public void updateRiderCount(int riders) {
         this.riderCounter.setText("Riders: " + riders);
     }
 
+    /**
+     * Sets the direction of the elevator movement.
+     *
+     * @param direction The direction of the elevator (Up or Down).
+     */
     public void setDirection(Direction direction) {
         this.floorLabel.setIcon(direction == Direction.Up ? UP_ICON : DOWN_ICON);
     }
 
+    /**
+     * Sets the doors' open or closed status.
+     *
+     * @param door true to set the doors as open, false to set as closed.
+     */
     public void setDoor(boolean door) {
         this.doorsLabel.setText(door ? DOORS_OPENS : DOORS_CLOSED);
-        String text = door ? "Open Doors" : "Close Doors";
-        updateStatus(text);
+        updateStatus(door ? "Open Doors" : "Close Doors");
     }
 
+    /**
+     * Handles the elevator fault status updates.
+     *
+     * @param status The fault status code.
+     * @param floorNum The floor number where the fault occurred.
+     */
     public void handleFault(int status, int floorNum) {
-        if (status == -1){
+        if (status == -1) {
             updateStatus("Door is stuck closed. Trying again...");
-        }
-        else {
+        } else {
             updateStatus("Door is stuck opened. Trying again...");
         }
         this.floorLabel.setIcon(FAULT);
     }
 
+    /**
+     * Shuts down the elevator, indicating a severe fault.
+     */
     public void shutDown() {
         for (int i = FloorSubsystem.GROUND_FLOOR; i <= FloorSubsystem.NUM_FLOORS; i++) {
             ((JLabel) slider.getLabelTable().get(i)).setText(String.valueOf(i));
@@ -114,26 +154,52 @@ public class ElevatorColumn extends JPanel {
         this.floorLabel.setIcon(HARD_FAULT);
     }
 
+    /**
+     * Updates the status label with a specified message.
+     *
+     * @param text The message to display as the status.
+     */
     private void updateStatus(String text) {
         statusLabel.setText("<html><div style='text-align: center;'>" + text + "</div></html>");
     }
 
+    /**
+     * Highlights a destination floor on the slider.
+     *
+     * @param floorNum The floor number to highlight.
+     */
     public void highlightDestination(int floorNum) {
         ((JLabel) slider.getLabelTable().get(floorNum)).setForeground(Color.yellow);
         this.slider.repaint();
     }
 
+    /**
+     * Removes the highlight from a previously highlighted destination floor.
+     *
+     * @param floorNum The floor number to unhighlight.
+     */
     public void unHighlightDestination(int floorNum) {
         ((JLabel) slider.getLabelTable().get(floorNum)).setForeground(Color.white);
         slider.repaint();
     }
 
+    /**
+     * Adds a star next to a floor number to indicate it is a destination floor.
+     *
+     * @param floorNum The floor number where the star should be added.
+     * @param destination The destination floor number.
+     */
     public void addStar(int floorNum, int destination) {
         ((JLabel) slider.getLabelTable().get(floorNum)).setText(floorNum + " *");
         updateStatus("Request received to go to floor " + destination + " from floor " + floorNum + ".");
         this.slider.repaint();
     }
 
+    /**
+     * Removes the star from a floor number, indicating it is no longer a destination floor.
+     *
+     * @param floorNum The floor number from which the star should be removed.
+     */
     public void removeStar(int floorNum) {
         ((JLabel) slider.getLabelTable().get(floorNum)).setText(String.valueOf(floorNum));
         slider.repaint();

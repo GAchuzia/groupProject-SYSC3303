@@ -76,12 +76,19 @@ public class Elevator implements Runnable {
     /** The random number generator for creating faults. */
     private Random number_gen;
 
-    private Object door;
+    /**
+     * The status of the door represented as an Object.
+     * 1: The door is open.
+     * 0: The door is closed.
+     * -1: The door is stuck and cannot be opened (stuck closed).
+     * -2: The door is stuck and cannot be closed (stuck opened).
+     */
+    private int door;
 
     /**
      * Constructs a new elevator.
      *
-     * @param socketPort The port at which we will be communicating to the elevator
+     * @param port The port at which we will be communicating to the elevator
      *                   with.
      */
     public Elevator(int port) throws SocketException {
@@ -96,19 +103,18 @@ public class Elevator implements Runnable {
         this.state = ElevatorState.Idle; // Elevators start in the idle state
         this.number_gen = new Random();
         this.requests_in_progress = new ArrayList<>();
-        this.door = false;
+        this.door = 0;
         ELEVATOR_COUNT++;
     }
 
     /**
-     * Sends a UDP packet containing the elevator's current position to the elevator
-     * subsystem. The elevator's current floor occupies the origin and destination
-     * fields.
+     * Sends the elevator's current location to the elevator subsystem using UDP. The message
+     * includes the elevator's ID, current floor, door status, and the number of requests in progress.
+     * The elevator's current floor is used as both the origin and destination to signify its position.
      */
     private void sendLocationUpdate() {
-
         ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size(), this.door, 0, 0, false);
-        status.setDirection(this.direction); // Notify scheduler of direction of movement as well
+        status.setDirection(this.direction);
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
         packet.setPort(ElevatorSubsystem.PORT);
@@ -122,9 +128,18 @@ public class Elevator implements Runnable {
         }
     }
 
+    /**
+     * Sends an update to the elevator subsystem using UDP when a request is processed. This message
+     * includes the elevator's ID, current floor, door status, number of requests in progress, and
+     * details of the request being processed such as origin floor, destination floor, and completion status.
+     *
+     * @param originFloor The floor from which the request originated.
+     * @param destinationFloor The target floor for the request.
+     * @param complete Flag indicating whether the request has been completed.
+     */
     private void sendRequestUpdate(int originFloor, int destinationFloor, boolean complete){
         ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size(), this.door, destinationFloor, originFloor, complete);
-        status.setDirection(this.direction); // Notify scheduler of direction of movement as well
+        status.setDirection(this.direction);
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
         packet.setPort(ElevatorSubsystem.PORT);
@@ -168,7 +183,6 @@ public class Elevator implements Runnable {
     /**
      * Moves the elevator to the destination floor.
      *
-     * @param direction    The direction to move in.
      * @param randomNumber the random number to generate the fault for the timer
      * @return True if the movement was successful, false if a fault occurred.
      */
@@ -219,6 +233,7 @@ public class Elevator implements Runnable {
     void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
+        // If the doors is stuck closed, mark them as stuck closed and send the status to elevator subsystem.
         if(randomNumber <= CHANCE_OF_DOORS_STUCK){
             this.door = -1;
             sendLocationUpdate();
@@ -238,7 +253,7 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
         System.out.println("Elevator #" + this.id + " door opened");
-        this.door = true;
+        this.door = 1;
     }
 
     /**
@@ -247,6 +262,7 @@ public class Elevator implements Runnable {
     void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
+        // If the doors is stuck opened, mark them as stuck opened and send the status to elevator subsystem.
         if(randomNumber <= CHANCE_OF_DOORS_STUCK){
             this.door = -2;
             sendLocationUpdate();
@@ -267,7 +283,7 @@ public class Elevator implements Runnable {
         }
 
         System.out.println("Elevator #" + this.id + " door closed");
-        this.door = false;
+        this.door = 0;
 
     }
 
