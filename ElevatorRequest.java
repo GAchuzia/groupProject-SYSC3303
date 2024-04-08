@@ -55,7 +55,8 @@ public class ElevatorRequest {
 
     private boolean door = false;
     private int finalDestination;
-
+    private int initialOrigin;
+    private boolean finalComplete = false;
     /**
      * Provides a means to parse the input file's elevator request timestamps into
      * Java's LocalTime object.
@@ -75,7 +76,7 @@ public class ElevatorRequest {
      * @param destination The floor the elevator is heading towards.
      * @param riders      The number of riders on the elevator;
      */
-    public ElevatorRequest(int elevator, int origin, int destination, int riders, boolean door, int finalDestination) {
+    public ElevatorRequest(int elevator, int origin, int destination, int riders, boolean door, int finalDestination, int initialOrigin, boolean finalComplete) {
         this.elevator = elevator;
         this.origin = origin;
         this.destination = destination;
@@ -88,6 +89,8 @@ public class ElevatorRequest {
         this.riders = riders;
         this.door = door;
         this.finalDestination = finalDestination;
+        this.initialOrigin = initialOrigin;
+        this.finalComplete = finalComplete;
     }
 
     /**
@@ -106,6 +109,7 @@ public class ElevatorRequest {
         this.elevator = -1; // No ID set when created from file line
         this.riders = 0;
         this.finalDestination = this.destination;
+        this.initialOrigin = this.origin;
     }
 
     /**
@@ -129,6 +133,8 @@ public class ElevatorRequest {
         this.riders = buffer.getInt();
         this.door = buffer.getInt() == 1;
         this.finalDestination = buffer.getInt();
+        this.initialOrigin = buffer.getInt();
+        this.finalComplete = buffer.getInt() == 1;
 
         buffer.compact(); // Compact array so remaining data is timestamp
 
@@ -169,6 +175,12 @@ public class ElevatorRequest {
     }
     public int getFinalDestinationFloor() {
         return this.finalDestination;
+    }
+    public int getInitialOriginFloor() {
+        return this.initialOrigin;
+    }
+    public boolean isFinalComplete() {
+        return this.finalComplete;
     }
 
     /**
@@ -306,6 +318,8 @@ public class ElevatorRequest {
         buffer.putInt(this.riders);
         buffer.putInt(this.door ? 1 : 0);
         buffer.putInt(this.finalDestination);
+        buffer.putInt(this.initialOrigin);
+        buffer.putInt(this.finalComplete ? 1 : 0);
         buffer.put(this.timestamp.toString().getBytes());
         return buffer.array();
     }

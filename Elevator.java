@@ -80,6 +80,8 @@ public class Elevator implements Runnable {
 
     private int destinationFloor;
 
+    private int originFloor;
+    private boolean finalComplete = false;
     /**
      * Constructs a new elevator.
      *
@@ -100,6 +102,7 @@ public class Elevator implements Runnable {
         this.requests_in_progress = new ArrayList<>();
         this.door = false;
         this.destinationFloor = 0;
+        this.originFloor = 0;
         ELEVATOR_COUNT++;
     }
 
@@ -110,7 +113,7 @@ public class Elevator implements Runnable {
      */
     private void sendLocationUpdate() {
 
-        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size(), this.door, this.destinationFloor);
+        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size(), this.door, this.destinationFloor, this.originFloor, this.finalComplete);
         status.setDirection(this.direction); // Notify scheduler of direction of movement as well
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
@@ -205,12 +208,12 @@ public class Elevator implements Runnable {
     void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
-        // There is a chance that the door is stuck closed
-        while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
-            System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
-            // Keep generating a new random number until doors are opened
-            randomNumber = this.nextRandomNum();
-        }
+//        // There is a chance that the door is stuck closed
+//        while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
+//            System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
+//            // Keep generating a new random number until doors are opened
+//            randomNumber = this.nextRandomNum();
+//        }
 
         try {
             Thread.sleep(1000);
@@ -228,12 +231,12 @@ public class Elevator implements Runnable {
     void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
-        // There is a chance that the door is stuck open
-        while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
-            System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
-            // Keep generating a new random number until doors are closed
-            randomNumber = this.nextRandomNum();
-        }
+//        // There is a chance that the door is stuck open
+//        while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
+//            System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
+//            // Keep generating a new random number until doors are closed
+//            randomNumber = this.nextRandomNum();
+//        }
 
         try {
             Thread.sleep(1000);
@@ -314,7 +317,7 @@ public class Elevator implements Runnable {
 
             // If the request is now complete, send the completion back to the floor
             if (r.isComplete()) {
-                this.destinationFloor = 0;
+                this.finalComplete = true;
 
                 System.out.println("Elevator #" + this.id + " completed request " + r.getRequest());
 
@@ -409,6 +412,8 @@ public class Elevator implements Runnable {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
                         System.out.println("Elevator #" + this.id + " got request " + new_request);
                         this.destinationFloor = new_request.getDestinationFloor();
+                        this.originFloor = new_request.getOriginFloor();
+                        this.finalComplete = false;
                         // Add request to progress list
                         this.requests_in_progress.add(new RequestProgressWrapper(new_request));
                     } catch (UnsupportedEncodingException e) {

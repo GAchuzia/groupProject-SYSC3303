@@ -2,9 +2,6 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.DatagramPacket;
 import java.io.IOException;
-import java.util.ArrayList;
-
-import static java.lang.Math.abs;
 
 /**
  * The scheduler that will be responsible for assigning the correct elevators to
@@ -102,6 +99,8 @@ public class Scheduler {
                             statuses[i].setRiders(response.getRiders());
                             statuses[i].setDoor(response.getDoor());
                             statuses[i].setDestinationFloor(response.getFinalDestinationFloor());
+                            statuses[i].setOriginFloor(response.getInitialOriginFloor());
+                            statuses[i].setComplete(response.isFinalComplete());
 
                             // Set state back to idle as a default option
                             state = SchedulerState.Idle;

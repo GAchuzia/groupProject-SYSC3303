@@ -7,7 +7,9 @@ public class ElevatorPanel extends JPanel {
     private static final int HEIGHT = 700;
     private static final int COLUMN_WIDTH = 300;
 
-    /** Keeps track of the elevator columns for updating. */
+    /**
+     * Keeps track of the elevator columns for updating.
+     */
     private ElevatorColumn columns[] = new ElevatorColumn[ElevatorSubsystem.NUM_ELEVATORS];
 
     public ElevatorPanel() {
@@ -35,8 +37,17 @@ public class ElevatorPanel extends JPanel {
             this.columns[i].shutDown();
         }
         this.columns[i].setDoor(status.getDoor());
-        if(status.getDestinationFloor() != 0){
-            this.columns[i].highlightDestination(status.getDestinationFloor());
+        if(status.isComplete()){
+            this.columns[i].unHighlightDestination(status.getDestinationFloor());
+            this.columns[i].removeStar(status.getOriginFloor());
+        }
+        else {
+            if(status.getDestinationFloor() != 0){
+                this.columns[i].highlightDestination(status.getDestinationFloor());
+            }
+            if(status.getOriginFloor() != 0){
+                this.columns[i].addStar(status.getOriginFloor());
+            }
         }
     }
 }

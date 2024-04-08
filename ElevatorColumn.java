@@ -19,7 +19,8 @@ public class ElevatorColumn extends JPanel {
     private Dimension labelDimensions;
     private final static String DOORS_OPENS = "[|   |]";
     private final static String DOORS_CLOSED = "[|]";
-
+    private int highlightedFloor;
+    private int staredFloor;
     public ElevatorColumn(int id, int width, int height) {
 
         // Initialize the panel itself
@@ -103,15 +104,26 @@ public class ElevatorColumn extends JPanel {
     }
 
     public void highlightDestination(int floorNum) {
-        JLabel label = (JLabel) this.slider.getLabelTable().get(floorNum);
-        Hashtable<Integer, JLabel> table = (Hashtable<Integer, JLabel>) slider.getLabelTable();
-        if (label != null) {
-            label.setForeground(Color.RED);
-            table.put(floorNum, label);
-            this.slider.setLabelTable(slider.getLabelTable());
-            updateStatus("New destination floor " + floorNum);
-            this.slider.repaint();
-        }
+        this.highlightedFloor = floorNum;
+        ((JLabel) slider.getLabelTable().get(floorNum)).setForeground(Color.yellow);
+        updateStatus("New destination floor " + floorNum);
+        this.slider.repaint();
     }
 
+    public void unHighlightDestination(int floorNum) {
+        ((JLabel) slider.getLabelTable().get(floorNum)).setForeground(Color.white);
+        slider.repaint();
+    }
+
+    public void addStar(int floorNum) {
+        this.staredFloor = floorNum;
+        ((JLabel) slider.getLabelTable().get(floorNum)).setText(floorNum + " *");
+        updateStatus("Received request at floor " + floorNum);
+        this.slider.repaint();
+    }
+
+    public void removeStar(int floorNum) {
+        ((JLabel) slider.getLabelTable().get(floorNum)).setText(String.valueOf(floorNum));
+        slider.repaint();
+    }
 }

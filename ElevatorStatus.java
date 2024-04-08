@@ -30,6 +30,8 @@ public class ElevatorStatus {
     private boolean door;
 
     private int destinationFloor;
+    private int originFloor;
+    private boolean complete;
 
     /**
      * Creates a new status object to track an elevator's position, starting the
@@ -42,6 +44,8 @@ public class ElevatorStatus {
         this.riders = 0; // No passengers to start
         this.door = false;
         this.destinationFloor = 0;
+        this.originFloor = 0;
+        this.complete = false;
     }
 
     /**
@@ -59,6 +63,8 @@ public class ElevatorStatus {
         this.elevator_id = buffer.getInt();
         this.door = buffer.getInt() == 1;
         this.destinationFloor = buffer.getInt();
+        this.originFloor = buffer.getInt();
+        this.complete = buffer.getInt() == 1;
     }
 
     /**
@@ -119,6 +125,12 @@ public class ElevatorStatus {
     public int getDestinationFloor() {
         return this.destinationFloor;
     }
+    public int getOriginFloor() {
+        return this.originFloor;
+    }
+    public boolean isComplete() {
+        return this.complete;
+    }
 
     /**
      * Record the floor the elevator is on.
@@ -141,7 +153,12 @@ public class ElevatorStatus {
     public void setDestinationFloor(int destinationFloor) {
         this.destinationFloor = destinationFloor;
     }
-
+    public void setOriginFloor(int originFloor) {
+        this.originFloor = originFloor;
+    }
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
     public void setDoor(boolean door) {
         this.door = door;
     }
@@ -182,6 +199,8 @@ public class ElevatorStatus {
         buffer.putInt(this.elevator_id);
         buffer.putInt(this.door ? 1 : 0);
         buffer.putInt(this.destinationFloor);
+        buffer.putInt(this.originFloor);
+        buffer.putInt(this.complete ? 1 : 0);
         return buffer.array();
     }
 }

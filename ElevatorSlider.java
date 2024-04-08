@@ -6,29 +6,31 @@ public class ElevatorSlider extends JSlider {
 
     private Hashtable<Integer, JLabel> floorLabels;
 
-    private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 20);
+    private static final Font LABEL_FONT = new Font("Sans Serif", 0, 13);
 
     public ElevatorSlider(int width, int height) {
         super(SwingConstants.VERTICAL, FloorSubsystem.GROUND_FLOOR, FloorSubsystem.NUM_FLOORS,
                 FloorSubsystem.GROUND_FLOOR);
 
-        Dimension size = new Dimension(width, height);
-        this.setPreferredSize(size);
-
-        this.setBackground(Color.BLACK);
-        this.setPaintTicks(true);
+        this.setPreferredSize(new Dimension(width, height));
+        this.setBackground(Color.black);
+        this.setMajorTickSpacing(1);
         this.setPaintLabels(true);
-        this.setSnapToTicks(true);
-        this.setEnabled(false); // Slider should not be interactive
+        this.setPaintTicks(true);
 
-        // Create custom labels for each floor
-        this.floorLabels = new Hashtable<>();
-        for (int i = 1; i <= FloorSubsystem.NUM_FLOORS; i++) {
+        this.removeMouseListener(this.getMouseListeners()[0]);
+        this.setFocusable(false);
+
+        floorLabels = new Hashtable<>();
+
+        for (int i = FloorSubsystem.GROUND_FLOOR; i <= FloorSubsystem.NUM_FLOORS; i++) {
             JLabel label = new JLabel(String.valueOf(i));
-            label.setForeground(Color.WHITE); // Use the passed color for the labels
+            label.setForeground(Color.WHITE);
+            label.setPreferredSize(new Dimension(
+                    label.getPreferredSize().width + 10, label.getPreferredSize().height));
             label.setFont(LABEL_FONT);
             this.floorLabels.put(i, label);
         }
-        this.setLabelTable(this.floorLabels);
+        this.setLabelTable(floorLabels);
     }
 }
