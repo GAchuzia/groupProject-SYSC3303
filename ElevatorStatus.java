@@ -12,25 +12,31 @@ import java.nio.ByteBuffer;
  */
 public class ElevatorStatus {
 
-    /** The floor the elevator is currently on. */
+    /** The current floor of the elevator. */
     private int floor;
 
-    /** The direction the elevator is moving in. */
+    /** The current movement direction of the elevator. */
     private Direction direction;
 
-    /** Whether or not the elevator has been shut down. */
+    /** Flag indicating whether the elevator is shut down. */
     private boolean shut_down;
 
-    /** The number of riders currently on the elevator. */
+    /** The number of passengers currently in the elevator. */
     private int riders;
 
-    /** The ID of the elevator this status is associated with. */
+    /** The identifier of the elevator this status pertains to. */
     private int elevator_id;
 
+    /** The status of the elevator's door. */
     private int door;
 
+    /** The designated destination floor of the elevator. */
     private int destinationFloor;
+
+    /** The original floor from which the elevator was requested. */
     private int originFloor;
+
+    /** Indicates whether the current request has been completed. */
     private boolean complete;
 
     /**
@@ -68,121 +74,171 @@ public class ElevatorStatus {
     }
 
     /**
-     * Get the elevator ID associated with this status.
-     * 
-     * @return The elevator ID associated with this status.
+     * Retrieves the elevator ID this status is associated with.
+     *
+     * @return The elevator ID.
      */
     public int getElevator() {
         return this.elevator_id;
     }
 
     /**
-     * Set the elevator ID associated with this status.
-     * 
-     * @param new_id The elevator ID to be associated with this status.
-     */
-    public void setElevator(int new_id) {
-        this.elevator_id = new_id;
-    }
-
-    /**
-     * Get the number of riders currently on the elevator.
-     * 
-     * @return The number of riders currently on the elevator.
+     * Retrieves the current number of riders in the elevator.
+     *
+     * @return The number of riders.
      */
     public int getRiders() {
         return this.riders;
     }
 
     /**
-     * Set the number of riders currently on the elevator.
-     */
-    public void setRiders(int riders) {
-        this.riders = riders;
-    }
-
-    /**
-     * Gets the last recorded floor the elevator was at.
-     * 
-     * @return The last recorded floor the elevator was at.
+     * Retrieves the current floor of the elevator.
+     *
+     * @return The floor number.
      */
     public int getFloor() {
         return this.floor;
     }
 
     /**
-     * Gets the last recorded direction the elevator was moving in.
-     * 
-     * @return The last recorded floor the elevator was moving in.
+     * Retrieves the current direction of the elevator's movement.
+     *
+     * @return The direction the elevator is moving in.
      */
     public Direction getDirection() {
         return this.direction;
     }
 
+    /**
+     * Retrieves the status of the elevator's door.
+     *
+     * @return The door status.
+     */
     public int getDoor() {
         return this.door;
     }
+
+    /**
+     * Retrieves the destination floor of the current request.
+     *
+     * @return The destination floor number.
+     */
     public int getDestinationFloor() {
         return this.destinationFloor;
     }
+
+    /**
+     * Retrieves the origin floor of the current request.
+     *
+     * @return The origin floor number.
+     */
     public int getOriginFloor() {
         return this.originFloor;
     }
+
+    /**
+     * Checks if the current request has been completed.
+     *
+     * @return True if complete, false otherwise.
+     */
     public boolean isComplete() {
         return this.complete;
     }
 
     /**
-     * Record the floor the elevator is on.
-     * 
-     * @param The floor to record.
-     */
-    public void setFloor(int floor) {
-        this.floor = floor;
-    }
-
-    /**
-     * Record the direction the elevator is moving in.
-     * 
-     * @param The direction to record.
-     */
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
-    public void setDestinationFloor(int destinationFloor) {
-        this.destinationFloor = destinationFloor;
-    }
-    public void setOriginFloor(int originFloor) {
-        this.originFloor = originFloor;
-    }
-    public void setComplete(boolean complete) {
-        this.complete = complete;
-    }
-    public void setDoor(int door) {
-        this.door = door;
-    }
-
-    /**
-     * Check if the elevator has been recorded as shutdown.
-     * 
+     * Checks if the elevator is marked as shut down.
+     *
      * @return True if the elevator is shut down, false otherwise.
      */
     public boolean isShutDown() {
         return this.shut_down;
     }
 
+// Setters
+
     /**
-     * Mark the elevator as being shut down.
+     * Sets the elevator ID for this status.
+     *
+     * @param new_id The new elevator ID.
+     */
+    public void setElevator(int new_id) {
+        this.elevator_id = new_id;
+    }
+
+    /**
+     * Sets the number of riders currently in the elevator.
+     *
+     * @param riders The new number of riders.
+     */
+    public void setRiders(int riders) {
+        this.riders = riders;
+    }
+
+    /**
+     * Updates the floor number the elevator is on.
+     *
+     * @param floor The new floor number.
+     */
+    public void setFloor(int floor) {
+        this.floor = floor;
+    }
+
+    /**
+     * Updates the direction of the elevator's movement.
+     *
+     * @param direction The new movement direction.
+     */
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    /**
+     * Sets the status of the elevator's door.
+     *
+     * @param door The new door status.
+     */
+    public void setDoor(int door) {
+        this.door = door;
+    }
+
+    /**
+     * Sets the destination floor for the current request.
+     *
+     * @param destinationFloor The destination floor number.
+     */
+    public void setDestinationFloor(int destinationFloor) {
+        this.destinationFloor = destinationFloor;
+    }
+
+    /**
+     * Sets the origin floor for the current request.
+     *
+     * @param originFloor The origin floor number.
+     */
+    public void setOriginFloor(int originFloor) {
+        this.originFloor = originFloor;
+    }
+
+    /**
+     * Marks the current request as complete or incomplete.
+     *
+     * @param complete True to mark the request as complete, false otherwise.
+     */
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
+
+    /**
+     * Marks the elevator as shut down.
      */
     public void markShutDown() {
         this.shut_down = true;
     }
 
+
     /** String representation of the state. */
     public String toString() {
-        return "Status(id= " + this.elevator_id + ", floor=" + this.floor + ", direction=" + this.direction + ", shut_down=" + this.shut_down
-                + ", riders=" + this.riders + ")";
+        return STR."Status(id= \{this.elevator_id}, floor=\{this.floor}, direction=\{this.direction}, shut_down=\{this.shut_down}, riders=\{this.riders})";
     }
 
     /**

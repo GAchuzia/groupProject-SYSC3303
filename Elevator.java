@@ -355,7 +355,7 @@ public class Elevator implements Runnable {
 
             // If the request is now complete, send the completion back to the floor
             if (r.isComplete()) {
-                r.getRequest().setFinalComplete(true);
+                r.getRequest().markFinalComplete(true);
                 ElevatorRequest request = r.getRequest();
 
                 System.out.println("Elevator #" + this.id + " completed request " + r.getRequest());
