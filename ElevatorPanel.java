@@ -33,21 +33,27 @@ public class ElevatorPanel extends JPanel {
         this.columns[i].goToFloor(status.getFloor());
         this.columns[i].updateRiderCount(status.getRiders());
         this.columns[i].setDirection(status.getDirection());
-        if (status.isShutDown()) {
-            this.columns[i].shutDown();
+
+        if(status.getDoor() instanceof Boolean){
+            this.columns[i].setDoor((boolean) status.getDoor());
         }
-        this.columns[i].setDoor(status.getDoor());
+        else if((Integer) status.getDoor() < 0){
+            this.columns[i].handleFault((int) status.getDoor(), status.getFloor());
+        }
+
         if(status.isComplete()){
             this.columns[i].unHighlightDestination(status.getDestinationFloor());
             this.columns[i].removeStar(status.getOriginFloor());
         }
         else {
-            if(status.getDestinationFloor() != 0){
+            if(status.getDestinationFloor() != 0 && status.getOriginFloor() != 0){
                 this.columns[i].highlightDestination(status.getDestinationFloor());
+                this.columns[i].addStar(status.getOriginFloor(), status.getDestinationFloor());
             }
-            if(status.getOriginFloor() != 0){
-                this.columns[i].addStar(status.getOriginFloor());
-            }
+        }
+
+        if (status.isShutDown()) {
+            this.columns[i].shutDown();
         }
     }
 }

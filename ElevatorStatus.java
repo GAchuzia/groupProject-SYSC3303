@@ -27,7 +27,7 @@ public class ElevatorStatus {
     /** The ID of the elevator this status is associated with. */
     private int elevator_id;
 
-    private boolean door;
+    private Object door;
 
     private int destinationFloor;
     private int originFloor;
@@ -61,7 +61,13 @@ public class ElevatorStatus {
         this.shut_down = buffer.getInt() == 1;
         this.riders = buffer.getInt();
         this.elevator_id = buffer.getInt();
-        this.door = buffer.getInt() == 1;
+        int d = buffer.getInt();
+        if(d <= -1){
+            this.door = d;
+        }
+        else {
+            this.door = d == 1;
+        }
         this.destinationFloor = buffer.getInt();
         this.originFloor = buffer.getInt();
         this.complete = buffer.getInt() == 1;
@@ -119,7 +125,7 @@ public class ElevatorStatus {
         return this.direction;
     }
 
-    public boolean getDoor() {
+    public Object getDoor() {
         return this.door;
     }
     public int getDestinationFloor() {
@@ -159,7 +165,7 @@ public class ElevatorStatus {
     public void setComplete(boolean complete) {
         this.complete = complete;
     }
-    public void setDoor(boolean door) {
+    public void setDoor(Object door) {
         this.door = door;
     }
 
@@ -197,7 +203,12 @@ public class ElevatorStatus {
         buffer.putInt(this.shut_down ? 1 : 0);
         buffer.putInt(this.riders);
         buffer.putInt(this.elevator_id);
-        buffer.putInt(this.door ? 1 : 0);
+        if (this.door instanceof Boolean) {
+            buffer.putInt((boolean) this.door ? 1 : 0);
+        }
+        else{
+            buffer.putInt((int) this.door);
+        }
         buffer.putInt(this.destinationFloor);
         buffer.putInt(this.originFloor);
         buffer.putInt(this.complete ? 1 : 0);

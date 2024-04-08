@@ -53,7 +53,7 @@ public class ElevatorRequest {
     /** The number of riders in the elevator this request is being processed by. */
     private int riders;
 
-    private boolean door = false;
+    private Object door = false;
     private int finalDestination;
     private int initialOrigin;
     private boolean finalComplete = false;
@@ -76,7 +76,7 @@ public class ElevatorRequest {
      * @param destination The floor the elevator is heading towards.
      * @param riders      The number of riders on the elevator;
      */
-    public ElevatorRequest(int elevator, int origin, int destination, int riders, boolean door, int finalDestination, int initialOrigin, boolean finalComplete) {
+    public ElevatorRequest(int elevator, int origin, int destination, int riders, Object door, int finalDestination, int initialOrigin, boolean finalComplete) {
         this.elevator = elevator;
         this.origin = origin;
         this.destination = destination;
@@ -131,7 +131,13 @@ public class ElevatorRequest {
         this.timerFault = buffer.getInt() == 1;
         this.direction = Direction.values()[buffer.getInt()];
         this.riders = buffer.getInt();
-        this.door = buffer.getInt() == 1;
+        int d = buffer.getInt();
+        if(d <= -1){
+            this.door = d;
+        }
+        else {
+            this.door = d == 1;
+        }
         this.finalDestination = buffer.getInt();
         this.initialOrigin = buffer.getInt();
         this.finalComplete = buffer.getInt() == 1;
@@ -252,7 +258,7 @@ public class ElevatorRequest {
         this.direction = direction;
     }
 
-    public boolean getDoor() {
+    public Object getDoor() {
         return this.door;
     }
 
@@ -324,7 +330,12 @@ public class ElevatorRequest {
         buffer.putInt(this.timerFault ? 1 : 0);
         buffer.putInt(this.direction.ordinal());
         buffer.putInt(this.riders);
-        buffer.putInt(this.door ? 1 : 0);
+        if (this.door instanceof Boolean) {
+            buffer.putInt((boolean) this.door ? 1 : 0);
+        }
+        else{
+            buffer.putInt((int) this.door);
+        }
         buffer.putInt(this.finalDestination);
         buffer.putInt(this.initialOrigin);
         buffer.putInt(this.finalComplete ? 1 : 0);

@@ -76,7 +76,7 @@ public class Elevator implements Runnable {
     /** The random number generator for creating faults. */
     private Random number_gen;
 
-    private boolean door;
+    private Object door;
 
     /**
      * Constructs a new elevator.
@@ -219,6 +219,11 @@ public class Elevator implements Runnable {
     void openDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " opening doors.");
 
+        if(randomNumber <= CHANCE_OF_DOORS_STUCK){
+            this.door = -1;
+            sendLocationUpdate();
+        }
+
         // There is a chance that the door is stuck closed
         while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
             System.out.println("Elevator #" + this.id + " door is stuck closed. Trying again...");
@@ -242,6 +247,11 @@ public class Elevator implements Runnable {
     void closeDoors(int randomNumber) {
         System.out.println("Elevator #" + this.id + " closing doors.");
 
+        if(randomNumber <= CHANCE_OF_DOORS_STUCK){
+            this.door = -2;
+            sendLocationUpdate();
+        }
+
         // There is a chance that the door is stuck open
         while (randomNumber <= CHANCE_OF_DOORS_STUCK) {
             System.out.println("Elevator #" + this.id + " door is stuck open. Trying again...");
@@ -250,11 +260,12 @@ public class Elevator implements Runnable {
         }
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.exit(1);
         }
+
         System.out.println("Elevator #" + this.id + " door closed");
         this.door = false;
 

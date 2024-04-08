@@ -13,14 +13,14 @@ public class ElevatorColumn extends JPanel {
 
     private static final ImageIcon UP_ICON = new ImageIcon("Icons/upArrowIcon.png");
     private static final ImageIcon DOWN_ICON = new ImageIcon("Icons/downArrowIcon.png");
-
+    private static final ImageIcon HARD_FAULT = new ImageIcon("Icons/hardFaultIcon.png");
+    private static final ImageIcon FAULT = new ImageIcon("Icons/transientFaultIcon.png");
     private static final int LABEL_HEIGHT = 40;
-    private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 20);
+    private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 15);
     private Dimension labelDimensions;
     private final static String DOORS_OPENS = "[|   |]";
     private final static String DOORS_CLOSED = "[|]";
-    private int highlightedFloor;
-    private int staredFloor;
+
     public ElevatorColumn(int id, int width, int height) {
 
         // Initialize the panel itself
@@ -91,12 +91,27 @@ public class ElevatorColumn extends JPanel {
 
     public void setDoor(boolean door) {
         this.doorsLabel.setText(door ? DOORS_OPENS : DOORS_CLOSED);
-        String text = door ? "Doors Opening" : "Doors Closing";
+        String text = door ? "Open Doors" : "Close Doors";
         updateStatus(text);
     }
 
+    public void handleFault(int status, int floorNum) {
+        if (status == -1){
+            updateStatus("Door is stuck closed. Trying again...");
+        }
+        else {
+            updateStatus("Door is stuck opened. Trying again...");
+        }
+        this.floorLabel.setIcon(FAULT);
+    }
+
     public void shutDown() {
-        this.floorLabel.setText("SHUT DOWN!");
+        for (int i = FloorSubsystem.GROUND_FLOOR; i <= FloorSubsystem.NUM_FLOORS; i++) {
+            ((JLabel) slider.getLabelTable().get(i)).setText(String.valueOf(i));
+            ((JLabel) slider.getLabelTable().get(i)).setForeground(Color.RED);
+        }
+        updateStatus("SHUT DOWN!");
+        this.floorLabel.setIcon(HARD_FAULT);
     }
 
     private void updateStatus(String text) {
@@ -104,9 +119,7 @@ public class ElevatorColumn extends JPanel {
     }
 
     public void highlightDestination(int floorNum) {
-        this.highlightedFloor = floorNum;
         ((JLabel) slider.getLabelTable().get(floorNum)).setForeground(Color.yellow);
-        updateStatus("New destination floor " + floorNum);
         this.slider.repaint();
     }
 
@@ -115,10 +128,9 @@ public class ElevatorColumn extends JPanel {
         slider.repaint();
     }
 
-    public void addStar(int floorNum) {
-        this.staredFloor = floorNum;
+    public void addStar(int floorNum, int destination) {
         ((JLabel) slider.getLabelTable().get(floorNum)).setText(floorNum + " *");
-        updateStatus("Received request at floor " + floorNum);
+        updateStatus("Request received to go to floor " + destination + " from floor " + floorNum + ".");
         this.slider.repaint();
     }
 
