@@ -158,11 +158,15 @@ public class ElevatorRequest {
         this.initialOrigin = buffer.getInt();
         this.finalComplete = buffer.getInt() == 1;
 
-        // Handling the timestamp decoding.
-        byte[] timestamp_bytes = new byte[buffer.remaining()];
-        buffer.get(timestamp_bytes);
-        String timestamp_text = new String(timestamp_bytes, "US-ASCII").trim();
-        this.timestamp = LocalTime.parse(timestamp_text, PARSER);
+        buffer.compact(); // Compact array so remaining data is timestamp
+
+        // Remove excess null terminating characters
+        byte[] timestamp_bytes = buffer.array();
+        int i = 0;
+        for (; timestamp_bytes[i] != 0; i++)
+            ;
+        String timestamp_text = new String(timestamp_bytes, 0, i, "US-ASCII");
+        this.timestamp = LocalTime.parse(timestamp_text);
     }
 
 
