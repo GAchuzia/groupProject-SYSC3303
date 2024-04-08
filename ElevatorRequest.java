@@ -176,11 +176,19 @@ public class ElevatorRequest {
     public int getFinalDestinationFloor() {
         return this.finalDestination;
     }
+    public void setFinalDestinationFloor(int finalDestination){this.finalDestination = finalDestination;}
     public int getInitialOriginFloor() {
         return this.initialOrigin;
     }
+    public void setInitialOriginFloor(int initialOrigin) {
+        this.initialOrigin = initialOrigin;
+    }
     public boolean isFinalComplete() {
         return this.finalComplete;
+    }
+
+    public void setFinalComplete(boolean finalComplete) {
+        this.finalComplete = finalComplete;
     }
 
     /**
