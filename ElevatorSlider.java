@@ -18,7 +18,6 @@ public class ElevatorSlider extends JSlider {
         this.setBackground(Color.BLACK);
         this.setPaintTicks(true);
         this.setPaintLabels(true);
-        this.setMajorTickSpacing(height / FloorSubsystem.NUM_FLOORS);
         this.setSnapToTicks(true);
         this.setEnabled(false); // Slider should not be interactive
 

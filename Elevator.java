@@ -76,6 +76,10 @@ public class Elevator implements Runnable {
     /** The random number generator for creating faults. */
     private Random number_gen;
 
+    private boolean door;
+
+    private int destinationFloor;
+
     /**
      * Constructs a new elevator.
      *
@@ -94,6 +98,8 @@ public class Elevator implements Runnable {
         this.state = ElevatorState.Idle; // Elevators start in the idle state
         this.number_gen = new Random();
         this.requests_in_progress = new ArrayList<>();
+        this.door = false;
+        this.destinationFloor = 0;
         ELEVATOR_COUNT++;
     }
 
@@ -104,7 +110,7 @@ public class Elevator implements Runnable {
      */
     private void sendLocationUpdate() {
 
-        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size());
+        ElevatorRequest status = new ElevatorRequest(this.id, this.floor, this.floor, this.requests_in_progress.size(), this.door, this.destinationFloor);
         status.setDirection(this.direction); // Notify scheduler of direction of movement as well
         byte[] status_b = status.getBytes();
         DatagramPacket packet = new DatagramPacket(status_b, status_b.length);
@@ -213,7 +219,7 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
         System.out.println("Elevator #" + this.id + " door opened");
-
+        this.door = true;
     }
 
     /**
@@ -236,6 +242,7 @@ public class Elevator implements Runnable {
             System.exit(1);
         }
         System.out.println("Elevator #" + this.id + " door closed");
+        this.door = false;
 
     }
 
@@ -307,6 +314,7 @@ public class Elevator implements Runnable {
 
             // If the request is now complete, send the completion back to the floor
             if (r.isComplete()) {
+                this.destinationFloor = 0;
 
                 System.out.println("Elevator #" + this.id + " completed request " + r.getRequest());
 
@@ -400,6 +408,7 @@ public class Elevator implements Runnable {
                     try {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
                         System.out.println("Elevator #" + this.id + " got request " + new_request);
+                        this.destinationFloor = new_request.getDestinationFloor();
                         // Add request to progress list
                         this.requests_in_progress.add(new RequestProgressWrapper(new_request));
                     } catch (UnsupportedEncodingException e) {
@@ -437,12 +446,14 @@ public class Elevator implements Runnable {
                 case ElevatorState.DoorsOpen:
                     this.openDoors(this.nextRandomNum());
                     this.state = ElevatorState.DoorsClosed;
+                    this.sendLocationUpdate();
                     break;
 
                 case ElevatorState.DoorsClosed:
                     this.closeDoors(this.nextRandomNum());
                     this.updateRequests(); // Update requests after every drop-off/pick-up
                     this.state = ElevatorState.Idle; // Check for a new request before moving
+                    this.sendLocationUpdate();
                     break;
 
                 case ElevatorState.Halted:

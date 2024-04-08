@@ -100,6 +100,8 @@ public class Scheduler {
                             statuses[i].setFloor(response.getOriginFloor());
                             statuses[i].setDirection(response.getDirection());
                             statuses[i].setRiders(response.getRiders());
+                            statuses[i].setDoor(response.getDoor());
+                            statuses[i].setDestinationFloor(response.getFinalDestinationFloor());
 
                             // Set state back to idle as a default option
                             state = SchedulerState.Idle;

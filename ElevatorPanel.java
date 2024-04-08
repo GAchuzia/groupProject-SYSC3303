@@ -29,10 +29,14 @@ public class ElevatorPanel extends JPanel {
     public void updateDisplay(ElevatorStatus status) {
         int i = status.getElevator();
         this.columns[i].goToFloor(status.getFloor());
-        this.columns[i].setDirection(status.getDirection());
         this.columns[i].updateRiderCount(status.getRiders());
+        this.columns[i].setDirection(status.getDirection());
         if (status.isShutDown()) {
             this.columns[i].shutDown();
+        }
+        this.columns[i].setDoor(status.getDoor());
+        if(status.getDestinationFloor() != 0){
+            this.columns[i].highlightDestination(status.getDestinationFloor());
         }
     }
 }
@@ -52,6 +56,7 @@ class ElevatorPanelDemo {
 
         frame.pack();
         frame.setLocationRelativeTo(null);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximize the window when it's displayed
         frame.setVisible(true);
     }
 }

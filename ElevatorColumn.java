@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Hashtable;
 
 public class ElevatorColumn extends JPanel {
 
@@ -7,6 +8,8 @@ public class ElevatorColumn extends JPanel {
     private ElevatorSlider slider;
     private JLabel riderCounter;
     private JLabel idLabel;
+    private JLabel statusLabel;
+    private JLabel doorsLabel;
 
     private static final ImageIcon UP_ICON = new ImageIcon("Icons/upArrowIcon.png");
     private static final ImageIcon DOWN_ICON = new ImageIcon("Icons/downArrowIcon.png");
@@ -14,6 +17,8 @@ public class ElevatorColumn extends JPanel {
     private static final int LABEL_HEIGHT = 40;
     private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 20);
     private Dimension labelDimensions;
+    private final static String DOORS_OPENS = "[|   |]";
+    private final static String DOORS_CLOSED = "[|]";
 
     public ElevatorColumn(int id, int width, int height) {
 
@@ -30,27 +35,39 @@ public class ElevatorColumn extends JPanel {
         this.slider = new ElevatorSlider(width, height - LABEL_HEIGHT * 3);
 
         // Displays the elevator ID
-        this.idLabel = this.newLabel();
+        this.idLabel = this.newLabel("");
         this.idLabel.setText("Elevator #" + id);
 
         // Displays current floor and direction
-        this.floorLabel = this.newLabel();
+        this.floorLabel = this.newLabel("");
         this.floorLabel.setIcon(UP_ICON);
         this.goToFloor(FloorSubsystem.GROUND_FLOOR); // Start on ground floor (1)
 
         // Displays how many riders are in the elevator
-        this.riderCounter = this.newLabel();
+        this.riderCounter = this.newLabel("");
         this.updateRiderCount(0); // No riders at start time
 
         // Add in components
         this.add(this.idLabel);
         this.add(this.floorLabel);
         this.add(this.slider);
-        this.add(this.riderCounter);
+
+        // Adding doors label here so it appears above the rider counter
+        this.doorsLabel = newLabel(DOORS_CLOSED);
+        this.doorsLabel.setHorizontalAlignment(JLabel.CENTER);
+        this.add(doorsLabel); // Add doors label to the panel
+
+        this.add(this.riderCounter); // Now the doors label will be above this
+
+        this.statusLabel = newLabel("<html><div style='text-align: center;'>Waiting for request</div></html>");
+        this.statusLabel.setVerticalAlignment(JLabel.CENTER);
+        this.statusLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        this.add(this.statusLabel);
     }
 
-    private JLabel newLabel() {
-        JLabel label = new JLabel("", JLabel.CENTER);
+    private JLabel newLabel(String text) {
+        JLabel label = new JLabel(text, JLabel.CENTER);
         label.setFont(LABEL_FONT);
         label.setForeground(Color.white);
         label.setPreferredSize(this.labelDimensions);
@@ -71,8 +88,30 @@ public class ElevatorColumn extends JPanel {
         this.floorLabel.setIcon(direction == Direction.Up ? UP_ICON : DOWN_ICON);
     }
 
+    public void setDoor(boolean door) {
+        this.doorsLabel.setText(door ? DOORS_OPENS : DOORS_CLOSED);
+        String text = door ? "Doors Opening" : "Doors Closing";
+        updateStatus(text);
+    }
+
     public void shutDown() {
         this.floorLabel.setText("SHUT DOWN!");
+    }
+
+    private void updateStatus(String text) {
+        statusLabel.setText("<html><div style='text-align: center;'>" + text + "</div></html>");
+    }
+
+    public void highlightDestination(int floorNum) {
+        JLabel label = (JLabel) this.slider.getLabelTable().get(floorNum);
+        Hashtable<Integer, JLabel> table = (Hashtable<Integer, JLabel>) slider.getLabelTable();
+        if (label != null) {
+            label.setForeground(Color.RED);
+            table.put(floorNum, label);
+            this.slider.setLabelTable(slider.getLabelTable());
+            updateStatus("New destination floor " + floorNum);
+            this.slider.repaint();
+        }
     }
 
 }

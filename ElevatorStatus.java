@@ -27,6 +27,10 @@ public class ElevatorStatus {
     /** The ID of the elevator this status is associated with. */
     private int elevator_id;
 
+    private boolean door;
+
+    private int destinationFloor;
+
     /**
      * Creates a new status object to track an elevator's position, starting the
      * elevator at the ground floor and moving in the upward direction.
@@ -36,6 +40,8 @@ public class ElevatorStatus {
         this.direction = Direction.Up; // The elevator can only go up from the ground floor
         this.shut_down = false; // Assume elevator starts as active
         this.riders = 0; // No passengers to start
+        this.door = false;
+        this.destinationFloor = 0;
     }
 
     /**
@@ -51,6 +57,8 @@ public class ElevatorStatus {
         this.shut_down = buffer.getInt() == 1;
         this.riders = buffer.getInt();
         this.elevator_id = buffer.getInt();
+        this.door = buffer.getInt() == 1;
+        this.destinationFloor = buffer.getInt();
     }
 
     /**
@@ -105,6 +113,13 @@ public class ElevatorStatus {
         return this.direction;
     }
 
+    public boolean getDoor() {
+        return this.door;
+    }
+    public int getDestinationFloor() {
+        return this.destinationFloor;
+    }
+
     /**
      * Record the floor the elevator is on.
      * 
@@ -121,6 +136,14 @@ public class ElevatorStatus {
      */
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public void setDestinationFloor(int destinationFloor) {
+        this.destinationFloor = destinationFloor;
+    }
+
+    public void setDoor(boolean door) {
+        this.door = door;
     }
 
     /**
@@ -157,6 +180,8 @@ public class ElevatorStatus {
         buffer.putInt(this.shut_down ? 1 : 0);
         buffer.putInt(this.riders);
         buffer.putInt(this.elevator_id);
+        buffer.putInt(this.door ? 1 : 0);
+        buffer.putInt(this.destinationFloor);
         return buffer.array();
     }
 }

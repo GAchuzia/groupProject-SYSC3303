@@ -48,7 +48,7 @@ public class FloorSubsystem {
         DatagramPacket message = null;
 
         // Reads the input file.
-        File file = new File(args[0]);
+        File file = new File("testdata.txt");
         Scanner reader = new Scanner(file);
 
         // Periodically read input file to simulate time between requests

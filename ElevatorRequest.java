@@ -37,6 +37,7 @@ public class ElevatorRequest {
      * The destination floor for the elevator request.
      */
     private int destination;
+    private int actualDestination;
 
     /**
      * The ID of the elevator this request is associated with.
@@ -51,6 +52,9 @@ public class ElevatorRequest {
 
     /** The number of riders in the elevator this request is being processed by. */
     private int riders;
+
+    private boolean door = false;
+    private int finalDestination;
 
     /**
      * Provides a means to parse the input file's elevator request timestamps into
@@ -71,7 +75,7 @@ public class ElevatorRequest {
      * @param destination The floor the elevator is heading towards.
      * @param riders      The number of riders on the elevator;
      */
-    public ElevatorRequest(int elevator, int origin, int destination, int riders) {
+    public ElevatorRequest(int elevator, int origin, int destination, int riders, boolean door, int finalDestination) {
         this.elevator = elevator;
         this.origin = origin;
         this.destination = destination;
@@ -82,6 +86,8 @@ public class ElevatorRequest {
         }
         this.timestamp = LocalTime.now();
         this.riders = riders;
+        this.door = door;
+        this.finalDestination = finalDestination;
     }
 
     /**
@@ -99,6 +105,7 @@ public class ElevatorRequest {
         this.destination = Integer.parseInt(elements[3]);
         this.elevator = -1; // No ID set when created from file line
         this.riders = 0;
+        this.finalDestination = this.destination;
     }
 
     /**
@@ -106,6 +113,7 @@ public class ElevatorRequest {
      *
      * @param bytes The byte array in which the elevator request is encoded.
      */
+
     public ElevatorRequest(byte[] bytes) throws UnsupportedEncodingException {
         ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
 
@@ -119,6 +127,8 @@ public class ElevatorRequest {
         this.timerFault = buffer.getInt() == 1;
         this.direction = Direction.values()[buffer.getInt()];
         this.riders = buffer.getInt();
+        this.door = buffer.getInt() == 1;
+        this.finalDestination = buffer.getInt();
 
         buffer.compact(); // Compact array so remaining data is timestamp
 
@@ -156,6 +166,9 @@ public class ElevatorRequest {
      */
     public int getDestinationFloor() {
         return this.destination;
+    }
+    public int getFinalDestinationFloor() {
+        return this.finalDestination;
     }
 
     /**
@@ -217,6 +230,10 @@ public class ElevatorRequest {
      */
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public boolean getDoor() {
+        return this.door;
     }
 
     /**
@@ -287,6 +304,8 @@ public class ElevatorRequest {
         buffer.putInt(this.timerFault ? 1 : 0);
         buffer.putInt(this.direction.ordinal());
         buffer.putInt(this.riders);
+        buffer.putInt(this.door ? 1 : 0);
+        buffer.putInt(this.finalDestination);
         buffer.put(this.timestamp.toString().getBytes());
         return buffer.array();
     }
