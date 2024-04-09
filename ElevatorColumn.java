@@ -79,7 +79,7 @@ public class ElevatorColumn extends JPanel {
         this.labelDimensions = new Dimension(width - 10, LABEL_HEIGHT);
 
         // Initialize slider to represent elevator movement
-        this.slider = new ElevatorSlider(width, height - LABEL_HEIGHT * 3);
+        this.slider = new ElevatorSlider(width, height - LABEL_HEIGHT * 5);
 
         // Initialize and set elevator ID label
         this.idLabel = this.newLabel("");

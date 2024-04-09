@@ -18,7 +18,7 @@ import java.util.Hashtable;
 public class ElevatorPanel extends JPanel {
 
     /** The height of each elevator column panel. */
-    private static final int HEIGHT = 700;
+    private static final int HEIGHT = 800;
 
     /** The width of each elevator column panel. */
     private static final int COLUMN_WIDTH = 300;
