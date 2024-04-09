@@ -90,7 +90,7 @@ diagrams, implemented capacity limit.
 Grant Achuzia: Added tests for the ElevatorStatus, ElevatorColumn, and RequestProgressWrapper classes.
 Javeria Sohail: Developed GUI panels for displaying elevator status.
 Saja Fawagreh: Developed GUI panels for displaying elevator status.
-Yousef Hammad: Added recording of movements and request processing time to gather statistics on the system's efficacy.
+Yousef Hammad: Added recording of movements and request processing time to gather statistics on the system's efficacy and worked on final report.
 
 === Setup Instructions ===
 
