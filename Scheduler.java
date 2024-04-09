@@ -4,9 +4,12 @@ import java.net.DatagramPacket;
 import java.io.IOException;
 
 /**
- * Represents a scheduler for an elevator system, responsible for assigning elevators to requests based on their
- * current state and location. It listens for UDP messages from both floor and elevator subsystems, routing requests
- * from floors to elevators and sending elevator status updates to the GUI. The scheduler operates in a loop, handling
+ * Represents a scheduler for an elevator system, responsible for assigning
+ * elevators to requests based on their
+ * current state and location. It listens for UDP messages from both floor and
+ * elevator subsystems, routing requests
+ * from floors to elevators and sending elevator status updates to the GUI. The
+ * scheduler operates in a loop, handling
  * messages according to its current state.
  *
  * @author Matteo Golin, 101220709
@@ -20,35 +23,36 @@ import java.io.IOException;
 public class Scheduler {
 
     /** The current state of the Scheduler (starts in Idle). */
-    static SchedulerState state = SchedulerState.Idle;
+    private static SchedulerState state = SchedulerState.Idle;
 
     /** The port for sending and receiving messages. */
-    static final int PORT = 2002;
+    public static final int PORT = 2002;
 
     /** The length of the buffer for receiving UDP messages. */
-    static final int BUFFER_LEN = 100;
+    private static final int BUFFER_LEN = 100;
 
     /** The floor number where the request originated. */
-    static int originFloor;
-
-    /** The number of the most recently used elevator reaching its destination. */
-    static int elevatorNum;
+    private static int originFloor;
 
     /**
-     * Maintains the status of each elevator in the system, including its current floor,
+     * Maintains the status of each elevator in the system, including its current
+     * floor,
      * direction, and whether it is in service.
      */
-    static ElevatorStatus[] statuses = new ElevatorStatus[ElevatorSubsystem.NUM_ELEVATORS];
+    private static ElevatorStatus[] statuses = new ElevatorStatus[ElevatorSubsystem.NUM_ELEVATORS];
 
     /** Executes the main logical loop of the Scheduler subsystem. */
     /**
-     * The main entry point of the scheduler application. It sets up a DatagramSocket for
-     * communication and continuously listens for messages from floor and elevator subsystems,
+     * The main entry point of the scheduler application. It sets up a
+     * DatagramSocket for
+     * communication and continuously listens for messages from floor and elevator
+     * subsystems,
      * processing each according to the scheduler's current state.
      *
      * @param args Command line arguments (not used).
-     * @throws SocketException If a socket could not be opened, or the socket could not bind to the specified port.
-     * @throws IOException If an I/O error occurs.
+     * @throws SocketException If a socket could not be opened, or the socket could
+     *                         not bind to the specified port.
+     * @throws IOException     If an I/O error occurs.
      */
     public static void main(String[] args) throws SocketException, IOException {
 
@@ -84,7 +88,7 @@ public class Scheduler {
                             ElevatorRequest request = new ElevatorRequest(message.getData());
 
                             // Route the request
-                            int chosenElevator = selectElevator(request);
+                            int chosenElevator = selectElevator(statuses, request);
                             request.setElevator(chosenElevator);
                             message.setData(request.getBytes()); // Re-encode message
                             message.setPort(ElevatorSubsystem.PORT);
@@ -155,14 +159,17 @@ public class Scheduler {
     }
 
     /**
-     * Selects the most appropriate elevator to handle a request based on the current status of all elevators
-     * and the request details. The method considers the direction of elevator movement and its current floor
+     * Selects the most appropriate elevator to handle a request based on the
+     * current status of all elevators
+     * and the request details. The method considers the direction of elevator
+     * movement and its current floor
      * to minimize wait times and improve efficiency.
      *
-     * @param request The elevator request including the origin floor and desired direction.
+     * @param request The elevator request including the origin floor and desired
+     *                direction.
      * @return The ID of the selected elevator to handle the request.
      */
-    public static int selectElevator(ElevatorRequest request) {
+    public static int selectElevator(ElevatorStatus statuses[], ElevatorRequest request) {
 
         // Schedule based on pick-up location only
         originFloor = request.getOriginFloor();
@@ -202,11 +209,13 @@ public class Scheduler {
 }
 
 /**
- * Enumerates the possible states of the Scheduler. The scheduler's state determines how it reacts to incoming
+ * Enumerates the possible states of the Scheduler. The scheduler's state
+ * determines how it reacts to incoming
  * messages and its overall behavior at any given time.
  * <ul>
- *     <li>Idle - The scheduler is waiting for new messages.</li>
- *     <li>Thinking - The scheduler is processing an incoming message and determining the appropriate action.</li>
+ * <li>Idle - The scheduler is waiting for new messages.</li>
+ * <li>Thinking - The scheduler is processing an incoming message and
+ * determining the appropriate action.</li>
  * </ul>
  *
  * @author Matteo Golin, 101220709
