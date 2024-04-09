@@ -154,7 +154,7 @@ public class ElevatorStatus {
         return this.shut_down;
     }
 
-// Setters
+    // Setters
 
     /**
      * Sets the elevator ID for this status.
@@ -235,10 +235,10 @@ public class ElevatorStatus {
         this.shut_down = true;
     }
 
-
     /** String representation of the state. */
     public String toString() {
-        return STR."Status(id= \{this.elevator_id}, floor=\{this.floor}, direction=\{this.direction}, shut_down=\{this.shut_down}, riders=\{this.riders})";
+        return "Status(id=" + this.elevator_id + ", floor=" + this.floor + ", direction=" + this.direction
+                + ", shut_down=" + this.shut_down + ", riders=" + this.riders + ")";
     }
 
     /**
