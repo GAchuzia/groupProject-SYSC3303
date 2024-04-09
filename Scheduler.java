@@ -31,9 +31,6 @@ public class Scheduler {
     /** The length of the buffer for receiving UDP messages. */
     private static final int BUFFER_LEN = 100;
 
-    /** The floor number where the request originated. */
-    private static int originFloor;
-
     /**
      * Maintains the status of each elevator in the system, including its current
      * floor,
@@ -172,7 +169,7 @@ public class Scheduler {
     public static int selectElevator(ElevatorStatus statuses[], ElevatorRequest request) {
 
         // Schedule based on pick-up location only
-        originFloor = request.getOriginFloor();
+        int originFloor = request.getOriginFloor();
 
         int chosenElevator = 0; // The elevator selected for this request (by default pick the first one)
 
