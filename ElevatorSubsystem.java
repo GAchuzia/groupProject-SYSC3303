@@ -37,16 +37,8 @@ public class ElevatorSubsystem {
         // Create socket for receiving requests
         DatagramSocket channel = new DatagramSocket(PORT);
 
-        // Initialize all elevators
-        Thread[] elevators = new Thread[NUM_ELEVATORS];
-        for (int i = 0; i < NUM_ELEVATORS; i++) {
-            elevators[i] = new Thread(new Elevator(ELEVATOR_PORT_START + i));
-        }
-
-        // Start all elevators
-        for (int i = 0; i < elevators.length; i++) {
-            elevators[i].start();
-        }
+        Elevator[] elevators = initElevators();
+        Thread[] elevator_threads = startElevators(elevators);
 
         // Process requests from scheduler
         while (true) {
@@ -67,5 +59,34 @@ public class ElevatorSubsystem {
                 channel.send(message);
             }
         }
+    }
+
+    /**
+     * Initializes `NUM_ELEVATORS` elevators and returns an array containing them
+     * all.
+     * 
+     * @return An array containing all the initialized elevators.
+     */
+    public static Elevator[] initElevators() throws SocketException {
+        Elevator[] elevators = new Elevator[NUM_ELEVATORS];
+        for (int i = 0; i < NUM_ELEVATORS; i++) {
+            elevators[i] = new Elevator(ELEVATOR_PORT_START + i);
+        }
+        return elevators;
+    }
+
+    /**
+     * Creates a thread for each elevator and starts it running.
+     *
+     * @param elevators An array of initialized Elevators to be run.
+     * @return An array of the elevator threads.
+     */
+    public static Thread[] startElevators(Elevator[] elevators) {
+        Thread[] threads = new Thread[elevators.length];
+        for (int i = 0; i < elevators.length; i++) {
+            threads[i] = new Thread(elevators[i]);
+            threads[i].start();
+        }
+        return threads;
     }
 }
