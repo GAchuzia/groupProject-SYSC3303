@@ -2,6 +2,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 
 /**
@@ -38,7 +39,7 @@ public class ElevatorSubsystem {
         DatagramSocket channel = new DatagramSocket(PORT);
 
         Elevator[] elevators = initElevators();
-        Thread[] elevator_threads = startElevators(elevators);
+        startElevators(elevators);
 
         // Process requests from scheduler
         while (true) {
@@ -46,19 +47,42 @@ public class ElevatorSubsystem {
             DatagramPacket message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
             channel.receive(message);
 
-            // Forward message
-            if (message.getPort() == Scheduler.PORT) {
-                ElevatorRequest request = new ElevatorRequest(message.getData());
-                message.setPort(2007 + request.getElevator()); // Set destination port to correct elevator
-                channel.send(message);
-            }
-
-            // Message came from an elevator and it's a status update
-            else {
-                message.setPort(Scheduler.PORT);
-                channel.send(message);
+            switch (message.getPort()) {
+                case Scheduler.PORT:
+                    // Forward message to the correct elevator
+                    routeToElevator(message, channel);
+                    break;
+                default:
+                    // This is an update from an elevator to be sent to the scheduler
+                    sendToScheduler(message, channel);
+                    break;
             }
         }
+    }
+
+    /**
+     * Forwards an ElevatorRequest to the correct elevator.
+     * 
+     * @param message The DatagramPacket containing the encoded ElevatorRequest to
+     *                be forwarded.
+     * @param channel The UDP socket to use for forwarding the request.
+     */
+    public static void routeToElevator(DatagramPacket message, DatagramSocket channel)
+            throws UnsupportedEncodingException, IOException {
+        ElevatorRequest request = new ElevatorRequest(message.getData());
+        message.setPort(ELEVATOR_PORT_START + request.getElevator());
+        channel.send(message);
+    }
+
+    /**
+     * Forwards a UDP message to the Scheduler.
+     * 
+     * @param message The UDP message to be forwarded to the Scheduler.
+     * @param channel The UDP socket to use for forwarding.
+     */
+    public static void sendToScheduler(DatagramPacket message, DatagramSocket channel) throws IOException {
+        message.setPort(Scheduler.PORT);
+        channel.send(message);
     }
 
     /**
