@@ -135,7 +135,7 @@ public class Scheduler {
                             }
 
                             // Forward the status update to the GUI
-                            byte[] data = statuses[i].getBytes();
+                            byte[] data = statuses[response.getElevator()].getBytes();
                             DatagramPacket update = new DatagramPacket(data, data.length);
                             update.setPort(GUISubsystem.PORT);
                             update.setAddress(message.getAddress());

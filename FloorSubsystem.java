@@ -44,9 +44,6 @@ public class FloorSubsystem {
         // Create socket for sending and receiving.
         DatagramSocket channel = new DatagramSocket(PORT);
 
-        // The message buffer for receiving new UDP messages
-        DatagramPacket message = null;
-
         // Reads the input file.
         File file = new File("testdata.txt");
         Scanner reader = new Scanner(file);
@@ -56,7 +53,13 @@ public class FloorSubsystem {
         requester.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 try {
-                    nextRequest(reader, channel);
+                    ElevatorRequest rqst = nextRequest(reader);
+                    if (rqst == null) {
+                        System.out.println("No more requests.");
+                        this.cancel();
+                        return; // Time to stop
+                    }
+                    sendRequest(rqst, channel);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(1);
@@ -66,25 +69,50 @@ public class FloorSubsystem {
 
         // Continually check for completed messages and print them
         while (true) {
-            message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
-            channel.receive(message);
-            ElevatorRequest response = new ElevatorRequest(message.getData());
+            ElevatorRequest response = receiveProcessedRequest(channel);
             System.out.println("Floor got message: " + response);
-
         }
     }
 
-    public static void nextRequest(Scanner reader, DatagramSocket socket) throws IOException {
+    /**
+     * Waits to receive a UDP message from the scheduler.
+     * 
+     * @param socket The UDP socket to receive from.
+     * @return The received ElevatorRequest object.
+     */
+    public static ElevatorRequest receiveProcessedRequest(DatagramSocket socket) throws IOException {
+        DatagramPacket message = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+        socket.receive(message);
+        return new ElevatorRequest(message.getData());
+    }
+
+    /**
+     * Reads the next elevator request from the input file.
+     * 
+     * @param reader The file reader that is reading the input request file.
+     * @return The next elevator request as an ElevatorRequest object.
+     */
+    public static ElevatorRequest nextRequest(Scanner reader) {
         if (reader.hasNextLine()) {
             try {
-                ElevatorRequest rqst = new ElevatorRequest(reader.nextLine());
-                System.out.println("Floor put request on queue: " + rqst);
-                byte[] byte_rqst = rqst.getBytes();
-                socket.send(new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(),
-                        Scheduler.PORT));
+                return new ElevatorRequest(reader.nextLine());
             } catch (DateTimeParseException e) {
                 System.out.println("Failed to parse input line timestamp: " + e);
             }
         }
+        return null;
+    }
+
+    /**
+     * Sends an elevator request to the scheduler over UDP.
+     * 
+     * @param request The request to be sent.
+     * @param socket  The UDP socket to use to send the request.
+     */
+    public static void sendRequest(ElevatorRequest request, DatagramSocket socket) throws IOException {
+        System.out.println("Floor put request on queue: " + request);
+        byte[] byte_rqst = request.getBytes();
+        socket.send(new DatagramPacket(byte_rqst, byte_rqst.length, InetAddress.getLocalHost(),
+                Scheduler.PORT));
     }
 }
