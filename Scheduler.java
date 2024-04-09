@@ -105,15 +105,7 @@ public class Scheduler {
                             ElevatorRequest response = new ElevatorRequest(message.getData());
 
                             // It's a status update, so record elevator information
-                            int i = response.getElevator();
-                            statuses[i].setElevator(i);
-                            statuses[i].setFloor(response.getOriginFloor());
-                            statuses[i].setDirection(response.getDirection());
-                            statuses[i].setRiders(response.getRiders());
-                            statuses[i].setDoor(response.getDoor());
-                            statuses[i].setDestinationFloor(response.getFinalDestinationFloor());
-                            statuses[i].setOriginFloor(response.getInitialOriginFloor());
-                            statuses[i].setComplete(response.isFinalComplete());
+                            updateRecords(statuses, response);
 
                             // Set state back to idle as a default option
                             state = SchedulerState.Idle;
@@ -156,14 +148,34 @@ public class Scheduler {
     }
 
     /**
+     * Updates the current records of each elevator's status with the latest
+     * elevator response.
+     * 
+     * @param statuses The record of elevator statuses.
+     * @param response The latest status update from an elevator.
+     */
+    public static void updateRecords(ElevatorStatus statuses[], ElevatorRequest response) {
+        int i = response.getElevator();
+        statuses[i].setElevator(i);
+        statuses[i].setFloor(response.getOriginFloor());
+        statuses[i].setDirection(response.getDirection());
+        statuses[i].setRiders(response.getRiders());
+        statuses[i].setDoor(response.getDoor());
+        statuses[i].setDestinationFloor(response.getFinalDestinationFloor());
+        statuses[i].setOriginFloor(response.getInitialOriginFloor());
+        statuses[i].setComplete(response.isFinalComplete());
+    }
+
+    /**
      * Selects the most appropriate elevator to handle a request based on the
      * current status of all elevators
      * and the request details. The method considers the direction of elevator
      * movement and its current floor
      * to minimize wait times and improve efficiency.
      *
-     * @param request The elevator request including the origin floor and desired
-     *                direction.
+     * @param statuses The record of elevator statuses.
+     * @param request  The elevator request including the origin floor and desired
+     *                 direction.
      * @return The ID of the selected elevator to handle the request.
      */
     public static int selectElevator(ElevatorStatus statuses[], ElevatorRequest request) {
