@@ -1,6 +1,13 @@
 /**
  * Enumeration representing the states of an elevator.
  * The states include Idle, Moving, DoorsOpen, and DoorsClosed.
+ *
+ * @author Matteo Golin, 101220709
+ * @author Grant Achuzia, 101222695
+ * @author Saja Fawagreh, 101217326
+ * @author Javeria Sohail, 101197163
+ * @author Yousef Hammad, 101217858
+ * @version 0.0.0
  */
 public enum ElevatorState {
 
