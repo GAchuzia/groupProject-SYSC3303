@@ -2,34 +2,72 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Represents a visual panel component for an elevator column in a GUI application.
- * It displays the elevator's current status, including its ID, floor, direction, door status,
- * and the number of riders. Additionally, it provides visual indicators for faults and shutdown states.
+ * Represents a visual panel component for an elevator column in a GUI
+ * application.
+ *
+ * It displays the elevator's current status, including its ID, floor,
+ * direction, door status, and the number of riders. Additionally, it provides
+ * visual indicators for faults and shutdown states.
+ *
+ * @author Matteo Golin, 101220709
+ * @author Grant Achuzia, 101222695
+ * @author Saja Fawagreh, 101217326
+ * @author Javeria Sohail, 101197163
+ * @author Yousef Hammad, 101217858
+ * @version 0.0.0
  */
 public class ElevatorColumn extends JPanel {
 
-    private JLabel floorLabel; // Displays current floor
-    private ElevatorSlider slider; // Visual representation of elevator movement
-    private JLabel riderCounter; // Displays number of riders
-    private JLabel idLabel; // Displays elevator ID
-    private JLabel statusLabel; // Displays current status or fault message
-    private JLabel doorsLabel; // Displays doors status (open or closed)
+    /** Displays current floor. */
+    private JLabel floorLabel;
 
+    /* Visual representation of elevator movement. */
+    private ElevatorSlider slider;
+
+    /* Displays current number of riders. */
+    private JLabel riderCounter;
+
+    /* Displays the elevator ID */
+    private JLabel idLabel;
+
+    /* Displays current status, such as a fault message. */
+    private JLabel statusLabel;
+
+    /* Displays doors status (open or closed). */
+    private JLabel doorsLabel;
+
+    /** Icon with up arrow to show upwards movement. */
     private static final ImageIcon UP_ICON = new ImageIcon("Icons/upArrowIcon.png");
+
+    /** Icon with down arrow to show downward movement. */
     private static final ImageIcon DOWN_ICON = new ImageIcon("Icons/downArrowIcon.png");
+
+    /** Icon with "x" to show a fault that cannot be recovered from. */
     private static final ImageIcon HARD_FAULT = new ImageIcon("Icons/hardFaultIcon.png");
+
+    /** Icon with "!" to show a fault that can be recovered from. */
     private static final ImageIcon FAULT = new ImageIcon("Icons/transientFaultIcon.png");
+
+    /** The height for text labels. */
     private static final int LABEL_HEIGHT = 40;
+
+    /** The font for text labels. */
     private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 15);
+
+    /** The dimensions that will be used for text labels. */
     private Dimension labelDimensions;
+
+    /** A string representation of opened elevator doors */
     private final static String DOORS_OPENS = "[|   |]";
+
+    /** A string representation of closed elevator doors */
     private final static String DOORS_CLOSED = "[|]";
 
     /**
      * Constructs an ElevatorColumn panel.
      *
-     * @param id The identifier for the elevator.
-     * @param width The preferred width for the elevator panel.
+     * @param id     The identifier for the elevator.
+     * @param width  The preferred width for the elevator panel.
      * @param height The preferred height for the elevator panel.
      */
     public ElevatorColumn(int id, int width, int height) {
@@ -75,7 +113,8 @@ public class ElevatorColumn extends JPanel {
     }
 
     /**
-     * Creates and returns a new JLabel with specified text, centered alignment, and predefined styles.
+     * Creates and returns a new JLabel with specified text, centered alignment, and
+     * predefined styles.
      *
      * @param text The text to display on the label.
      * @return A newly created JLabel with specified properties.
@@ -130,7 +169,7 @@ public class ElevatorColumn extends JPanel {
     /**
      * Handles the elevator fault status updates.
      *
-     * @param status The fault status code.
+     * @param status   The fault status code.
      * @param floorNum The floor number where the fault occurred.
      */
     public void handleFault(int status, int floorNum) {
@@ -186,7 +225,7 @@ public class ElevatorColumn extends JPanel {
     /**
      * Adds a star next to a floor number to indicate it is a destination floor.
      *
-     * @param floorNum The floor number where the star should be added.
+     * @param floorNum    The floor number where the star should be added.
      * @param destination The destination floor number.
      */
     public void addStar(int floorNum, int destination) {
@@ -196,7 +235,8 @@ public class ElevatorColumn extends JPanel {
     }
 
     /**
-     * Removes the star from a floor number, indicating it is no longer a destination floor.
+     * Removes the star from a floor number, indicating it is no longer a
+     * destination floor.
      *
      * @param floorNum The floor number from which the star should be removed.
      */
