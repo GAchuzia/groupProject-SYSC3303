@@ -87,10 +87,10 @@ Yousef Hammad: Updated the Elevator and the ElevatorState class
 Iteration 5:
 Matteo Golin: Modified GUI, wrote GUISubsystem and hooked it up to scheduler, created sequence and state machine
 diagrams, implemented capacity limit.
-Grant Achuzia: Added tests for the ElevatorStatus, ElevatorColumn, and RequestProgressWrapper classes
-Javeria Sohail:
-Saja Fawagreh:
-Yousef Hammad:
+Grant Achuzia: Added tests for the ElevatorStatus, ElevatorColumn, and RequestProgressWrapper classes.
+Javeria Sohail: Developed GUI panels for displaying elevator status.
+Saja Fawagreh: Developed GUI panels for displaying elevator status.
+Yousef Hammad: Added recording of movements and request processing time to gather statistics on the system's efficacy.
 
 === Setup Instructions ===
 
