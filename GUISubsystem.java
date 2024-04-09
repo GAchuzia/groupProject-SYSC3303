@@ -18,15 +18,38 @@ import javax.swing.*;
 public class GUISubsystem {
 
     /** The port for receiving messages. */
-    static final int PORT = 2004;
+    public static final int PORT = 2004;
 
     /** Buffer length for receiving UDP packets. */
-    static final int BUFFER_LEN = 100;
+    private static final int BUFFER_LEN = 100;
 
     /** Primary logic for the WebGUI. */
     public static void main(String[] args) throws SocketException, IOException {
+
+        // Channel for receiving UDP messages from the scheduler.
         DatagramSocket channel = new DatagramSocket(PORT);
 
+        // Show the GUI
+        ElevatorPanel elevatorPanel = createGUI();
+
+        // Update the GUI as packets are received
+        while (true) {
+
+            // Wait for status update
+            ElevatorStatus statusUpdate = receiveUpdate(channel);
+
+            // Display status update
+            elevatorPanel.updateDisplay(statusUpdate);
+        }
+    }
+
+    /**
+     * Creates and displays the GUI.
+     * 
+     * @return A reference to the ElevatorPanel so it can be updated with new
+     *         information.
+     */
+    public static ElevatorPanel createGUI() {
         JFrame frame = new JFrame("Elevator GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -37,18 +60,18 @@ public class GUISubsystem {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        while (true) {
-
-            // Wait for packet from scheduler
-            DatagramPacket p = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
-            channel.receive(p);
-
-            // Parse packet
-            ElevatorStatus status = new ElevatorStatus(p.getData());
-
-            // Display
-            elevatorPanel.updateDisplay(status);
-        }
+        return elevatorPanel;
     }
 
+    /**
+     * Waits for an elevator status update from the scheduler.
+     * 
+     * @param channel The UDP socket to use for receiving messages.
+     * @return The received ElevatorStatus object.
+     */
+    public static ElevatorStatus receiveUpdate(DatagramSocket channel) throws IOException {
+        DatagramPacket p = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
+        channel.receive(p);
+        return new ElevatorStatus(p.getData());
+    }
 }
