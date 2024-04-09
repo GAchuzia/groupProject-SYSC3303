@@ -1,13 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.net.InetAddress;
+import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.format.DateTimeParseException;
-import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.stream.Stream;
 import java.io.IOException;
 
 /**
@@ -35,6 +33,9 @@ public class FloorSubsystem {
     /** The ground floor of the building. */
     public static final int GROUND_FLOOR = 1;
 
+    /** The file to read requests from. */
+    public static final String DATA_FILE = "testdata.txt";
+
     /** Time between each request in milliseconds. */
     static final int TIME_BETWEEN_REQUESTS = 5000;
 
@@ -45,8 +46,15 @@ public class FloorSubsystem {
         DatagramSocket channel = new DatagramSocket(PORT);
 
         // Reads the input file.
-        File file = new File("testdata.txt");
+        File file = new File(DATA_FILE);
         Scanner reader = new Scanner(file);
+
+        // Track the number of sent requests and total requests
+        long numRequests = 0;
+        long receivedRequests = 0;
+        try (Stream<String> fileStream = Files.lines(Paths.get(DATA_FILE))) {
+            numRequests = fileStream.count();
+        }
 
         // Periodically read input file to simulate time between requests
         Timer requester = new Timer();
@@ -67,10 +75,22 @@ public class FloorSubsystem {
             }
         }, 0, TIME_BETWEEN_REQUESTS);
 
+        // Track current time of first request
+        Date startTime = new Date();
+
         // Continually check for completed messages and print them
         while (true) {
             ElevatorRequest response = receiveProcessedRequest(channel);
             System.out.println("Floor got message: " + response);
+            receivedRequests++;
+
+            if (receivedRequests == numRequests) {
+                Date finishTime = new Date();
+                long totalTime = finishTime.getTime() - startTime.getTime();
+                System.out.println("All requests completed in " + totalTime / 1000 + " seconds.");
+                System.exit(0);
+            }
+
         }
     }
 
