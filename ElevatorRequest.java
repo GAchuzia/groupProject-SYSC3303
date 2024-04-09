@@ -39,7 +39,8 @@ public class ElevatorRequest {
     private int destination;
 
     /**
-     * Initially intended destination, can vary from {@code destination} in complex scenarios.
+     * Initially intended destination, can vary from {@code destination} in complex
+     * scenarios.
      */
     private int actualDestination;
 
@@ -54,7 +55,8 @@ public class ElevatorRequest {
     private boolean complete = false;
 
     /**
-     * Indicates if there's a detected fault with the timing mechanism of the elevator.
+     * Indicates if there's a detected fault with the timing mechanism of the
+     * elevator.
      */
     private boolean timerFault = false;
 
@@ -64,7 +66,8 @@ public class ElevatorRequest {
     private int riders;
 
     /**
-     * Status of the elevator's door associated with this request; typically 0 for closed.
+     * Status of the elevator's door associated with this request; typically 0 for
+     * closed.
      */
     private int door = 0;
 
@@ -94,18 +97,20 @@ public class ElevatorRequest {
             .toFormatter();
 
     /**
-     * Constructs a new ElevatorRequest object with detailed parameters for immediate requests.
+     * Constructs a new ElevatorRequest object with detailed parameters for
+     * immediate requests.
      *
-     * @param elevator          The elevator ID this request is associated with.
-     * @param origin            The floor the request originated from.
-     * @param destination       The destination floor of the request.
-     * @param riders            The number of riders.
-     * @param door              The status of the elevator's door.
-     * @param finalDestination  The final destination of the request.
-     * @param initialOrigin     The initial origin floor of the request.
-     * @param finalComplete     Indicates if the request has been fully completed.
+     * @param elevator         The elevator ID this request is associated with.
+     * @param origin           The floor the request originated from.
+     * @param destination      The destination floor of the request.
+     * @param riders           The number of riders.
+     * @param door             The status of the elevator's door.
+     * @param finalDestination The final destination of the request.
+     * @param initialOrigin    The initial origin floor of the request.
+     * @param finalComplete    Indicates if the request has been fully completed.
      */
-    public ElevatorRequest(int elevator, int origin, int destination, int riders, int door, int finalDestination, int initialOrigin, boolean finalComplete) {
+    public ElevatorRequest(int elevator, int origin, int destination, int riders, int door, int finalDestination,
+            int initialOrigin, boolean finalComplete) {
         this.elevator = elevator;
         this.origin = origin;
         this.destination = destination;
@@ -119,9 +124,11 @@ public class ElevatorRequest {
     }
 
     /**
-     * Constructs an ElevatorRequest object from a string line typically read from an input file.
+     * Constructs an ElevatorRequest object from a string line typically read from
+     * an input file.
      *
-     * @param input_line The string containing the request details in a predefined format.
+     * @param input_line The string containing the request details in a predefined
+     *                   format.
      */
     public ElevatorRequest(String input_line) {
         String[] elements = input_line.split(" ");
@@ -136,10 +143,12 @@ public class ElevatorRequest {
     }
 
     /**
-     * Decodes an ElevatorRequest from a byte array. This is useful for networking scenarios where requests are serialized.
+     * Decodes an ElevatorRequest from a byte array. This is useful for networking
+     * scenarios where requests are serialized.
      *
      * @param bytes The byte array containing the serialized ElevatorRequest.
-     * @throws UnsupportedEncodingException If the platform does not support the required encoding.
+     * @throws UnsupportedEncodingException If the platform does not support the
+     *                                      required encoding.
      */
     public ElevatorRequest(byte[] bytes) throws UnsupportedEncodingException {
         ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
@@ -168,7 +177,6 @@ public class ElevatorRequest {
         String timestamp_text = new String(timestamp_bytes, 0, i, "US-ASCII");
         this.timestamp = LocalTime.parse(timestamp_text);
     }
-
 
     /**
      * Returns the timestamp when the elevator request was made.
@@ -216,7 +224,8 @@ public class ElevatorRequest {
     }
 
     /**
-     * Checks if the request has been completely fulfilled, considering any adjustments or rerouting.
+     * Checks if the request has been completely fulfilled, considering any
+     * adjustments or rerouting.
      *
      * @return True if the request is fully complete, false otherwise.
      */
@@ -252,7 +261,8 @@ public class ElevatorRequest {
     }
 
     /**
-     * Returns whether the elevator experienced a timer fault while processing this request.
+     * Returns whether the elevator experienced a timer fault while processing this
+     * request.
      *
      * @return True if there was a timer fault, false otherwise.
      */
@@ -278,8 +288,6 @@ public class ElevatorRequest {
         return this.door;
     }
 
-    // Setters
-
     /**
      * Associates this request with an elevator by its ID.
      *
@@ -297,7 +305,8 @@ public class ElevatorRequest {
     }
 
     /**
-     * Sets the flag indicating a timer fault occurred during this request's processing.
+     * Sets the flag indicating a timer fault occurred during this request's
+     * processing.
      *
      * @param val The new value for the timer fault flag.
      */
@@ -324,7 +333,8 @@ public class ElevatorRequest {
     }
 
     /**
-     * Generates a string representation of this elevator request, detailing its timestamp,
+     * Generates a string representation of this elevator request, detailing its
+     * timestamp,
      * direction of travel, origin and destination floors, and completion status.
      *
      * @return A detailed string summarizing the elevator request.
@@ -337,16 +347,21 @@ public class ElevatorRequest {
     }
 
     /**
-     * Compares this elevator request to another object for equality. Two requests are considered equal
-     * if they have the same destination and origin floors, identical timestamps, and direction of travel.
+     * Compares this elevator request to another object for equality. Two requests
+     * are considered equal
+     * if they have the same destination and origin floors, identical timestamps,
+     * and direction of travel.
      *
      * @param obj The object to compare with this elevator request.
-     * @return True if the specified object is an elevator request with the same properties, false otherwise.
+     * @return True if the specified object is an elevator request with the same
+     *         properties, false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
 
         ElevatorRequest other = (ElevatorRequest) obj;
         return this.destination == other.destination &&
@@ -354,7 +369,6 @@ public class ElevatorRequest {
                 this.timestamp.equals(other.timestamp) &&
                 this.direction == other.direction;
     }
-
 
     /**
      * Encodes this ElevatorRequest into a byte array for serialization.
