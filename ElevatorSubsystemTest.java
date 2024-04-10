@@ -1,14 +1,16 @@
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
- * Iteration 3 Update: Since the ElevatorSubsystem class has no constructor
- * and doesn't use message queues anymore, the previous test cases are deprecated.
- * Test suite to cover the functionality of the ElevatorSubsystem.
- *
  * @author Matteo Golin, 101220709
  * @author Grant Achuzia, 101222695
  * @author Saja Fawagreh, 101217326
@@ -17,83 +19,83 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 0.0.0
  */
 
+public class ElevatorSubsystemTest {
 
-//class ElevatorSubsystemTest {
-//
-//
-//    /**
-//     * The incoming message queue for the elevator subsystem.
-//     */
-//    private MessageQueue<ElevatorRequest> incoming;
-//    /**
-//     * The outgoing message queue for the elevator subsystem.
-//     */
-//    private MessageQueue<ElevatorRequest> outgoing;
-//    /**
-//     * The elevator subsystem itself.
-//     */
-//    private ElevatorSubsystem subsystem;
-//
-//    /**
-//     * Initializes the ElevatorSubsystem with new message queues.
-//     */
-//    @BeforeEach
-//    protected void setUp() {
-//        this.incoming = new MessageQueue<>();
-//        this.outgoing = new MessageQueue<>();
-//        this.subsystem = new ElevatorSubsystem(incoming, outgoing, 1);
-//    }
-//
-//    /**
-//     * Removes the subsystem and its message queues so they can be freshly replaced.
-//     */
-//    @AfterEach
-//    void tearDown() {
-//        this.subsystem = null;
-//        this.outgoing = null;
-//        this.incoming = null;
-//    }
-//
-//    /**
-//     * Tests the echo behaviour of the ElevatorSubsystem when it receives a message.
-//     *
-//     * @throws InterruptedException When the elevator thread is interrupted.
-//     */
-//    @Test
-//    void testEcho() throws InterruptedException {
-//
-//        ElevatorRequest elevatorRequest = new ElevatorRequest("23:10:12.1 3 Down 2");
-//
-//        // Start the elevator subsystem to process the message
-//        Thread elevatorThread = new Thread(String.valueOf(this.subsystem));
-//        elevatorThread.start();
-//        assertTrue(elevatorThread.isAlive());
-//
-//        // Put the message on the incoming queue
-//        incoming.putMessage(elevatorRequest);
-//        Thread.sleep(300); // Gives the ElevatorSubsytem thread time to process the message
-//
-//        // Check that the ElevatorSubsystem put the request in the outgoing queue
-//        assertFalse(this.outgoing.isEmpty());
-//        assertEquals(elevatorRequest, this.outgoing.getMessage());
-//
-//        // Stop the ElevatorSubsystem
-//        this.incoming.putMessage(null);
-//        elevatorThread.join();
-//    }
-//
-//    /**
-//     * Test that the ElevatorSubsystem exits when it receives a null message and passes the null message back.
-//     */
-//    @Test
-//    void testExit() throws InterruptedException {
-//
-//        // Start subsystem thread
-//        Thread elevatorThread = new Thread(String.valueOf(this.subsystem));
-//        elevatorThread.start();
-//
-//        this.incoming.putMessage(null);
-//        Thread.sleep(300); // Give the subsystem time to process the message
-//        assertFalse(elevatorThread.isAlive());
-//    }
-//}
+    /**
+     * Checks if the message being sent to an elevator is sent to the correct port.
+     */
+    @Test
+    public void testRouteToElevator() throws IOException {
+        DatagramSocket mockSocket = new DatagramSocket();
+        ElevatorRequest request = new ElevatorRequest(1, 1, 5, 2, 0, 5, 1, false);
+        DatagramPacket message = new DatagramPacket(request.getBytes(), request.getBytes().length, InetAddress.getLocalHost(), ElevatorSubsystem.ELEVATOR_PORT_START + request.getElevator());
+
+        ElevatorSubsystem.routeToElevator(message, mockSocket);
+
+        assertEquals(ElevatorSubsystem.ELEVATOR_PORT_START + request.getElevator(), message.getPort());
+    }
+
+    /**
+     *  Checks that the message being sent to the scheduler is being sent to the correct port.
+     * @throws IOException
+     */
+    @Test
+    public void testSendToScheduler() throws IOException {
+        // Create a test socket
+        DatagramSocket testSocket = new DatagramSocket();
+
+        // Create a message with the destination address and port
+        InetAddress address = InetAddress.getByName("localhost");
+        int port = Scheduler.PORT;
+        byte[] data = new byte[10];
+        DatagramPacket message = new DatagramPacket(data, data.length, address, port);
+
+        // Send message
+        ElevatorSubsystem.sendToScheduler(message, testSocket);
+        assertEquals(port, message.getPort());
+    }
+
+    /**
+     * Checks that the correct number of initialized elevators are created with
+     * the correct number of ports.
+     * @throws SocketException
+     */
+    @Test
+    public void testInitElevators() throws SocketException {
+        Elevator[] elevators = ElevatorSubsystem.initElevators();
+
+        // Check that the correct number of elevators are initialized
+        assertEquals(ElevatorSubsystem.NUM_ELEVATORS, elevators.length);
+        for (int i = 0; i < ElevatorSubsystem.NUM_ELEVATORS; i++) {
+            // Checks that the correct number of ports are made for the elevators
+            assertEquals(ElevatorSubsystem.ELEVATOR_PORT_START + i, elevators[i].getPort());
+        }
+    }
+
+    /**
+     * Initializes elevator threads and checks that the correct number of threads
+     * are started. Also checks that the elevators are in the RUNNABLE state.
+     * @throws InterruptedException
+     * @throws SocketException
+     */
+    @Test
+    public void testStartElevators() throws InterruptedException, SocketException {
+        // Initialize an array of elevators
+        Elevator[] elevators = new Elevator[3];
+        for (int i = 0; i < elevators.length; i++) {
+            elevators[i] = new Elevator(2012 + i);
+        }
+
+        // Make sure correct number of threads are created
+
+        Thread[] threads = ElevatorSubsystem.startElevators(elevators);
+        // Check that we started the correct number of threads for the elevators
+        assertEquals(elevators.length, threads.length);
+        for (Thread thread : threads) {
+            // Check that the elevators are in the RUNNABLE state
+            assertEquals(Thread.State.RUNNABLE, thread.getState());
+        }
+    }
+
+
+}
