@@ -45,9 +45,33 @@ class SchedulerTest {
      * Tests that selectElevator selects the closest elevator regardless of direction
      * for a request if there are no elevators going in the desired direction.
      */
-//    @Test
-//    public void testSelectElevator() {
-//    }
+    @Test
+    public void testSelectElevator() {
+        ElevatorStatus[] statuses = new ElevatorStatus[3];
+
+        // At floor 6, going up
+        statuses[0] = new ElevatorStatus();
+        statuses[0].setElevator(0);
+        statuses[0].setFloor(6);
+        statuses[0].setDirection(Direction.Up);
+
+        // At floor 3, going down
+        statuses[1] = new ElevatorStatus();
+        statuses[1].setElevator(1);
+        statuses[1].setFloor(3);
+        statuses[1].setDirection(Direction.Down);
+
+        // At floor 5, going down
+        statuses[2] = new ElevatorStatus();
+        statuses[2].setElevator(2);
+        statuses[2].setFloor(5);
+        statuses[2].setDirection(Direction.Down);
+
+        ElevatorRequest request = new ElevatorRequest(0, 1, 4, 1, 0, 4, 1, false); // Request from floor 1 to 4
+
+        int selectedElevator = Scheduler.selectElevator(statuses, request);
+        assertEquals(1, selectedElevator);
+    }
 
 
 }
