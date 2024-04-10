@@ -4,6 +4,8 @@ import java.util.TreeSet;
 import java.io.*;
 import java.net.*;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * Represents a physical or simulated elevator.
@@ -85,6 +87,12 @@ public class Elevator implements Runnable {
      */
     private int door;
 
+
+    // Declare variables to hold the start and end times
+    private long startTime;
+    private long endTime;
+
+
     /**
      * Constructs a new elevator.
      *
@@ -106,6 +114,20 @@ public class Elevator implements Runnable {
         this.door = 0;
         ELEVATOR_COUNT++;
     }
+
+
+    // Method to start the timer
+    private void startTimer() {
+        startTime = System.nanoTime();
+    }
+
+    // Method to stop the timer and print the elapsed time
+    private void stopTimer() {
+        endTime = System.nanoTime();
+        long elapsedTimeInMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+        System.out.println("Time taken to process request: " + elapsedTimeInMillis + " milliseconds");
+    }
+
 
     /**
      * Sends the elevator's current location to the elevator subsystem using UDP. The message
@@ -359,7 +381,7 @@ public class Elevator implements Runnable {
                 ElevatorRequest request = r.getRequest();
 
                 System.out.println("Elevator #" + this.id + " completed request " + r.getRequest());
-
+                stopTimer();
                 sendRequestUpdate(request.getInitialOriginFloor(), request.getFinalDestinationFloor(), request.isFinalComplete());
 
                 byte[] data = r.getRequest().getBytes();
@@ -411,17 +433,9 @@ public class Elevator implements Runnable {
      * Implements the finite state machine logic of an elevator.
      */
     public void run() {
-
         while (true) {
-
             switch (this.state) {
-
                 case ElevatorState.Idle:
-
-                    // If there are still requests to process, don't wait for new requests longer
-                    // than 50ms
-                    // This will still get new requests for handling multiple at once, but it won't
-                    // wait too long
                     try {
                         if (!this.requests_in_progress.isEmpty()) {
                             channel.setSoTimeout(50);
@@ -431,13 +445,8 @@ public class Elevator implements Runnable {
                     } catch (SocketException e) {
                         throw new RuntimeException(e);
                     }
-
-                    // Construct a DatagramPacket for receiving packets up to 100 bytes long (the
-                    // length of the byte array).
                     DatagramPacket new_packet = new DatagramPacket(new byte[BUFFER_LEN], BUFFER_LEN);
                     System.out.println("Elevator #" + this.id + " Waiting for new elevator request...");
-
-                    // Receive the packet from the scheduler
                     try {
                         channel.receive(new_packet);
                     } catch (SocketTimeoutException ignore) {
@@ -447,43 +456,30 @@ public class Elevator implements Runnable {
                         e.printStackTrace();
                         System.exit(1);
                     }
-
-                    // Parse packet
+                    // Start the timer when a request is received
+                    startTimer();
                     try {
                         ElevatorRequest new_request = new ElevatorRequest(new_packet.getData());
                         System.out.println("Elevator #" + this.id + " got request " + new_request);
-                        // Add request to progress list
                         this.requests_in_progress.add(new RequestProgressWrapper(new_request));
                         sendRequestUpdate(new_request.getInitialOriginFloor(), new_request.getFinalDestinationFloor(), new_request.isFinalComplete());
                     } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
-
                     break;
 
                 case ElevatorState.Moving:
-
-                    // If there are no floors in our direction, then go the other way
                     if (!this.floorsInDirection()) {
                         this.toggleDirection();
                     }
-
-                    // Check if moving was successful or if a fault was generated
                     if (!this.move(this.nextRandomNum())) {
                         this.state = ElevatorState.Halted;
                         break;
                     }
-
-                    // Check if we are currently on a floor that is part of an ongoing request so we
-                    // can track completion
                     if (this.atStop()) {
-                        // Go open doors since someone needs to get on/off here
                         this.state = ElevatorState.DoorsOpen;
                         break;
                     }
-
-                    // At this point we're not at a destination floor, but we've moved successfully.
-                    // That means it's time to move again.
                     this.state = ElevatorState.Moving;
                     break;
 
@@ -495,8 +491,9 @@ public class Elevator implements Runnable {
 
                 case ElevatorState.DoorsClosed:
                     this.closeDoors(this.nextRandomNum());
-                    this.updateRequests(); // Update requests after every drop-off/pick-up
-                    this.state = ElevatorState.Idle; // Check for a new request before moving
+                    this.updateRequests();
+                    // Stop the timer when request is complete
+                    this.state = ElevatorState.Idle;
                     this.sendLocationUpdate();
                     break;
 
@@ -505,25 +502,6 @@ public class Elevator implements Runnable {
             }
         }
     }
-
-    /**
-     * Sets the current floor of the elevator.
-     *
-     * @param floor The new floor of the elevator.
-     */
-    public void setFloor(int floor) {
-        this.floor = floor;
-    }
-
-    /**
-     * Sets the direction of the elevator.
-     *
-     * @param direction The new direction of the elevator.
-     */
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
 
     /**
      * Get the current floor of the elevator.
