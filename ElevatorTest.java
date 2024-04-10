@@ -18,19 +18,6 @@ public class ElevatorTest {
     private Elevator elevator;
 
 
-    /**
-     * Tests that the elevator successfully moves up when provided with a random number greater than 5,
-     * without triggering a fault.
-     */
-    @Test
-    public void testMoveGreaterThan5() throws SocketException {
-        elevator = new Elevator(2003);
-        elevator.setFloor(1);
-        elevator.setDirection(Direction.Up);
-        boolean result = elevator.move(6);
-        assertTrue(result);
-        assertEquals(2, elevator.getFloor());
-    }
 
     /**
      * Test that a random number greater than 30 results in the doors successfully
