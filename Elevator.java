@@ -507,6 +507,25 @@ public class Elevator implements Runnable {
     }
 
     /**
+     * Sets the current floor of the elevator.
+     *
+     * @param floor The new floor of the elevator.
+     */
+    public void setFloor(int floor) {
+        this.floor = floor;
+    }
+
+    /**
+     * Sets the direction of the elevator.
+     *
+     * @param direction The new direction of the elevator.
+     */
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+
+    /**
      * Get the current floor of the elevator.
      *
      * @return The current floor of the elevator.

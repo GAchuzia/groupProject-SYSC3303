@@ -15,21 +15,22 @@ import java.net.*;
  * @version 0.0.0
  */
 public class ElevatorTest {
+    private Elevator elevator;
+
 
     /**
-     * Tests that a random number greater than five does not trigger a fault, and
-     * the elevator successfully moves floors.
+     * Tests that the elevator successfully moves up when provided with a random number greater than 5,
+     * without triggering a fault.
      */
-//    @Test
-//    public void testMoveTo() throws SocketException {
-//        Elevator elevator = new Elevator(2003);
-//        int destinationFloor = 4;
-//        boolean result = elevator.moveTo(destinationFloor, 10);
-//
-//        assertTrue(result);
-//        assertEquals(destinationFloor, elevator.getFloor());
-//        assertEquals(ElevatorState.Idle, elevator.getState());
-//    }
+    @Test
+    public void testMoveGreaterThan5() throws SocketException {
+        elevator = new Elevator(2003);
+        elevator.setFloor(1);
+        elevator.setDirection(Direction.Up);
+        boolean result = elevator.move(6);
+        assertTrue(result);
+        assertEquals(2, elevator.getFloor());
+    }
 
     /**
      * Test that a random number greater than 30 results in the doors successfully
@@ -37,7 +38,7 @@ public class ElevatorTest {
      */
     @Test
     public void testOpenDoors() throws SocketException {
-        Elevator elevator = new Elevator(2004);
+        elevator = new Elevator(2004);
         ByteArrayOutputStream streamOutput = new ByteArrayOutputStream();
         System.setOut(new PrintStream(streamOutput));
 
@@ -54,7 +55,7 @@ public class ElevatorTest {
      */
     @Test
     public void testCloseDoors() throws SocketException {
-        Elevator elevator = new Elevator(2005);
+        elevator = new Elevator(2005);
         ByteArrayOutputStream streamOutput = new ByteArrayOutputStream();
         System.setOut(new PrintStream(streamOutput));
 
@@ -67,11 +68,11 @@ public class ElevatorTest {
     /**
      * Tests that requesting the next floor with no floors to process returns null.
      */
-//    @Test
-//    public void testNextFloorUp() throws SocketException {
-//        Elevator elevator = new Elevator(2006);
-//        assertEquals(null, elevator.nextFloor());
-//    }
+    @Test
+    public void testNextFloorUp() throws SocketException {
+        elevator = new Elevator(2006);
+        assertEquals(false, elevator.floorsInDirection());
+    }
 
     /**
      * Tests that toggling direction results in the opposite direction of the
@@ -79,10 +80,20 @@ public class ElevatorTest {
      */
     @Test
     public void testToggleDirection() throws SocketException {
-        Elevator elevator = new Elevator(2007);
-
+        elevator = new Elevator(2007);
         Direction initial_direction = elevator.getDirection();
         elevator.toggleDirection();
         assertNotEquals(initial_direction, elevator.getDirection());
+    }
+
+    /**
+     * Tests if the elevator is at a floor that needs to be stopped at.
+     */
+    @Test
+    public void testAtStop() throws SocketException {
+        elevator = new Elevator(2008);
+
+        elevator.move(elevator.nextRandomNum());
+        assertFalse(elevator.atStop());
     }
 }
