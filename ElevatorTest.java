@@ -18,6 +18,30 @@ public class ElevatorTest {
     private Elevator elevator;
 
 
+    /**
+     * Test that elevator correctly moves to the next floor in the right direction.
+     * Also checks that the elevator does not try to move below the ground floor.
+     */
+    @Test
+    public void testMove() throws SocketException {
+        elevator = new Elevator(1998);
+
+        // Elevator moves up a floor
+        elevator.move(6); // randomNumber > 5 to not trigger fault
+        assertEquals(2, elevator.getFloor());
+
+        // Elevator moves down a floor
+        elevator.toggleDirection();
+        elevator.move(6);
+        assertEquals(1, elevator.getFloor());
+
+        // Elevator tries to go below ground floor
+        assertFalse(elevator.move(6));
+
+        // Fault is triggered
+        elevator.toggleDirection();
+        assertFalse(elevator.move(1)); // randomNumber < 5 to trigger fault
+    }
 
     /**
      * Test that a random number greater than 30 results in the doors successfully
