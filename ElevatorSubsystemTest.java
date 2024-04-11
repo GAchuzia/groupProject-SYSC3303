@@ -86,6 +86,7 @@ public class ElevatorSubsystemTest {
             elevators[i] = new Elevator(2012 + i);
         }
 
+        Thread.sleep(3000); // Wait for 3 second (adjust as needed)
         // Make sure correct number of threads are created
 
         Thread[] threads = ElevatorSubsystem.startElevators(elevators);

@@ -25,7 +25,7 @@ class ElevatorStatusTest {
         elevatorStatus.markShutDown();
         elevatorStatus.setRiders(9);
 
-        String expected_str = "Status(id= 2, floor=9, direction=Down, shut_down=true, riders=9)";
+        String expected_str = "Status(id=2, floor=9, direction=Down, shut_down=true, riders=9)";
         assertEquals(expected_str, elevatorStatus.toString());
     }
 
