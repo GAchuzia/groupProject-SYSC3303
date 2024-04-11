@@ -93,4 +93,34 @@ class FloorSubsystemTest {
         ElevatorRequest receivedRequest = new ElevatorRequest(p.getData());
         assertEquals(request, receivedRequest);
     }
+
+    /**
+     * Tests that the floor subsystem can receive requests from the scheduler.
+     * WARNING: This test will fail if port 6541 is already in use. Please ensure it
+     * is not before running.
+     */
+    @Test
+    public void testReceiveRequest() throws IOException, SocketException {
+
+        int port = 6541;
+
+        ElevatorRequest request = new ElevatorRequest(FIRST_LINE_OF_FILE);
+
+        // Socket for the floor subsystem to use to receive
+        DatagramSocket socket = new DatagramSocket(port);
+
+        // Socket that is the mock Scheduler
+        DatagramSocket scheduler = new DatagramSocket();
+
+        // Send the request as though we are the scheduler
+        byte[] data = request.getBytes();
+        DatagramPacket sent = new DatagramPacket(data, data.length);
+        sent.setPort(port);
+        sent.setAddress(InetAddress.getLocalHost());
+        scheduler.send(sent);
+
+        // Receive the request
+        ElevatorRequest receivedRequest = FloorSubsystem.receiveProcessedRequest(socket);
+        assertEquals(request, receivedRequest);
+    }
 }
