@@ -17,8 +17,6 @@ import java.net.*;
 public class ElevatorTest {
     private Elevator elevator;
 
-
-
     /**
      * Test that a random number greater than 30 results in the doors successfully
      * opening.
@@ -80,7 +78,46 @@ public class ElevatorTest {
     public void testAtStop() throws SocketException {
         elevator = new Elevator(2008);
 
-        elevator.move(elevator.nextRandomNum());
+        elevator.move(90);
         assertFalse(elevator.atStop());
+    }
+
+    /**
+     * Tests that the elevator sends a completion message to the ElevatorSubsystem
+     * when it is finished a request.
+     * WARNING: The port `ElevatorSubsystem.PORT` cannot be in use when this test is
+     * run.
+     */
+    @Test
+    public void testUpdateRequests() throws IOException {
+        int port = 2009;
+        elevator = new Elevator(port);
+
+        // Test request for the elevator to process
+        ElevatorRequest request = new ElevatorRequest("14:05:15.0 2 Up 4");
+
+        // Mock ElevatorSubsystem
+        DatagramSocket socket = new DatagramSocket(ElevatorSubsystem.PORT);
+
+        // Send the request to the elevator
+        new Thread(elevator).start();
+        byte[] data = request.getBytes();
+        DatagramPacket p = new DatagramPacket(data, data.length);
+        p.setPort(port);
+        p.setAddress(InetAddress.getLocalHost());
+        socket.send(p);
+
+        // Wait to receive the response from the elevator that the request is complete
+        DatagramPacket response = new DatagramPacket(new byte[100], 100);
+
+        socket.receive(response);
+        ElevatorRequest parsed_response = new ElevatorRequest(response.getData());
+
+        while (!parsed_response.isComplete()) {
+            socket.receive(response);
+            parsed_response = new ElevatorRequest(response.getData());
+        }
+        assertTrue(parsed_response.isComplete());
+        assertEquals(request.getTimestamp(), parsed_response.getTimestamp());
     }
 }
