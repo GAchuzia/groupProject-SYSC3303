@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.net.*;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Iteration 3 Update: Since the FloorSubsystem class has no constructor
- * and doesn't use message queues anymore, the previous test cases are deprecated.
+ * and doesn't use message queues anymore, the previous test cases are
+ * deprecated.
  * Test suite for the functionality of the FloorSubsystem.
  *
  * @author Matteo Golin, 101220709
@@ -20,100 +23,74 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Yousef Hammad, 101217858
  * @version 0.0.0
  */
-//
-//class FloorSubsystemTest {
-//
-//    /**
-//     * Test input file containing elevator request data.
-//     */
-//    private static final String TEST_INPUT_FILE = "./testdata.txt";
-//
-//    /**
-//     * Message queue for incoming messages to the floor subsystem.
-//     */
-//    private MessageQueue<ElevatorRequest> incoming;
-//    /**
-//     * Message queue for outgoing messages from the floor subsystem.
-//     */
-//    private MessageQueue<ElevatorRequest> outgoing;
-//
-//    /**
-//     * The floor subsystem itself.
-//     */
-//    private FloorSubsystem subsystem;
-//
-//    /**
-//     * Sets up the subsystem with its incoming and outgoing message queues.
-//     */
-//    @BeforeEach
-//    void setUp() {
-//        this.incoming = new MessageQueue<>();
-//        this.outgoing = new MessageQueue<>();
-//        try {
-//            this.subsystem = new FloorSubsystem(TEST_INPUT_FILE, this.incoming, this.outgoing);
-//        } catch (FileNotFoundException e) {
-//            fail("Could not open input file.");
-//        }
-//    }
-//
-//    /**
-//     * Removes the subsystem and its message queues so that they can be freshly replaced.
-//     */
-//    @AfterEach
-//    void tearDown() {
-//        this.subsystem = null;
-//        this.outgoing = null;
-//        this.incoming = null;
-//    }
-//
-//    /**
-//     * Tests that the FloorSubsystem can send elevator requests.
-//     *
-//     * @throws InterruptedException When any of the threads are interrupted.
-//     */
-//    @Test
-//    void testRunning() throws InterruptedException {
-//        // Start the floor subsystem to produce messages
-//        Thread floorThread = new Thread(String.valueOf(this.subsystem));
-//        floorThread.start();
-//        Thread.sleep(1500); // Give the subsystem time to produce messages
-//
-//        // Check that FloorSubsystem put a request in the outgoing queue which matches the first line of the input file
-//        assertFalse(this.outgoing.isEmpty());
-//        try {
-//            File file = new File(TEST_INPUT_FILE);
-//            Scanner reader = new Scanner(file);
-//            String line = reader.nextLine();
-//            assertEquals(new ElevatorRequest(line), this.outgoing.getMessage());
-//        } catch (FileNotFoundException e) {
-//            fail(e);
-//        }
-//
-//        // Stop the FloorSubsystem
-//        this.incoming.putMessage(null);
-//        floorThread.join();
-//    }
-//
-//    /**
-//     * Tests that the FloorSubsystem exits when it receives a null message.
-//     */
-//    @Test
-//    void testExit() throws InterruptedException {
-//        // Start thread
-//        Thread floorThread = new Thread(String.valueOf(this.subsystem));
-//        floorThread.start();
-//        assertTrue(floorThread.isAlive());
-//
-//        this.incoming.putMessage(null);
-//        Thread.sleep(300); // Allow subsystem to receive null message
-//        assertFalse(floorThread.isAlive());
-//    }
-//
-//    /**
-//     * Tests that the floor subsystem will fail to construct when the input file does not exist.
-//     */
-//    @Test
-//    void testBadFile() {
-//        assertThrows(FileNotFoundException.class, () -> new FloorSubsystem("thisfiledefinitelydoesnotexist.lol", this.incoming, this.outgoing));
-//    }
-//}
+
+class FloorSubsystemTest {
+
+    /** The testdata file. */
+    public static final String TEST_FILE = "./testdata.txt";
+
+    /** The string in the first line of the testdata.txt file. */
+    public static final String FIRST_LINE_OF_FILE = "14:05:15.0 2 Up 4";
+
+    /**
+     * Tests that the first line of the test file is correctly parsed into an
+     * elevator request by the floor subsystem.
+     */
+    @Test
+    public void testNextRequestFirstLine() throws FileNotFoundException {
+        File file = new File(TEST_FILE);
+        Scanner reader = new Scanner(file);
+
+        ElevatorRequest readRequest = FloorSubsystem.nextRequest(reader);
+        ElevatorRequest correctRequest = new ElevatorRequest(FIRST_LINE_OF_FILE);
+
+        assertEquals(correctRequest, readRequest);
+    }
+
+    /**
+     * Tests that the nextRequest method of the FloorSubsystem returns null when
+     * there are no more lines in the file.
+     */
+    @Test
+    public void testNextRequestIsNull() throws FileNotFoundException {
+        File file = new File(TEST_FILE);
+        Scanner reader = new Scanner(file);
+
+        // Read all of the lines in the file
+        while (reader.hasNext()) {
+            reader.nextLine();
+        }
+
+        ElevatorRequest readRequest = FloorSubsystem.nextRequest(reader);
+        assertNull(readRequest);
+    }
+
+    /**
+     * Tests that messages sent with the sendRequest method are 'received' by a mock
+     * scheduler.
+     *
+     * WARNING: This test must be run when the port specified by `Scheduler.PORT` is
+     * not in use.
+     */
+    @Test
+    public void testSendRequest() throws IOException, SocketException {
+        ElevatorRequest request = new ElevatorRequest(FIRST_LINE_OF_FILE);
+
+        // Socket for the floor subsystem to use to send
+        DatagramSocket socket = new DatagramSocket();
+
+        // Socket that is the mock Scheduler
+        DatagramSocket scheduler = new DatagramSocket(Scheduler.PORT);
+
+        // Send the request
+        FloorSubsystem.sendRequest(request, socket);
+
+        // Receive the request
+        DatagramPacket p = new DatagramPacket(new byte[100], 100);
+        scheduler.receive(p);
+
+        // Parse the received request to compare
+        ElevatorRequest receivedRequest = new ElevatorRequest(p.getData());
+        assertEquals(request, receivedRequest);
+    }
+}
