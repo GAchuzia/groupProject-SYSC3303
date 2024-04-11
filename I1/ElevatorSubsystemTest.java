@@ -36,7 +36,7 @@
 //    protected void setUp() {
 //        this.incoming = new MessageQueue<>();
 //        this.outgoing = new MessageQueue<>();
-//        this.subsystem = new ElevatorSubsystem(incoming, outgoing, 1);
+//        this.subsystem = new ElevatorSubsystem(incoming, outgoing);
 //    }
 //
 //    /**
@@ -52,7 +52,7 @@
 //    /**
 //     * Tests the echo behaviour of the ElevatorSubsystem when it receives a message.
 //     *
-//     * @throws InterruptedException When the elevator thread is interrupted.
+//     * @throws InterruptedException
 //     */
 //    @Test
 //    void testEcho() throws InterruptedException {
