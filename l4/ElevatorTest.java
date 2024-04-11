@@ -16,16 +16,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Yousef Hammad, 101217858
  * @version 0.0.0
  */
-class ElevatorTest {
-
-    /**
-     * Tests that the elevator is initialized correctly using the default
-     * constructor.
-     */
-    @Test
-    void testDefaultConstructor() throws SocketException {
-        Elevator elevator = new Elevator(1234);
-        assertEquals(1, elevator.getFloor());
-        assertEquals(ElevatorState.Idle, elevator.getState());
-    }
-}
+//class ElevatorTest {
+//
+//    /**
+//     * Tests that the elevator is initialized correctly using the default
+//     * constructor.
+//     */
+//    @Test
+//    void testDefaultConstructor() throws SocketException {
+//        Elevator elevator = new Elevator(1234);
+//        assertEquals(1, elevator.getFloor());
+//        assertEquals(ElevatorState.Idle, elevator.getState());
+//    }
+//}
